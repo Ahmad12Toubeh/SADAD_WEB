@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { apiFetch, getRemindersOverdue, getRemindersSent, getRemindersUpcoming } from "@/lib/api";
+import { getRemindersOverdue, getRemindersSent, getRemindersUpcoming, sendReminder } from "@/lib/api";
 
 function WhatsAppIcon() {
   return (
@@ -16,46 +16,41 @@ function WhatsAppIcon() {
 }
 
 export default function RemindersPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [overdueItems, setOverdueItems] = useState<any[]>([]);
   const [upcomingItems, setUpcomingItems] = useState<any[]>([]);
   const [sentItems, setSentItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [overdue, upcoming, sent] = await Promise.all([
+        getRemindersOverdue(),
+        getRemindersUpcoming(7),
+        getRemindersSent(),
+      ]);
+      setOverdueItems(overdue.items ?? []);
+      setUpcomingItems(upcoming.items ?? []);
+      setSentItems(sent.items ?? []);
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to load reminders");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const [overdue, upcoming, sent] = await Promise.all([
-          getRemindersOverdue(),
-          getRemindersUpcoming(7),
-          getRemindersSent(),
-        ]);
-        if (cancelled) return;
-        setOverdueItems(overdue.items ?? []);
-        setUpcomingItems(upcoming.items ?? []);
-        setSentItems(sent.items ?? []);
-      } catch (err: any) {
-        const key = err?.messageKey as string | undefined;
-        if (!cancelled) setError(key ? t(key) : err?.message ?? "Failed to load reminders");
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    fetchData();
   }, [t]);
 
-  const sendReminder = async (installmentId: string, channel: "whatsapp" | "sms") => {
+  const handleSend = async (installmentId: string, channel: "whatsapp" | "sms") => {
+    if (!installmentId) return;
     try {
-      await apiFetch("/reminders/send", {
-        method: "POST",
-        body: JSON.stringify({ installmentId, channel }),
-      });
+      await sendReminder({ installmentId, channel });
       const sent = await getRemindersSent();
       setSentItems(sent.items ?? []);
     } catch (err: any) {
@@ -67,8 +62,8 @@ export default function RemindersPage() {
   return (
     <div className="space-y-8 pb-12">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">التذكيرات الذكية</h1>
-        <p className="text-slate-500 mt-2 text-sm">تتبع الأقساط المتأخرة والمستحقة قريباً وأرسل تنبيهات لعملائك.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("reminders.page.title")}</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">{t("reminders.page.subtitle")}</p>
       </div>
 
       {error && (
@@ -81,38 +76,49 @@ export default function RemindersPage() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle size={20} className="text-red-500" />
-          <h2 className="text-lg font-bold text-red-700">متأخرة عن السداد ({overdueItems.length})</h2>
+          <h2 className="text-lg font-bold text-red-700 dark:text-red-500">
+            {t("reminders.overdue.title")} ({overdueItems.length})
+          </h2>
         </div>
         <div className="space-y-3">
           {overdueItems.map((item) => (
-            <Card key={item.installmentId ?? item.id} className="border-red-100 bg-red-50/40 rounded-xl shadow-sm">
+            <Card key={item.installmentId ?? item.id} className="border-red-100 dark:border-red-900/30 bg-red-50/40 dark:bg-red-900/10 rounded-xl shadow-sm">
               <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 shrink-0 font-bold">
+                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 shrink-0 font-bold">
                     {item.dueDate ? Math.max(1, Math.ceil((Date.now() - new Date(item.dueDate).getTime()) / (1000 * 60 * 60 * 24))) : "!"}
                   </div>
                   <div>
-                    <p className="font-bold text-slate-900">{item.customerName ?? "-"}</p>
-                    <p className="text-sm text-slate-500">
-                      متأخر — مبلغ: <span className="font-bold">{Number(item.amount ?? 0).toLocaleString()} ر.س</span>
+                    <p className="font-bold text-slate-900 dark:text-white">{item.customerName ?? "-"}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {t("analytics.charts.status.late")} — {t("debts.new.s2.amount")}: <span className="font-bold">{(item.amount ?? 0).toLocaleString()} {t("dashboard.currency")}</span>
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" className="gap-2 bg-[#25D366] hover:bg-[#20b558] text-white shadow-sm shadow-green-500/20">
+                  <Button 
+                    size="sm" 
+                    className="gap-2 bg-[#25D366] hover:bg-[#20b558] text-white shadow-sm shadow-green-500/20"
+                    onClick={() => handleSend(item.installmentId ?? item.id, "whatsapp")}
+                  >
                     <WhatsAppIcon />
-                    <span onClick={() => sendReminder(item.installmentId, "whatsapp")}>واتساب</span>
+                    {t("reminders.actions.whatsapp")}
                   </Button>
-                  <Button size="sm" variant="outline" className="gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="gap-2 dark:border-slate-700"
+                    onClick={() => handleSend(item.installmentId ?? item.id, "sms")}
+                  >
                     <Send size={14} />
-                    <span onClick={() => sendReminder(item.installmentId, "sms")}>SMS</span>
+                    {t("reminders.actions.sms")}
                   </Button>
                 </div>
               </CardContent>
             </Card>
           ))}
           {!isLoading && overdueItems.length === 0 && (
-            <div className="text-sm text-slate-500">لا يوجد أقساط متأخرة حالياً.</div>
+            <div className="text-sm text-slate-500">{t("guarantors.page.list.empty")}</div>
           )}
         </div>
       </div>
@@ -121,29 +127,35 @@ export default function RemindersPage() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <Clock size={20} className="text-orange-500" />
-          <h2 className="text-lg font-bold text-orange-700">مستحقة قريباً ({upcomingItems.length})</h2>
+          <h2 className="text-lg font-bold text-orange-700 dark:text-orange-400">
+            {t("reminders.upcoming.title")} ({upcomingItems.length})
+          </h2>
         </div>
         <div className="space-y-3">
           {upcomingItems.map((item) => (
-            <Card key={item.installmentId ?? item.id} className="border-orange-100 bg-orange-50/30 rounded-xl shadow-sm">
+            <Card key={item.installmentId ?? item.id} className="border-orange-100 dark:border-orange-900/30 bg-orange-50/30 dark:bg-orange-900/10 rounded-xl shadow-sm">
               <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
                 <div>
-                  <p className="font-bold text-slate-900">{item.customerName ?? "-"}</p>
-                  <p className="text-sm text-slate-500">
-                    تستحق قريباً — مبلغ: <span className="font-bold">{Number(item.amount ?? 0).toLocaleString()} ر.س</span>
+                  <p className="font-bold text-slate-900 dark:text-white">{item.customerName ?? "-"}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {t("reminders.upcoming.title")} — {t("debts.new.s2.amount")}: <span className="font-bold">{(item.amount ?? 0).toLocaleString()} {t("dashboard.currency")}</span>
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" className="gap-2 bg-[#25D366] hover:bg-[#20b558] text-white">
+                  <Button 
+                    size="sm" 
+                    className="gap-2 bg-[#25D366] hover:bg-[#20b558] text-white"
+                    onClick={() => handleSend(item.installmentId ?? item.id, "whatsapp")}
+                  >
                     <WhatsAppIcon />
-                    <span onClick={() => sendReminder(item.installmentId, "whatsapp")}>تنبيه مسبق</span>
+                    {t("reminders.actions.preAlert")}
                   </Button>
                 </div>
               </CardContent>
             </Card>
           ))}
           {!isLoading && upcomingItems.length === 0 && (
-            <div className="text-sm text-slate-500">لا يوجد أقساط مستحقة قريباً.</div>
+            <div className="text-sm text-slate-500">{t("guarantors.page.list.empty")}</div>
           )}
         </div>
       </div>
@@ -152,27 +164,29 @@ export default function RemindersPage() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2 size={20} className="text-green-600" />
-          <h2 className="text-lg font-bold text-slate-700">تم الإرسال مؤخراً</h2>
+          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-300">{t("reminders.sent.title")}</h2>
         </div>
         <div className="space-y-3">
           {sentItems.map((item) => (
-            <Card key={item.id} className="border-slate-100 bg-slate-50/60 rounded-xl shadow-sm">
+            <Card key={item.id} className="border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 rounded-xl shadow-sm">
               <CardContent className="flex items-center justify-between gap-4 p-5">
                 <div className="flex items-center gap-4">
                   <Bell size={18} className="text-slate-400" />
                   <div>
-                    <p className="font-bold text-slate-800">{item.customer ?? "—"}</p>
-                    <p className="text-sm text-slate-500">
-                      عبر {item.channel} — {item.sentAt ?? "—"}
+                    <p className="font-bold text-slate-800 dark:text-white">{item.customer ?? "—"}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {item.channel} — {item.sentAt ?? "—"}
                     </p>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1.5 rounded-full">تم الإرسال</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-3 py-1.5 rounded-full">
+                  {t("reminders.sent.status")}
+                </span>
               </CardContent>
             </Card>
           ))}
           {!isLoading && sentItems.length === 0 && (
-            <div className="text-sm text-slate-500">لا يوجد تذكيرات مرسلة بعد.</div>
+            <div className="text-sm text-slate-500">{t("guarantors.page.list.empty")}</div>
           )}
         </div>
       </div>

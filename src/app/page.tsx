@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslation, Trans } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, ShieldCheck, CheckCircle2, Bell, BarChart2, Users, Zap, Star, ChevronDown, Globe, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -55,48 +56,103 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative px-6 py-24 md:py-36 flex flex-col items-center text-center overflow-hidden">
           <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl opacity-60"></div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 0.6, scale: 1 }}
+              transition={{ duration: 2, repeat: Infinity, repeatType: "mirror" }}
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/20 dark:bg-primary/30 rounded-full blur-3xl"
+            ></motion.div>
           </div>
 
-          <span className="text-primary font-semibold bg-primary/10 dark:bg-primary/20 px-4 py-1.5 rounded-full text-sm mb-6 inline-block">
-            {t("landing.hero.badge")}
-          </span>
-          <h1 className="text-4xl md:text-6xl font-extrabold text-secondary dark:text-slate-100 leading-tight mb-6 max-w-4xl">
-            {t("landing.hero.title1")}{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600 block sm:inline">
-              {t("landing.hero.title2")}
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mb-10">
-            <Trans i18nKey="landing.hero.desc" components={{ strong: <strong className="text-slate-700 dark:text-slate-200" /> }} />
-          </p>
+          <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-6xl gap-12 mt-8">
+            <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-start">
+              <motion.span 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-primary font-semibold bg-primary/10 dark:bg-primary/20 px-4 py-1.5 rounded-full text-sm mb-6 inline-block"
+              >
+                {t("landing.hero.badge")}
+              </motion.span>
+              
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-4xl md:text-6xl font-extrabold text-secondary dark:text-slate-100 leading-tight mb-6"
+              >
+                {t("landing.hero.title1")}{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600 block sm:inline">
+                  {t("landing.hero.title2")}
+                </span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mb-10"
+              >
+                <Trans i18nKey="landing.hero.desc" components={{ strong: <strong className="text-slate-700 dark:text-slate-200" /> }} />
+              </motion.p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <Link href="/register">
-              <Button size="lg" className="gap-2 px-8 shadow-lg shadow-primary/25">
-                {t("landing.hero.ctaPrimary")}
-                {i18n.dir() === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
-              </Button>
-            </Link>
-            <a href="#how-it-works">
-              <Button size="lg" variant="outline" className="gap-2 px-8 dark:border-slate-700 dark:hover:bg-slate-800 dark:text-slate-300">
-                {t("landing.hero.ctaSecondary")}
-                <ChevronDown size={18} />
-              </Button>
-            </a>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="flex flex-col sm:flex-row items-center gap-4"
+              >
+                <Link href="/register">
+                  <Button size="lg" className="gap-2 px-8 shadow-lg shadow-primary/25 hover:scale-105 transition-transform active:scale-95">
+                    {t("landing.hero.ctaPrimary")}
+                    {i18n.dir() === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+                  </Button>
+                </Link>
+                <a href="#how-it-works">
+                  <Button size="lg" variant="outline" className="gap-2 px-8 dark:border-slate-700 dark:hover:bg-slate-800 dark:text-slate-300">
+                    {t("landing.hero.ctaSecondary")}
+                    <ChevronDown size={18} />
+                  </Button>
+                </a>
+              </motion.div>
+            </div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="flex-1 w-full max-w-[300px] md:max-w-[400px] lg:max-w-[500px] relative mt-8 lg:mt-0"
+            >
+              <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full -z-10 animate-pulse"></div>
+              <img 
+                src="/assets/hero.png" 
+                alt="SADAD Hero Illustration" 
+                className="w-full h-auto drop-shadow-2xl"
+              />
+            </motion.div>
           </div>
 
-          <div className="mt-14 flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400 justify-center">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="mt-14 flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400 justify-center"
+          >
             {(t("landing.hero.tags", { returnObjects: true }) as string[]).map(feat => (
               <div key={feat} className="flex items-center gap-2">
                 <CheckCircle2 size={17} className="text-green-500" />
                 <span>{feat}</span>
               </div>
             ))}
-          </div>
+          </motion.div>
 
           {/* Dashboard Preview */}
-          <div className="mt-20 w-full max-w-5xl mx-auto rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-300/40 dark:shadow-none">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mt-20 w-full max-w-5xl mx-auto rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-300/40 dark:shadow-none"
+          >
             <div className="bg-secondary dark:bg-slate-900 h-8 flex items-center gap-2 px-4">
               <div className="w-3 h-3 rounded-full bg-red-400"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
@@ -114,7 +170,7 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Features Section */}
@@ -164,14 +220,22 @@ export default function Home() {
                   desc: t("landing.features.f6Desc"),
                   color: "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400",
                 },
-              ].map(feat => (
-                <div key={feat.title} className="bg-white dark:bg-slate-950 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow text-start">
+              ].map((feat, idx) => (
+                <motion.div 
+                  key={feat.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
+                  className="bg-white dark:bg-slate-950 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm transition-all text-start"
+                >
                   <div className={`w-12 h-12 ${feat.color} rounded-xl flex items-center justify-center mb-4`}>
                     <feat.icon size={24} />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg mb-2">{feat.title}</h3>
                   <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{feat.desc}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -255,6 +319,49 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Support Section */}
+        <section className="py-24 px-6 bg-white dark:bg-slate-950 overflow-hidden relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl -z-10"></div>
+          <div className="max-w-4xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="bg-slate-50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-16 text-start"
+            >
+              <div className="flex-1">
+                <span className="text-primary font-semibold text-sm bg-primary/10 dark:bg-primary/20 px-4 py-1.5 rounded-full mb-4 inline-block">
+                  {t("landing.support.badge")}
+                </span>
+                <h2 className="text-3xl font-extrabold text-secondary dark:text-white mb-4">
+                  {t("landing.support.title")}
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
+                  {t("landing.support.desc")}
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <Button className="gap-2 px-6 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20">
+                    <Zap size={18} />
+                    {t("landing.support.btn")}
+                  </Button>
+                  <Button variant="ghost" className="gap-2 dark:text-slate-300">
+                    <Globe size={18} />
+                    {t("landing.support.email")}
+                  </Button>
+                </div>
+              </div>
+              <div className="w-full md:w-1/3 flex justify-center">
+                <div className="relative">
+                  <div className="w-32 h-32 md:w-48 md:h-48 bg-primary/20 dark:bg-primary/30 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <ShieldCheck size={64} className="text-primary md:w-24 md:h-24" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
 

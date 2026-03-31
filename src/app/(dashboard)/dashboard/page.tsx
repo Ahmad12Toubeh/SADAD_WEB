@@ -1,9 +1,10 @@
-"use client";
+"use client"; // force re-check
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
-import { getAnalyticsMonthly, getAnalyticsSummary } from "@/lib/api";
+import { Debt, getAnalyticsMonthly, getAnalyticsSummary, getRecentActivity } from "@/lib/api";
+import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -22,6 +23,7 @@ export default function DashboardPage() {
     currency: string;
   } | null>(null);
   const [monthly, setMonthly] = useState<Array<{ year: number; month: number; debts: number; collected: number }>>([]);
+  const [recent, setRecent] = useState<Debt[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,10 +31,11 @@ export default function DashboardPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const [s, m] = await Promise.all([getAnalyticsSummary(), getAnalyticsMonthly(6)]);
+        const [s, m, r] = await Promise.all([getAnalyticsSummary(), getAnalyticsMonthly(6), getRecentActivity(5)]);
         if (cancelled) return;
         setSummary(s);
         setMonthly(m.items ?? []);
+        setRecent(r);
       } catch (err: any) {
         const key = err?.messageKey as string | undefined;
         if (!cancelled) setError(key ? t(key) : err?.message ?? "Failed to load dashboard");
@@ -46,16 +49,9 @@ export default function DashboardPage() {
   }, [t]);
 
   const trendData = useMemo(() => {
-    const monthNames = [
-      t("analytics.charts.months.jan"),
-      t("analytics.charts.months.feb"),
-      t("analytics.charts.months.mar"),
-      t("analytics.charts.months.apr"),
-      t("analytics.charts.months.may"),
-      t("analytics.charts.months.jun"),
-    ];
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
     return monthly.map((row) => ({
-      name: monthNames[(row.month - 1) % 6] ?? `${row.month}/${row.year}`,
+      name: t(`analytics.charts.months.${months[row.month - 1]}`) || `${row.month}/${row.year}`,
       total: row.debts,
       collected: row.collected,
     }));
@@ -206,6 +202,67 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Activity */}
+      <Card className="border-slate-200 dark:bg-slate-800 dark:border-slate-700 shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="dark:text-white">{t("dashboard.recentActivity")}</CardTitle>
+          <Link href="/dashboard/debts" className="text-sm font-medium text-primary hover:underline">
+            {t("common.viewAll")}
+          </Link>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-start">
+              <thead className="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-slate-900/50">
+                <tr>
+                  <th className="px-6 py-3 font-bold">{t("customers.new.name")}</th>
+                  <th className="px-6 py-3 font-bold">{t("debts.new.s2.amount")}</th>
+                  <th className="px-6 py-3 font-bold">{t("debts.new.s2.type")}</th>
+                  <th className="px-6 py-3 font-bold">{t("debts.new.s2.dueDate")}</th>
+                  <th className="px-6 py-3 font-bold">{t("common.status")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                {recent.map((debt) => (
+                  <tr key={debt.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">
+                      <Link href={`/dashboard/customers/${debt.customerId}`} className="hover:text-primary hover:underline">
+                         {debt.customerName || debt.customerId}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 dark:text-slate-300">
+                      {debt.principalAmount.toLocaleString()} {t("dashboard.currency")}
+                    </td>
+                    <td className="px-6 py-4 dark:text-slate-400">
+                      {t(`debts.new.s2.types.${debt.type === 'invoice' ? 't1' : debt.type === 'loan' ? 't2' : 't3'}`)}
+                    </td>
+                    <td className="px-6 py-4 dark:text-slate-400">
+                      {new Date(debt.dueDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US')}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        debt.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                        debt.status === 'late' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                      }`}>
+                        {t(`analytics.charts.status.${debt.status}`)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {recent.length === 0 && !isLoading && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-10 text-center text-slate-500 italic">
+                      {t("common.noResults")}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

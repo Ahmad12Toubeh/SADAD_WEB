@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
+import { motion } from "framer-motion";
 import { login, register as apiRegister, setAccessToken } from "@/lib/api";
 
 export default function RegisterPage() {
@@ -39,19 +40,53 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="w-full max-w-md mx-auto relative z-10">
+    <motion.main 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-md mx-auto relative z-10"
+    >
       <div className="flex flex-col items-center mb-10 text-center">
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-4">{t("auth.register.title")}</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2">{t("auth.register.subtitle")}</p>
+        <motion.div
+           initial={{ scale: 0 }}
+           animate={{ scale: 1 }}
+           transition={{ type: "spring", stiffness: 260, damping: 20 }}
+           className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-4"
+        >
+          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+        </motion.div>
+        <motion.h1 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-3xl font-extrabold text-slate-900 dark:text-white"
+        >
+          {t("auth.register.title")}
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-slate-500 dark:text-slate-400 mt-2"
+        >
+          {t("auth.register.subtitle")}
+        </motion.p>
       </div>
 
-      <Card className="border-0 shadow-2xl shadow-slate-200/50 dark:shadow-none dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl">
+      <Card className="border-0 shadow-2xl shadow-slate-200/50 dark:shadow-none dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl overflow-hidden">
+        <div className="h-1.5 w-full bg-gradient-to-r from-primary to-blue-600"></div>
         <CardContent className="p-8">
           <form className="space-y-5" onSubmit={handleRegister}>
             {error && (
-              <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-medium dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-medium dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200"
+              >
                 {error}
-              </div>
+              </motion.div>
             )}
             <div className="space-y-2">
               <Label htmlFor="name" className="dark:text-slate-300">{t("auth.register.nameLabel")}</Label>
@@ -119,7 +154,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full h-11 text-base shadow-xl shadow-primary/20 mt-4" disabled={isLoading}>
+            <Button type="submit" className="w-full h-11 text-base shadow-xl shadow-primary/20 mt-4 active:scale-95 transition-transform" disabled={isLoading}>
               {isLoading ? t("auth.register.loading") : t("auth.register.submit")}
             </Button>
           </form>
@@ -128,10 +163,10 @@ export default function RegisterPage() {
 
       <p className="text-center text-slate-600 dark:text-slate-400 mt-10">
         {t("auth.register.hasAccount")}{" "}
-        <Link href="/login" className="font-semibold text-primary hover:text-secondary dark:hover:text-blue-400 transition-colors">
+        <Link href="/login" className="font-semibold text-primary hover:text-secondary dark:hover:text-blue-400 transition-colors underline decoration-primary/30 underline-offset-4 hover:decoration-primary">
           {t("auth.register.loginLink")}
         </Link>
       </p>
-    </main>
+    </motion.main>
   );
 }

@@ -14,6 +14,19 @@
     "lightMode": "Light Mode",
     "darkMode": "Dark Mode"
   },
+  "common": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "search": "Search...",
+    "noResults": "No results found",
+    "export": "Export Data",
+    "viewAll": "View All"
+  },
   "header": {
     "searchPlaceholder": "Search for customer or invoice...",
     "storeName": "Al-Amal Store",
@@ -75,6 +88,16 @@
       "saving": "Saving...",
       "save": "Save Customer Data",
       "cancel": "Cancel"
+    },
+    "details": {
+      "title": "Customer Details",
+      "paidAmount": "Paid Amount",
+      "remainingAmount": "Remaining Amount",
+      "totalDebt": "Total Indebtedness",
+      "transactionsTitle": "Debt Records",
+      "editBtn": "Edit Data",
+      "deleteBtn": "Delete Customer",
+      "emptyDebts": "No debts for this customer currently."
     }
   },
   "settings": {
@@ -102,7 +125,13 @@
       "businessType": "Business Type",
       "address": "Address",
       "cr": "Commercial Register (Optional)",
-      "currency": "Default Currency"
+      "currency": "Default Currency",
+      "types": {
+        "food": "Grocery / Food",
+        "building": "Construction / Building",
+        "electronics": "Electronics",
+        "other": "Other"
+      }
     },
     "notifications": {
       "title": "Notification Settings",
@@ -188,6 +217,15 @@
         "confirm": "Confirm & Continue",
         "saving": "Saving..."
       }
+    },
+    "details": {
+      "title": "Debt Details",
+      "paidAmount": "Total Collected",
+      "remainingAmount": "Remaining Pending Amount",
+      "progress": "Completion Rate",
+      "deleteBtn": "Delete Debt",
+      "installment": "Installment No.",
+      "dueDate": "Due Date"
     }
   },
   "analytics": {
@@ -216,7 +254,13 @@
         "mar": "Mar",
         "apr": "Apr",
         "may": "May",
-        "jun": "Jun"
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Aug",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dec"
       }
     }
   },
@@ -302,10 +346,48 @@
       "desc": "Join thousands of merchants managing their receivables with Sadad confidently.",
       "btn": "Start Free Now"
     },
+    "support": {
+      "badge": "Technical Support",
+      "title": "We're always here to help",
+      "desc": "Whether you face a technical issue or have pricing questions, our team is ready to respond anytime.",
+      "btn": "Contact us via WhatsApp",
+      "email": "Send an Email"
+    },
     "footer": {
-      "rights": "© 2025 SADAD. All Rights Reserved.",
+      "rights": "© 2026 SADAD - Smart Debt Management Platform. All Rights Reserved.",
       "login": "Login",
       "register": "Create Account"
+    }
+  },
+  "associations": {
+    "page": {
+      "title": "Your Association (Jam'eya)",
+      "subtitle": "Track your financial associations and monthly receipt turns.",
+      "createBtn": "Create New Association",
+      "closeBtn": "Close Form",
+      "empty": "No associations currently.",
+      "active": "Active",
+      "progress": "Current Month",
+      "from": "from",
+      "myTurn": "My Receipt Turn",
+      "value": "My Receipt Value",
+      "received": "You received your turn! ✅",
+      "remaining": "Remaining",
+      "months": "months",
+      "untilTurn": "until your receipt turn.",
+      "detailsBtn": "View details and members",
+      "editTitle": "Edit Association",
+      "saveBtn": "Save Association",
+      "updating": "Updating...",
+      "saveChanges": "Save Changes"
+    },
+    "form": {
+      "name": "Association Name",
+      "members": "Number of Members",
+      "amount": "Monthly Amount",
+      "turn": "My Receipt Turn",
+      "member": "member",
+      "currency": "SAR / mo"
     }
   },
   "auth": {
@@ -402,6 +484,27 @@
     },
     "validation": {
       "invalid": "Invalid input"
+    }
+  },
+  "reminders": {
+    "page": {
+      "title": "Smart Reminders",
+      "subtitle": "Track overdue and upcoming installments and send alerts to your customers."
+    },
+    "overdue": {
+      "title": "Overdue for Payment"
+    },
+    "upcoming": {
+      "title": "Upcoming Soon"
+    },
+    "sent": {
+      "title": "Recently Sent",
+      "status": "Sent"
+    },
+    "actions": {
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "preAlert": "Pre-alert"
     }
   }
 }

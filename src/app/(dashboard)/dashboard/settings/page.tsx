@@ -194,10 +194,10 @@ export default function SettingsPage() {
                         onChange={(e) => setStore((s: any) => ({ ...s, businessType: e.target.value }))}
                         className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-sm text-start"
                       >
-                        <option>مواد غذائية</option>
-                        <option>مواد بناء</option>
-                        <option>إلكترونيات</option>
-                        <option>أخرى</option>
+                        <option value="food">{t("settings.store.types.food")}</option>
+                        <option value="building">{t("settings.store.types.building")}</option>
+                        <option value="electronics">{t("settings.store.types.electronics")}</option>
+                        <option value="other">{t("settings.store.types.other")}</option>
                       </select>
                     </div>
                     <div className="space-y-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Search, UserCheck, Phone, ShieldCheck, ShieldAlert, FileText, ArrowUpRight } from "lucide-react";
 import { Input } from "@/components/ui/Input";
@@ -43,8 +44,10 @@ export default function GuarantorsPage() {
 
   const stats = useMemo(() => {
     const total = items.length;
-    // backend doesn't provide risk right now; keep stats basic
-    return { total };
+    const active = items.filter(i => i.status === 'active').length;
+    const bouncing = items.filter(i => i.debtStatus === 'late' || i.debtStatus === 'bad').length;
+    const safe = total - bouncing;
+    return { total, active, bouncing, safe };
   }, [items]);
 
   return (
@@ -99,7 +102,9 @@ export default function GuarantorsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.safe")}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">112</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+                   {isLoading ? "…" : stats.safe}
+                </h3>
               </div>
             </div>
           </CardContent>
@@ -112,7 +117,9 @@ export default function GuarantorsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.bouncing")}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">12</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+                  {isLoading ? "…" : stats.bouncing}
+                </h3>
               </div>
             </div>
           </CardContent>
@@ -125,7 +132,9 @@ export default function GuarantorsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.contracts")}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">340</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+                  {isLoading ? "…" : stats.total}
+                </h3>
               </div>
             </div>
           </CardContent>
@@ -134,12 +143,11 @@ export default function GuarantorsPage() {
 
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mt-8">
         <div className="overflow-x-auto">
-          <table className="w-full text-start border-collapse">
+          <table className="w-full text-start border-collapse text-sm">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-sm font-semibold">
+              <tr className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-semibold">
                 <th className="px-6 py-4 text-start">{t("guarantor.page.columns.name")}</th>
                 <th className="px-6 py-4 text-start">{t("guarantor.page.columns.phone")}</th>
-                <th className="px-6 py-4 text-start">{t("guarantor.page.columns.debtsCount")}</th>
                 <th className="px-6 py-4 text-start">{t("guarantor.page.columns.totalCapital")}</th>
                 <th className="px-6 py-4 text-start">{t("guarantor.page.columns.risk")}</th>
                 <th className="px-6 py-4 text-end">{t("guarantor.page.columns.actions")}</th>
@@ -150,8 +158,8 @@ export default function GuarantorsPage() {
                 <tr key={guarantor.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
-                        <UserCheck size={18} />
+                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold">
+                        {guarantor.name?.charAt(0)}
                       </div>
                       <span className="font-bold text-slate-900 dark:text-white">{guarantor.name ?? "-"}</span>
                     </div>
@@ -163,25 +171,27 @@ export default function GuarantorsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-300 text-sm">
-                      <FileText size={14} /> — {t("guarantor.page.list.debts")}
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      {(guarantor.totalDebt ?? 0).toLocaleString()} <span className="text-xs text-slate-400">{t("dashboard.currency")}</span>
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">
-                      — <span className="text-xs text-slate-400">{t("dashboard.currency")}</span>
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                      <ShieldCheck size={14} /> —
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${
+                      guarantor.debtStatus === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      guarantor.debtStatus === 'late' || guarantor.debtStatus === 'bad' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                      'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                    }`}>
+                      {guarantor.debtStatus === 'paid' ? t("guarantor.page.riskLevels.safe") : 
+                       guarantor.debtStatus === 'late' || guarantor.debtStatus === 'bad' ? t("guarantor.page.riskLevels.warning") : t("analytics.charts.status.active")}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-end">
-                    <Button variant="ghost" className="h-9 px-3 text-primary dark:text-blue-400 hover:bg-primary/10 dark:hover:bg-primary/20">
-                      {t("guarantor.page.list.view")}
-                      <ArrowUpRight size={16} className="ml-1 rtl:mr-1 rtl:ml-0" />
-                    </Button>
+                    <Link href={`/dashboard/debts/${guarantor.debtId}`}>
+                       <Button variant="ghost" className="h-9 px-3 text-primary dark:text-blue-400 hover:bg-primary/10 dark:hover:bg-primary/20">
+                        {t("guarantor.page.list.view")}
+                        <ArrowUpRight size={16} className="ml-1 rtl:mr-1 rtl:ml-0" />
+                      </Button>
+                    </Link>
                   </td>
                 </tr>
               ))}

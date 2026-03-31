@@ -320,7 +320,7 @@ export default function NewDebtWizard() {
                     {hasGuarantor && (
                       <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
                         <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1"><UserCheck size={16}/> {t("guarantor.title")}</span>
-                        <span className="font-semibold text-primary">تم التفعيل</span>
+                        <span className="font-semibold text-primary">{t("guarantor.status.active")}</span>
                       </div>
                     )}
                     <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">

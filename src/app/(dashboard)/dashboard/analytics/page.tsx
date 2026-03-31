@@ -2,10 +2,13 @@
 
 import { useTranslation } from "react-i18next";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useTheme } from "@/contexts/Providers";
 import { useEffect, useMemo, useState } from "react";
 import { getAnalyticsMonthly, getAnalyticsSummary } from "@/lib/api";
+import { exportToCsv } from "@/lib/utils/export";
 
 const COLORS = ["#22c55e", "#00A3E0", "#f97316", "#ef4444"];
 
@@ -48,9 +51,15 @@ export default function AnalyticsPage() {
       t("analytics.charts.months.apr"),
       t("analytics.charts.months.may"),
       t("analytics.charts.months.jun"),
+      t("analytics.charts.months.jul"),
+      t("analytics.charts.months.aug"),
+      t("analytics.charts.months.sep"),
+      t("analytics.charts.months.oct"),
+      t("analytics.charts.months.nov"),
+      t("analytics.charts.months.dec"),
     ];
     return monthly.map((row) => ({
-      name: monthNames[(row.month - 1) % 6] ?? `${row.month}/${row.year}`,
+      name: monthNames[row.month - 1] ?? `${row.month}/${row.year}`,
       debts: row.debts,
       collected: row.collected,
     }));
@@ -68,9 +77,25 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("analytics.title")}</h1>
-        <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">{t("analytics.subtitle")}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("analytics.title")}</h1>
+          <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">{t("analytics.subtitle")}</p>
+        </div>
+        <Button 
+          variant="outline" 
+          className="gap-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          onClick={() => exportToCsv("analytics_monthly", monthly, {
+            year: "Year",
+            month: "Month",
+            debts: t("analytics.charts.newDebts"),
+            collected: t("analytics.charts.collected"),
+          } as any)}
+          disabled={isLoading || monthly.length === 0}
+        >
+          <Download size={18} />
+          {t("common.export")}
+        </Button>
       </div>
 
       {error && (

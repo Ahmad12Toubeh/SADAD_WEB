@@ -5,6 +5,97 @@ export type ApiError = {
   messageKey?: string;
 };
 
+export type CustomerType = "individual" | "company";
+export type CustomerStatus = "regular" | "late" | "defaulting";
+
+export type Customer = {
+  id: string;
+  type: CustomerType;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  cr?: string;
+  notes?: string;
+  status: CustomerStatus;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type DebtPlanType = "one_time" | "installments";
+export type DebtStatus = "active" | "paid" | "late" | "bad";
+
+export type Debt = {
+  id: string;
+  customerId: string;
+  customerName?: string;
+  type: "invoice" | "loan" | "other";
+  principalAmount: number;
+  currency: string;
+  planType: DebtPlanType;
+  dueDate: string;
+  category?: string;
+  notes?: string;
+  status: DebtStatus;
+  hasGuarantor: boolean;
+  guarantorActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type InstallmentStatus = "pending" | "paid" | "late";
+
+export type Installment = {
+  id: string;
+  debtId: string;
+  amount: number;
+  dueDate: string;
+  status: InstallmentStatus;
+  paidAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type GuarantorStatus = "inactive" | "active";
+
+export type Guarantor = {
+  id: string;
+  debtId: string;
+  name: string;
+  phone: string;
+  notes?: string;
+  status: GuarantorStatus;
+  activatedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type Association = {
+  id: string;
+  name: string;
+  members: number;
+  monthlyAmount: number;
+  myTurn: number;
+  currentMonth: number;
+  status: string;
+  totalValue: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AnalyticsSummary = {
+  totalActiveDebt: number;
+  collectedThisMonth: number;
+  overdueAmount: number;
+  activeCustomers: number;
+  currency: string;
+};
+
+export type AnalyticsMonthly = {
+  items: Array<{ year: number; month: number; debts: number; collected: number }>;
+  currency: string;
+};
+
 function getBaseUrl() {
   return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
 }
@@ -55,6 +146,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   return data as T;
 }
 
+// Auth
 export async function login(input: { email: string; password: string }) {
   return apiFetch<{ accessToken: string; user: { id: string; email: string; fullName: string; role: string } }>(
     "/auth/login",
@@ -75,40 +167,13 @@ export async function register(input: {
   );
 }
 
-export type Customer = {
-  id: string;
-  type: "individual" | "company";
-  name: string;
-  phone: string;
-  email: string | null;
-  address: string | null;
-  cr: string | null;
-  notes: string | null;
-  status: "regular" | "late" | "defaulting";
-};
+// Customers
+export async function listCustomers(search?: string) {
+  const qs = search ? `?search=${encodeURIComponent(search)}&page=1&limit=50` : `?page=1&limit=50`;
+  return apiFetch<{ items: Customer[] }>(`/customers${qs}`);
+}
 
-export type Association = {
-  id: string;
-  name: string;
-  members: number;
-  monthlyAmount: number;
-  myTurn: number;
-  currentMonth: number;
-  status: string;
-  totalValue: number;
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-export async function createCustomer(input: {
-  type: "individual" | "company";
-  name: string;
-  phone: string;
-  email?: string;
-  address?: string;
-  cr?: string;
-  notes?: string;
-}) {
+export async function createCustomer(input: Partial<Customer>) {
   return apiFetch<Customer>("/customers", { method: "POST", body: JSON.stringify(input) });
 }
 
@@ -116,17 +181,58 @@ export async function getCustomer(id: string) {
   return apiFetch<Customer>(`/customers/${id}`);
 }
 
-export async function getCustomerDebts(id: string) {
-  return apiFetch<{ items: any[] }>(`/customers/${id}/debts`);
+export async function updateCustomer(id: string, input: Partial<Customer>) {
+  return apiFetch<Customer>(`/customers/${id}`, { method: "PATCH", body: JSON.stringify(input) });
 }
 
+export async function deleteCustomer(id: string) {
+  return apiFetch<any>(`/customers/${id}`, { method: "DELETE" });
+}
+
+export async function getCustomerDebts(id: string) {
+  return apiFetch<{ items: Debt[] }>(`/customers/${id}/debts`);
+}
+
+// Debts
+export async function createDebt(input: any) {
+  return apiFetch<{ debt: Debt; installments: Installment[] }>(`/debts`, { method: "POST", body: JSON.stringify(input) });
+}
+
+export async function getDebt(id: string) {
+  return apiFetch<{ debt: Debt; installments: Installment[]; guarantor: Guarantor | null }>(`/debts/${id}`);
+}
+
+export async function updateDebt(id: string, input: any) {
+  return apiFetch<Debt>(`/debts/${id}`, { method: "PATCH", body: JSON.stringify(input) });
+}
+
+export async function deleteDebt(id: string) {
+  return apiFetch<any>(`/debts/${id}`, { method: "DELETE" });
+}
+
+export async function listDebtInstallments(id: string) {
+  return apiFetch<Installment[]>(`/debts/${id}/installments`);
+}
+
+// Guarantors
 export async function listGuarantors(search?: string) {
   const qs = search ? `?search=${encodeURIComponent(search)}` : "";
-  return apiFetch<{ items: any[] }>(`/guarantors${qs}`);
+  return apiFetch<{ items: Guarantor[] }>(`/guarantors${qs}`);
 }
 
+export async function activateGuarantor(debtId: string) {
+  return apiFetch<any>(`/debts/${debtId}/guarantor/activate`, { method: "POST" });
+}
+
+// Installments & Payments
+export async function payInstallment(installmentId: string, input: any = {}) {
+  return apiFetch<any>(`/installments/${installmentId}/payments`, { method: "POST", body: JSON.stringify(input) });
+}
+
+// Reminders
 export async function getRemindersUpcoming(days = 7) {
-  return apiFetch<{ items: any[] }>(`/reminders/upcoming?days=${days}`);
+  const n = Number.isFinite(days) ? days : 7;
+  return apiFetch<{ items: any[] }>(`/reminders/upcoming?days=${n}`);
 }
 
 export async function getRemindersOverdue() {
@@ -137,18 +243,29 @@ export async function getRemindersSent() {
   return apiFetch<{ items: any[] }>(`/reminders/sent`);
 }
 
+export async function sendReminder(input: { installmentId: string; channel: "whatsapp" | "sms" }) {
+  return apiFetch<any>("/reminders/send", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+// Analytics
 export async function getAnalyticsSummary() {
-  return apiFetch<{ totalActiveDebt: number; collectedThisMonth: number; overdueAmount: number; activeCustomers: number; currency: string }>(
-    `/analytics/summary`,
-  );
+  return apiFetch<AnalyticsSummary>(`/analytics/summary`);
 }
 
 export async function getAnalyticsMonthly(months = 6) {
-  return apiFetch<{ items: Array<{ year: number; month: number; debts: number; collected: number }>; currency: string }>(
-    `/analytics/monthly?months=${months}`,
-  );
+  const n = Number.isFinite(months) ? months : 6;
+  return apiFetch<AnalyticsMonthly>(`/analytics/monthly?months=${n}`);
 }
 
+export async function getRecentActivity(limit = 5): Promise<Debt[]> {
+  const res = await apiFetch<any>(`/debts?limit=${limit}`);
+  return res.items ?? [];
+}
+
+// Settings
 export async function getSettingsProfile() {
   return apiFetch<any>(`/settings/profile`);
 }
@@ -177,37 +294,12 @@ export async function changePassword(input: { currentPassword: string; newPasswo
   return apiFetch<any>(`/settings/security/password`, { method: "PATCH", body: JSON.stringify(input) });
 }
 
-export async function listCustomers(search?: string) {
-  const qs = search ? `?search=${encodeURIComponent(search)}&page=1&limit=20` : `?page=1&limit=20`;
-  return apiFetch<{ items: Customer[] }>(`/customers${qs}`);
-}
-
-export async function createDebt(input: any) {
-  return apiFetch<{ debt: any; installments: any[] }>(`/debts`, { method: "POST", body: JSON.stringify(input) });
-}
-
-export async function getDebt(id: string) {
-  return apiFetch<{ debt: any; installments: any[] }>(`/debts/${id}`);
-}
-
-export async function payInstallment(installmentId: string, input: any = {}) {
-  return apiFetch<any>(`/installments/${installmentId}/payments`, { method: "POST", body: JSON.stringify(input) });
-}
-
-export async function activateGuarantor(debtId: string) {
-  return apiFetch<any>(`/debts/${debtId}/guarantor/activate`, { method: "POST" });
-}
-
+// Associations
 export async function listAssociations() {
   return apiFetch<{ items: Association[] }>(`/associations`);
 }
 
-export async function createAssociation(input: {
-  name: string;
-  members: number;
-  monthlyAmount: number;
-  myTurn: number;
-}) {
+export async function createAssociation(input: Partial<Association>) {
   return apiFetch<Association>(`/associations`, { method: "POST", body: JSON.stringify(input) });
 }
 
@@ -215,15 +307,6 @@ export async function getAssociation(id: string) {
   return apiFetch<Association>(`/associations/${id}`);
 }
 
-export async function patchAssociation(
-  id: string,
-  input: Partial<{
-    name: string;
-    members: number;
-    monthlyAmount: number;
-    myTurn: number;
-  }>,
-) {
+export async function patchAssociation(id: string, input: Partial<Association>) {
   return apiFetch<Association>(`/associations/${id}`, { method: "PATCH", body: JSON.stringify(input) });
 }
-

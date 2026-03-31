@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTheme } from "@/contexts/Providers";
 import { Bell, Search, UserCircle, Moon, Sun, Globe, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/Input";
@@ -9,6 +12,15 @@ import { clearAccessToken } from "@/lib/api";
 export function Header() {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
+
+  const [search, setSearch] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && search.trim()) {
+      router.push(`/dashboard/customers?search=${encodeURIComponent(search.trim())}`);
+    }
+  };
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "ar" ? "en" : "ar";
@@ -28,7 +40,13 @@ export function Header() {
       {/* Search */}
       <div className="w-96 relative">
         <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-        <Input placeholder={t("header.searchPlaceholder")} className="pe-10 bg-slate-50 border-transparent focus-visible:bg-white dark:bg-slate-800 dark:focus-visible:bg-slate-700" />
+        <Input 
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={handleSearch}
+          placeholder={t("header.searchPlaceholder")} 
+          className="pe-10 bg-slate-50 border-transparent focus-visible:bg-white dark:bg-slate-800 dark:focus-visible:bg-slate-700" 
+        />
       </div>
 
       {/* Actions */}
@@ -61,13 +79,13 @@ export function Header() {
 
         {/* Profile & Logout */}
         <div className="flex items-center gap-4 ps-4 border-s border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
+          <Link href="/dashboard/settings" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="text-end hidden sm:block">
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("header.storeName")}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{t("header.role")}</p>
             </div>
             <UserCircle size={38} className="text-slate-300 dark:text-slate-600" strokeWidth={1.5} />
-          </div>
+          </Link>
           
           <button 
             onClick={handleLogout}

@@ -10,8 +10,9 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: "SADAD - Debt Management Platform",
-  description: "SADAD Debt Management Platform (سداد)",
+  title: "سداد | منصة إدارة الديون والتحصيل الذكي",
+  description: "سداد - الحل الأمثل لإدارة الديون، العملاء، والتنبيهات الذكية للتحصيل المالي. نظام متكامل يدعم العربية والإنجليزية.",
+  keywords: ["سداد", "إدارة ديون", "تحصيل مالي", "منصة مالية", "SADAD", "Debt Management"],
 };
 
 export default function RootLayout({
