@@ -2,16 +2,37 @@
 
 import { Users, Calendar, DollarSign, Plus, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { listAssociations } from "@/lib/api";
+import { Association, createAssociation, getAssociation, listAssociations, patchAssociation } from "@/lib/api";
 
 export default function AssociationsPage() {
   const { t } = useTranslation();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<Association[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    members: "10",
+    monthlyAmount: "500",
+    myTurn: "1",
+  });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    members: "",
+    monthlyAmount: "",
+    myTurn: "",
+  });
+
+  const reload = async () => {
+    const res = await listAssociations();
+    setItems(res.items ?? []);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -33,6 +54,68 @@ export default function AssociationsPage() {
     };
   }, [t]);
 
+  const onCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSaving(true);
+    try {
+      await createAssociation({
+        name: createForm.name.trim(),
+        members: Number(createForm.members),
+        monthlyAmount: Number(createForm.monthlyAmount),
+        myTurn: Number(createForm.myTurn),
+      });
+      await reload();
+      setIsCreateOpen(false);
+      setCreateForm({ name: "", members: "10", monthlyAmount: "500", myTurn: "1" });
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to create association");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const onSelectAssociation = async (id: string) => {
+    setError(null);
+    setSelectedId(id);
+    try {
+      const assoc = await getAssociation(id);
+      setEditForm({
+        name: assoc.name ?? "",
+        members: String(assoc.members ?? ""),
+        monthlyAmount: String(assoc.monthlyAmount ?? ""),
+        myTurn: String(assoc.myTurn ?? ""),
+      });
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to load association details");
+      setSelectedId(null);
+    }
+  };
+
+  const onUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedId) return;
+    setError(null);
+    setIsSaving(true);
+    try {
+      await patchAssociation(selectedId, {
+        name: editForm.name.trim(),
+        members: Number(editForm.members),
+        monthlyAmount: Number(editForm.monthlyAmount),
+        myTurn: Number(editForm.myTurn),
+      });
+      await reload();
+      setSelectedId(null);
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to update association");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-12">
       <div className="flex items-center justify-between">
@@ -40,11 +123,55 @@ export default function AssociationsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">جمعيتك (Jam&apos;eya)</h1>
           <p className="text-slate-500 mt-2 text-sm">تتبع جمعياتك المالية وأدوار الاستلام الشهرية.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setIsCreateOpen((v) => !v)}>
           <Plus size={18} />
-          إنشاء جمعية جديدة
+          {isCreateOpen ? "إغلاق النموذج" : "إنشاء جمعية جديدة"}
         </Button>
       </div>
+
+      {isCreateOpen && (
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="p-5">
+            <form onSubmit={onCreate} className="grid gap-3 md:grid-cols-2">
+              <Input
+                required
+                placeholder="اسم الجمعية"
+                value={createForm.name}
+                onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))}
+              />
+              <Input
+                required
+                type="number"
+                min={2}
+                placeholder="عدد الأعضاء"
+                value={createForm.members}
+                onChange={(e) => setCreateForm((f) => ({ ...f, members: e.target.value }))}
+              />
+              <Input
+                required
+                type="number"
+                min={1}
+                placeholder="المبلغ الشهري"
+                value={createForm.monthlyAmount}
+                onChange={(e) => setCreateForm((f) => ({ ...f, monthlyAmount: e.target.value }))}
+              />
+              <Input
+                required
+                type="number"
+                min={1}
+                placeholder="دوري في الاستلام"
+                value={createForm.myTurn}
+                onChange={(e) => setCreateForm((f) => ({ ...f, myTurn: e.target.value }))}
+              />
+              <div className="md:col-span-2">
+                <Button disabled={isSaving} type="submit">
+                  {isSaving ? "جاري الحفظ..." : "حفظ الجمعية"}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         {error && (
@@ -120,7 +247,54 @@ export default function AssociationsPage() {
                   </div>
                 )}
 
-                <Button variant="outline" className="w-full">عرض تفاصيل وأعضاء الجمعية</Button>
+                <Button variant="outline" className="w-full" onClick={() => onSelectAssociation(assoc.id)}>
+                  عرض تفاصيل وأعضاء الجمعية
+                </Button>
+
+                {selectedId === assoc.id && (
+                  <form onSubmit={onUpdate} className="space-y-2 border-t pt-4">
+                    <Input
+                      required
+                      value={editForm.name}
+                      onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                      placeholder="اسم الجمعية"
+                    />
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input
+                        required
+                        type="number"
+                        min={2}
+                        value={editForm.members}
+                        onChange={(e) => setEditForm((f) => ({ ...f, members: e.target.value }))}
+                        placeholder="الأعضاء"
+                      />
+                      <Input
+                        required
+                        type="number"
+                        min={1}
+                        value={editForm.monthlyAmount}
+                        onChange={(e) => setEditForm((f) => ({ ...f, monthlyAmount: e.target.value }))}
+                        placeholder="شهري"
+                      />
+                      <Input
+                        required
+                        type="number"
+                        min={1}
+                        value={editForm.myTurn}
+                        onChange={(e) => setEditForm((f) => ({ ...f, myTurn: e.target.value }))}
+                        placeholder="الدور"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="submit" disabled={isSaving}>
+                        {isSaving ? "جاري التحديث..." : "حفظ التعديلات"}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={() => setSelectedId(null)}>
+                        إلغاء
+                      </Button>
+                    </div>
+                  </form>
+                )}
               </CardContent>
             </Card>
           );

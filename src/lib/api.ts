@@ -62,7 +62,13 @@ export async function login(input: { email: string; password: string }) {
   );
 }
 
-export async function register(input: { email: string; password: string; fullName: string }) {
+export async function register(input: {
+  email: string;
+  password: string;
+  fullName: string;
+  phone?: string;
+  storeName?: string;
+}) {
   return apiFetch<{ id?: string; email: string; fullName: string }>(
     "/auth/register",
     { method: "POST", body: JSON.stringify(input) },
@@ -79,6 +85,19 @@ export type Customer = {
   cr: string | null;
   notes: string | null;
   status: "regular" | "late" | "defaulting";
+};
+
+export type Association = {
+  id: string;
+  name: string;
+  members: number;
+  monthlyAmount: number;
+  myTurn: number;
+  currentMonth: number;
+  status: string;
+  totalValue: number;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export async function createCustomer(input: {
@@ -180,6 +199,31 @@ export async function activateGuarantor(debtId: string) {
 }
 
 export async function listAssociations() {
-  return apiFetch<{ items: any[] }>(`/associations`);
+  return apiFetch<{ items: Association[] }>(`/associations`);
+}
+
+export async function createAssociation(input: {
+  name: string;
+  members: number;
+  monthlyAmount: number;
+  myTurn: number;
+}) {
+  return apiFetch<Association>(`/associations`, { method: "POST", body: JSON.stringify(input) });
+}
+
+export async function getAssociation(id: string) {
+  return apiFetch<Association>(`/associations/${id}`);
+}
+
+export async function patchAssociation(
+  id: string,
+  input: Partial<{
+    name: string;
+    members: number;
+    monthlyAmount: number;
+    myTurn: number;
+  }>,
+) {
+  return apiFetch<Association>(`/associations/${id}`, { method: "PATCH", body: JSON.stringify(input) });
 }
 

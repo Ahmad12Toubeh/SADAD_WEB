@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
+import { getAnalyticsMonthly, getAnalyticsSummary } from "@/lib/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -10,16 +12,54 @@ import { ArrowUpRight, ArrowDownRight, Users, Wallet, CreditCard, Activity } fro
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
   const { theme } = useTheme();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<{
+    totalActiveDebt: number;
+    collectedThisMonth: number;
+    overdueAmount: number;
+    activeCustomers: number;
+    currency: string;
+  } | null>(null);
+  const [monthly, setMonthly] = useState<Array<{ year: number; month: number; debts: number; collected: number }>>([]);
 
-  // Translated Mock Data
-  const trendData = [
-    { name: t("analytics.charts.months.jan"), total: 4000, collected: 2400 },
-    { name: t("analytics.charts.months.feb"), total: 3000, collected: 1398 },
-    { name: t("analytics.charts.months.mar"), total: 6000, collected: 4800 },
-    { name: t("analytics.charts.months.apr"), total: 2780, collected: 1908 },
-    { name: t("analytics.charts.months.may"), total: 1890, collected: 800 },
-    { name: t("analytics.charts.months.jun"), total: 2390, collected: 3800 },
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [s, m] = await Promise.all([getAnalyticsSummary(), getAnalyticsMonthly(6)]);
+        if (cancelled) return;
+        setSummary(s);
+        setMonthly(m.items ?? []);
+      } catch (err: any) {
+        const key = err?.messageKey as string | undefined;
+        if (!cancelled) setError(key ? t(key) : err?.message ?? "Failed to load dashboard");
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const trendData = useMemo(() => {
+    const monthNames = [
+      t("analytics.charts.months.jan"),
+      t("analytics.charts.months.feb"),
+      t("analytics.charts.months.mar"),
+      t("analytics.charts.months.apr"),
+      t("analytics.charts.months.may"),
+      t("analytics.charts.months.jun"),
+    ];
+    return monthly.map((row) => ({
+      name: monthNames[(row.month - 1) % 6] ?? `${row.month}/${row.year}`,
+      total: row.debts,
+      collected: row.collected,
+    }));
+  }, [monthly, t]);
 
   return (
     <div className="space-y-6 pb-12">
@@ -27,6 +67,11 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("dashboard.title")}</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">{t("dashboard.subtitle")}</p>
       </div>
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-medium dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
+          {error}
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -38,7 +83,10 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">124,500 <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span></div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">
+              {isLoading ? "…" : (summary?.totalActiveDebt ?? 0).toLocaleString()}{" "}
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
+            </div>
             <p className="text-xs text-red-500 flex items-center mt-1">
               <ArrowUpRight size={14} className="mr-1" /> {t("dashboard.upFromLastMonth")}
             </p>
@@ -53,7 +101,10 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">82,300 <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span></div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">
+              {isLoading ? "…" : (summary?.collectedThisMonth ?? 0).toLocaleString()}{" "}
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
+            </div>
              <p className="text-xs text-green-600 dark:text-green-400 flex items-center mt-1">
               <ArrowUpRight size={14} className="mr-1" /> {t("dashboard.upCollected")}
             </p>
@@ -68,7 +119,10 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">42,200 <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span></div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">
+              {isLoading ? "…" : (summary?.overdueAmount ?? 0).toLocaleString()}{" "}
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
+            </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">
               <ArrowDownRight size={14} className="mr-1" /> {t("dashboard.needsFollowUp")}
             </p>
@@ -83,7 +137,9 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">342</div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">
+              {isLoading ? "…" : (summary?.activeCustomers ?? 0).toLocaleString()}
+            </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {t("dashboard.newCustomers")}
             </p>

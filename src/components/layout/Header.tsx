@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
 import { Bell, Search, UserCircle, Moon, Sun, Globe, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/Input";
+import { clearAccessToken } from "@/lib/api";
 
 export function Header() {
   const { t, i18n } = useTranslation();
@@ -18,6 +19,7 @@ export function Header() {
   };
 
   const handleLogout = () => {
+    clearAccessToken();
     window.location.href = "/login";
   };
 

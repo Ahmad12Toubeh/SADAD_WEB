@@ -26,12 +26,9 @@ export default function RegisterPage() {
     setError(null);
     setIsLoading(true);
     try {
-      await apiRegister({ email, password, fullName });
+      await apiRegister({ email, password, fullName, phone, storeName });
       const res = await login({ email, password });
       setAccessToken(res.accessToken);
-      // storeName/phone can be saved later via settings endpoints
-      void storeName;
-      void phone;
       router.push("/dashboard");
     } catch (err: any) {
       const key = err?.messageKey as string | undefined;

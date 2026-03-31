@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "@/contexts/Providers";
 import { 
-  LayoutDashboard, Users, PlusCircle, FileText, Bell, 
+  LayoutDashboard, Users, PlusCircle, Bell, 
   PieChart, UsersRound, Settings, ShieldCheck, UserCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,7 +13,6 @@ const navigationConfig = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { key: "customers", href: "/dashboard/customers", icon: Users },
   { key: "addDebt", href: "/dashboard/debts/new", icon: PlusCircle },
-  { key: "debtDetails", href: "/dashboard/debts/details", icon: FileText },
   { key: "analytics", href: "/dashboard/analytics", icon: PieChart },
   { key: "associations", href: "/dashboard/associations", icon: UsersRound },
   { key: "guarantors", href: "/dashboard/guarantors", icon: UserCheck },
@@ -24,20 +22,7 @@ const navigationConfig = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { t, i18n } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
-
-  const handleLogout = () => {
-    window.location.href = "/login";
-  };
-
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "ar" ? "en" : "ar";
-    i18n.changeLanguage(newLang);
-    document.documentElement.dir = i18n.dir(newLang);
-    document.documentElement.lang = newLang;
-    localStorage.setItem("i18nextLng", newLang);
-  };
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col w-64 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-300 min-h-screen shrink-0 border-l border-slate-200 dark:border-white/5 rtl:border-l rtl:border-r-0 ltr:border-r ltr:border-l-0 shadow-sm transition-colors duration-300">
