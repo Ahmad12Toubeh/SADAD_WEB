@@ -170,7 +170,7 @@ export default function CustomersPage() {
               {!isLoading && items.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
-                    لم العثور على عملاء.
+                    {t("common.noResults")}
                   </td>
                 </tr>
               )}

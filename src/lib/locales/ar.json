@@ -40,10 +40,6 @@
     "badDebt": "ديون متعثرة (متأخرة)",
     "activeCustomers": "العملاء النشطون",
     "currency": "ر.س",
-    "upFromLastMonth": "+14.5% من الشهر الماضي",
-    "upCollected": "+21.2% من الشهر الماضي",
-    "needsFollowUp": "تحتاج لمتابعة فورية",
-    "newCustomers": "8 عملاء جدد هذا الأسبوع",
     "cashflowChart": "التدفق المالي وتراكم الديون",
     "collectionChart": "معدل التحصيل (الأقساط المدفوعة)"
   },
@@ -97,7 +93,8 @@
       "transactionsTitle": "سجل المديونيات",
       "editBtn": "تعديل البيانات",
       "deleteBtn": "حذف العميل",
-      "emptyDebts": "لا توجد ديون لهذا العميل حالياً"
+      "emptyDebts": "لا توجد ديون لهذا العميل حالياً",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء."
     }
   },
   "settings": {
@@ -225,7 +222,21 @@
       "progress": "نسبة الإكتمال",
       "deleteBtn": "حذف المديونية",
       "installment": "الدفعة رقم",
-      "dueDate": "الاستحقاق"
+      "dueDate": "الاستحقاق",
+      "downloadPdf": "تحميل PDF",
+      "issueInvoice": "إصدار فاتورة نهائية",
+      "markAsPaid": "تسجيل كسداد ✓"
+    },
+    "page": {
+      "title": "سجل الديون العام",
+      "subtitle": "إدارة ومتابعة كافة المديونيات المسجلة في النظام.",
+      "newDebt": "دين جديد",
+      "allDebts": "كافة المديونيات",
+      "searchPlaceholder": "بحث برقم الدين أو العميل...",
+      "colId": "رقم الدين",
+      "colDate": "التاريخ",
+      "colCategory": "الفئة",
+      "viewDetails": "عرض التفاصيل"
     }
   },
   "analytics": {

@@ -83,9 +83,6 @@ export default function DashboardPage() {
               {isLoading ? "…" : (summary?.totalActiveDebt ?? 0).toLocaleString()}{" "}
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
             </div>
-            <p className="text-xs text-red-500 flex items-center mt-1">
-              <ArrowUpRight size={14} className="mr-1" /> {t("dashboard.upFromLastMonth")}
-            </p>
           </CardContent>
         </Card>
 
@@ -101,9 +98,6 @@ export default function DashboardPage() {
               {isLoading ? "…" : (summary?.collectedThisMonth ?? 0).toLocaleString()}{" "}
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
             </div>
-             <p className="text-xs text-green-600 dark:text-green-400 flex items-center mt-1">
-              <ArrowUpRight size={14} className="mr-1" /> {t("dashboard.upCollected")}
-            </p>
           </CardContent>
         </Card>
 
@@ -119,9 +113,6 @@ export default function DashboardPage() {
               {isLoading ? "…" : (summary?.overdueAmount ?? 0).toLocaleString()}{" "}
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">
-              <ArrowDownRight size={14} className="mr-1" /> {t("dashboard.needsFollowUp")}
-            </p>
           </CardContent>
         </Card>
 
@@ -136,9 +127,6 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold text-slate-900 dark:text-white">
               {isLoading ? "…" : (summary?.activeCustomers ?? 0).toLocaleString()}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              {t("dashboard.newCustomers")}
-            </p>
           </CardContent>
         </Card>
       </div>

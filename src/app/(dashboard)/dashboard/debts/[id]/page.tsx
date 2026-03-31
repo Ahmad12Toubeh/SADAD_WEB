@@ -142,10 +142,10 @@ export default function DebtDetailsPage() {
              <Trash2 size={16} /> {t("common.delete")}
           </Button>
           <Button variant="outline" className="gap-2 hidden sm:flex dark:border-slate-700 dark:hover:bg-slate-800">
-            <Download size={16} /> {t("landing.features.f5Title")}
+            <Download size={16} /> {t("debts.details.downloadPdf")}
           </Button>
           <Button className="gap-2 shadow-sm shadow-primary/20">
-            <FileSpreadsheet size={16} /> {t("landing.features.f5Title")}
+            <FileSpreadsheet size={16} /> {t("debts.details.issueInvoice")}
           </Button>
         </div>
       </div>
@@ -317,7 +317,7 @@ export default function DebtDetailsPage() {
                     className="bg-primary hover:bg-primary/90 text-white font-black px-6 rounded-xl shadow-lg shadow-primary/20 h-11"
                     onClick={() => handlePay(inst.id)}
                   >
-                    {t("dashboard.collectedThisMonth")}
+                    {t("debts.details.markAsPaid")}
                   </Button>
                 )}
               </div>
@@ -329,7 +329,7 @@ export default function DebtDetailsPage() {
       <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-6 rounded-3xl flex items-start gap-4">
         <Info className="text-blue-500 shrink-0 mt-1" size={20} />
         <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
-          <strong>{t("debts.new.s4.desc")}</strong> {t("debts.new.s4.desc")}
+          {t("debts.new.s4.desc")}
         </p>
       </div>
 

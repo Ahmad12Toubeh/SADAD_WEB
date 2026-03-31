@@ -67,32 +67,32 @@ export default function DebtsPage() {
     <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">سجل الديون العام</h1>
-          <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">إدارة ومتابعة كافة المديونيات المسجلة في النظام.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("debts.page.title")}</h1>
+          <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">{t("debts.page.subtitle")}</p>
         </div>
         <Link href="/dashboard/debts/new">
           <Button className="gap-2">
             <Plus size={18} />
-            دين جديد
+            {t("debts.page.newDebt")}
           </Button>
         </Link>
       </div>
 
       <Card className="border-0 shadow-lg shadow-slate-200/40 rounded-2xl overflow-hidden dark:bg-slate-800">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-700 py-5 bg-white dark:bg-slate-800">
-          <CardTitle className="text-lg text-slate-900 dark:text-white">كافة المديونيات</CardTitle>
+          <CardTitle className="text-lg text-slate-900 dark:text-white">{t("debts.page.allDebts")}</CardTitle>
           <div className="flex gap-2 mt-4 sm:mt-0">
             <div className="relative">
               <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <Input 
-                placeholder="بحث برقم الدين أو العميل..." 
+                placeholder={t("debts.page.searchPlaceholder")} 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pe-10 h-10 w-full sm:w-64 text-sm bg-slate-50 dark:bg-slate-900 border-transparent dark:border-slate-700 focus-visible:bg-white" 
               />
             </div>
             <Button variant="outline" size="sm" className="gap-2 h-10 w-10 sm:w-auto px-0 sm:px-4 flex items-center justify-center dark:border-slate-700">
-              <Filter size={16} /> <span className="hidden sm:inline">تصفية</span>
+              <Filter size={16} /> <span className="hidden sm:inline">{t("customers.filter")}</span>
             </Button>
           </div>
         </CardHeader>
@@ -107,13 +107,13 @@ export default function DebtsPage() {
           <table className="w-full text-sm text-start whitespace-nowrap">
             <thead className="text-sm text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="px-6 py-4 font-semibold text-start">رقم الدين</th>
-                <th className="px-6 py-4 font-semibold text-start">العميل</th>
-                <th className="px-6 py-4 font-semibold text-start">التاريخ</th>
-                <th className="px-6 py-4 font-semibold text-start">الفئة</th>
-                <th className="px-6 py-4 font-semibold text-start">المبلغ الإجمالي</th>
-                <th className="px-6 py-4 font-semibold text-start">الحالة</th>
-                <th className="px-6 py-4 font-semibold text-center">الإجراءات</th>
+                <th className="px-6 py-4 font-semibold text-start">{t("debts.page.colId")}</th>
+                <th className="px-6 py-4 font-semibold text-start">{t("customers.table.customer")}</th>
+                <th className="px-6 py-4 font-semibold text-start">{t("debts.page.colDate")}</th>
+                <th className="px-6 py-4 font-semibold text-start">{t("debts.page.colCategory")}</th>
+                <th className="px-6 py-4 font-semibold text-start">{t("customers.table.totalDebt")}</th>
+                <th className="px-6 py-4 font-semibold text-start">{t("customers.table.status")}</th>
+                <th className="px-6 py-4 font-semibold text-center">{t("customers.table.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -142,13 +142,13 @@ export default function DebtsPage() {
                   </td>
                   <td className="px-6 py-5">
                     <span className={`px-3 py-1.5 rounded-full text-xs font-bold border ${getStatusStyle(item.status)}`}>
-                      {item.status}
+                      {t(`analytics.charts.status.${item.status}`) || item.status}
                     </span>
                   </td>
                   <td className="px-6 py-5 text-center">
                     <Link href={`/dashboard/debts/${item.id}`}>
                       <Button variant="ghost" className="text-primary hover:bg-primary/10 gap-2 h-9">
-                        <Eye size={16} /> عرض التفاصيل
+                        <Eye size={16} /> {t("debts.page.viewDetails")}
                       </Button>
                     </Link>
                   </td>
@@ -157,14 +157,14 @@ export default function DebtsPage() {
               {isLoading && (
                 <tr>
                   <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
-                    جاري تحميل سجل الديون...
+                    {t("common.loading")}
                   </td>
                 </tr>
               )}
               {!isLoading && filtered.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
-                    لا يوجد ديون مسجلة حالياً.
+                    {t("common.noResults")}
                   </td>
                 </tr>
               )}

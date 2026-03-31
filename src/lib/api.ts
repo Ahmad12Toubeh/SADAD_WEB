@@ -108,11 +108,15 @@ function getAccessToken() {
 export function setAccessToken(token: string) {
   if (typeof window === "undefined") return;
   localStorage.setItem("accessToken", token);
+  // Also set cookie for middleware auth guard
+  document.cookie = `accessToken=${token}; path=/; max-age=604800; SameSite=Lax`;
 }
 
 export function clearAccessToken() {
   if (typeof window === "undefined") return;
   localStorage.removeItem("accessToken");
+  // Clear cookie too
+  document.cookie = "accessToken=; path=/; max-age=0";
 }
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {

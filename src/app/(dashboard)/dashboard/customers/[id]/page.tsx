@@ -252,7 +252,7 @@ export default function CustomerDetailsPage({ params }: { params: { id: string }
                 <Trash2 size={32} />
               </div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t("common.confirm")}</h2>
-              <p className="text-slate-500 mb-6">{t("guarantor.modal.desc")}</p>
+              <p className="text-slate-500 mb-6">{t("customers.details.deleteConfirm")}</p>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setShowDeleteConfirm(false)}>{t("common.cancel")}</Button>
                 <Button variant="destructive" className="flex-1" onClick={handleDelete}>{t("common.delete")}</Button>
