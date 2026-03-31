@@ -28,6 +28,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-slate-50 text-slate-900 font-tajawal dark:bg-slate-900 dark:text-slate-50 transition-colors" suppressHydrationWarning>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var l = window.localStorage.getItem('i18nextLng') || 'ar';
+                var isEng = l.startsWith('en');
+                document.documentElement.lang = isEng ? 'en' : 'ar';
+                document.documentElement.dir = isEng ? 'ltr' : 'rtl';
+              } catch (e) {}
+            `,
+          }}
+        />
         <Providers>
           {children}
         </Providers>
