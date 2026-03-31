@@ -1,0 +1,407 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "addDebt": "Create New Debt",
+    "debtDetails": "Debt Details",
+    "analytics": "Analytics Summary",
+    "associations": "Associations Flow",
+    "guarantors": "Guarantors (Trust System)",
+    "reminders": "Smart Reminders",
+    "settings": "Platform Settings",
+    "logout": "Logout",
+    "language": "Change Language",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode"
+  },
+  "header": {
+    "searchPlaceholder": "Search for customer or invoice...",
+    "storeName": "Al-Amal Store",
+    "role": "General Manager"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "subtitle": "Welcome back Al-Amal Store, here is a summary of your store's financial performance.",
+    "totalActiveDebt": "Total Active Debt",
+    "collectedThisMonth": "Collected This Month",
+    "badDebt": "Bad Debt (Overdue)",
+    "activeCustomers": "Active Customers",
+    "currency": "SAR",
+    "upFromLastMonth": "+14.5% from last month",
+    "upCollected": "+21.2% from last month",
+    "needsFollowUp": "Needs immediate follow-up",
+    "newCustomers": "8 new customers this week",
+    "cashflowChart": "Cashflow & Accumulated Debt",
+    "collectionChart": "Collection Rate (Paid Installments)"
+  },
+  "customers": {
+    "title": "Customers Management",
+    "subtitle": "Track your customers, their debts, and credit status.",
+    "addCustomer": "Add New Customer",
+    "searchPlaceholder": "Search by name or phone...",
+    "filter": "Filter Results",
+    "table": {
+      "customer": "Customer",
+      "type": "Type",
+      "phone": "Phone",
+      "totalDebt": "Total Debt",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "regular": "Regular",
+      "late": "Late",
+      "defaulting": "Defaulting"
+    },
+    "pagination": "Showing 1 to 5 of 342 customers",
+    "prev": "Previous",
+    "next": "Next",
+    "new": {
+      "title": "Add New Customer",
+      "subtitle": "Add customer details to link their debts to their profile.",
+      "typeIndividual": "Individual",
+      "typeCompany": "Company / Establishment",
+      "fullName": "Full Name",
+      "companyName": "Company / Establishment Name",
+      "namePlaceholderIndividual": "e.g., Khaled Mohammed Al-Otaibi",
+      "namePlaceholderCompany": "e.g., Al-Ofoq Co. Ltd",
+      "phone": "Phone Number",
+      "email": "Email (Optional)",
+      "address": "Address (Optional)",
+      "addressPlaceholder": "e.g., Riyadh, Olaya District",
+      "cr": "Commercial Register (Optional)",
+      "notes": "Internal Notes (Optional)",
+      "notesPlaceholder": "Any special notes for this customer...",
+      "saving": "Saving...",
+      "save": "Save Customer Data",
+      "cancel": "Cancel"
+    }
+  },
+  "settings": {
+    "title": "Platform Settings",
+    "subtitle": "Manage your account details, store, and notification preferences.",
+    "tabs": {
+      "profile": "Profile Data",
+      "store": "Store Settings",
+      "notifications": "Notifications",
+      "security": "Security"
+    },
+    "profile": {
+      "title": "Personal Account Data",
+      "name": "Mohammed Ahmed",
+      "role": "General Manager",
+      "changePic": "Change Profile Picture",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone Number"
+    },
+    "store": {
+      "title": "Store Settings",
+      "storeName": "Store / Business Name",
+      "businessType": "Business Type",
+      "address": "Address",
+      "cr": "Commercial Register (Optional)",
+      "currency": "Default Currency"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "customWa": "Custom WhatsApp number for notifications",
+      "waPlaceholder": "Leave empty to use default account number",
+      "items": {
+        "delay": "Alert when installment is overdue",
+        "delayDesc": "Receive immediate notification when customer is late on payment",
+        "before": "Reminder 3 days before due date",
+        "beforeDesc": "Send proactive reminder to customer",
+        "weekly": "Weekly collection report",
+        "weeklyDesc": "Auto summary every Sunday for collected & remaining amounts",
+        "wa": "WhatsApp notifications for customers",
+        "waDesc": "Send automated reminders to customers via WhatsApp"
+      }
+    },
+    "security": {
+      "title": "Security & Password Update",
+      "currentPass": "Current Password",
+      "newPass": "New Password",
+      "confirmPass": "Confirm New Password",
+      "hint": "🔐 It's recommended to use a strong password with uppercase, lowercase, numbers, and symbols."
+    },
+    "saveBtn": "Save Changes",
+    "savedBtn": "✅ Saved!"
+  },
+  "debts": {
+    "new": {
+      "title": "Add New Debt",
+      "subtitle": "Add a new debt for a customer or create an installment invoice step by step.",
+      "steps": {
+        "step1": "Select Customer",
+        "step2": "Debt Details",
+        "step3": "Installment Plan",
+        "step4": "Review"
+      },
+      "stepTitles": {
+        "s1": "Select the customer for this debt",
+        "s2": "What are the debt details?",
+        "s3": "How will the amount be paid?",
+        "s4": "Review and confirm the data"
+      },
+      "s1": {
+        "searchLabel": "Search for existing customer",
+        "searchPlaceholder": "Search by phone or name...",
+        "or": "OR",
+        "addNew": "Add and register new customer +"
+      },
+      "s2": {
+        "amount": "Total Amount",
+        "dueDate": "Debt Due Date",
+        "type": "Debt Type",
+        "types": {
+          "t1": "Deferred Sales Invoice",
+          "t2": "Cash Advance",
+          "t3": "Goods Installment"
+        },
+        "notes": "Additional Notes",
+        "notesPlaceholder": "Enter any notes to help you remember details..."
+      },
+      "s3": {
+        "oneTime": "One-Time Payment",
+        "oneTimeDesc": "Pay the full amount on the due date.",
+        "installments": "Installment Plan (Scheduled)",
+        "installmentsDesc": "Divide the amount into monthly or weekly payments.",
+        "count": "Number of Installments",
+        "period": "Payment Frequency",
+        "periods": {
+          "monthly": "Every 30 Days",
+          "weekly": "Weekly"
+        }
+      },
+      "s4": {
+        "desc": "The debt file is ready based on your inputs. Once confirmed, alerts will be activated.",
+        "customer": "Customer",
+        "total": "Total Amount",
+        "plan": "Payment Plan",
+        "planPreview": "3 divided over 3 months"
+      },
+      "nav": {
+        "prev": "Previous Step",
+        "next": "Next",
+        "confirm": "Confirm & Continue",
+        "saving": "Saving..."
+      }
+    }
+  },
+  "analytics": {
+    "title": "Analytics and Reports",
+    "subtitle": "In-depth analytical view of collection performance and debt movement.",
+    "kpis": {
+      "rate": "Collection Rate",
+      "revenue": "Total Expected Revenue",
+      "avg": "Average Debt Amount",
+      "badDebt": "Bad Debts"
+    },
+    "charts": {
+      "trend": "New Debts vs Monthly Collection",
+      "newDebts": "New Debts",
+      "collected": "Collected",
+      "statusDistrib": "Debt Status Distribution",
+      "status": {
+        "paid": "Fully Paid",
+        "active": "Active Installments",
+        "late": "Overdue",
+        "bad": "Bad / Defaulted"
+      },
+      "months": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun"
+      }
+    }
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it Works",
+      "pricing": "Pricing",
+      "login": "Login",
+      "start": "Start Now"
+    },
+    "hero": {
+      "badge": "✨ The first debt management platform in the Arab market",
+      "title1": "Control Your Store Debts",
+      "title2": "and Collect Smartly",
+      "desc": "<strong>SADAD</strong> platform helps you track your customers' debts, send smart WhatsApp reminders, and schedule installments — all in one place.",
+      "ctaPrimary": "Create Free Account",
+      "ctaSecondary": "How does it work?",
+      "tags": ["No Credit Card Needed", "2-Minute Setup", "14 Days Free"],
+      "dashboard": {
+        "active": "Total Active Debts",
+        "collected": "Collected This Month",
+        "overdue": "Overdue Debts"
+      }
+    },
+    "features": {
+      "badge": "Features",
+      "title": "Everything your store needs to manage debts",
+      "desc": "From tracking to collection — all receivables management tools in one place.",
+      "f1Title": "Customer Management",
+      "f1Desc": "Keep complete profiles for each customer including debts, credit history, and contacts.",
+      "f2Title": "Smart WA Reminders",
+      "f2Desc": "Send automated payment reminders via WhatsApp or SMS without embarrassment.",
+      "f3Title": "Reports & Analytics",
+      "f3Desc": "Visual analytics to show collection rates and overdue debts for better decisions.",
+      "f4Title": "Installment Sheduling",
+      "f4Desc": "Split any amount into regular installments and the system auto-tracks payments.",
+      "f5Title": "Account Statements",
+      "f5Desc": "Get detailed statements for any customer ready to print or share instantly.",
+      "f6Title": "Jam'iyat System",
+      "f6Desc": "Organize financial associations among friends or staff and track turns."
+    },
+    "howItWorks": {
+      "badge": "How It Works",
+      "title": "Start in 3 Simple Steps",
+      "s1": "Create Account",
+      "s1d": "Register your store in 2 minutes — no credit card needed, start for free immediately.",
+      "s2": "Add Customers & Debts",
+      "s2d": "Enter customer info, due amounts, and installment plans in quick simple steps.",
+      "s3": "Track and Collect",
+      "s3d": "Monitor progress, send WA alerts to late payers, and get statements in one click."
+    },
+    "pricing": {
+      "badge": "Pricing",
+      "title": "Plans for Every Merchant",
+      "desc": "Start free, and upgrade as your store grows.",
+      "free": "Free",
+      "freePrice": "0",
+      "pro": "Pro",
+      "proPrice": "99",
+      "ent": "Enterprise",
+      "entPrice": "249",
+      "period": "/month",
+      "periodPro": " SAR/mo",
+      "ctaFree": "Start Free",
+      "ctaPro": "Subscribe Now",
+      "ctaEnt": "Contact Us",
+      "fFree1": "Up to 20 Customers",
+      "fFree2": "50 Entries/month",
+      "fFree3": "Basic SMS Reminders",
+      "fPro1": "Unlimited Customers",
+      "fPro2": "WhatsApp Reminders",
+      "fPro3": "Advanced Reports",
+      "fPro4": "PDF Statements",
+      "fPro5": "Priority Support",
+      "fEnt1": "All Pro Features",
+      "fEnt2": "Multi-users",
+      "fEnt3": "Custom API",
+      "fEnt4": "Custom 24/7 Support"
+    },
+    "cta": {
+      "title": "Ready to collect your debts?",
+      "desc": "Join thousands of merchants managing their receivables with Sadad confidently.",
+      "btn": "Start Free Now"
+    },
+    "footer": {
+      "rights": "© 2025 SADAD. All Rights Reserved.",
+      "login": "Login",
+      "register": "Create Account"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Log in to your SADAD platform",
+      "emailLabel": "Email or Phone Number",
+      "emailPlaceholder": "example@sadad.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot password?",
+      "submit": "Log In",
+      "loading": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign Up Free"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Start managing your store debts easily and for free",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "Mohammed Ahmed",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "example@sadad.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Create Free Account",
+      "loading": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Log In"
+    }
+  },
+  "guarantor": {
+    "title": "Guarantor (Trust System)",
+    "toggle": "Does this debt have a guarantor?",
+    "desc": "Add a guarantor to increase trust and reduce financial risk",
+    "name": "Guarantor's Full Name",
+    "phone": "Guarantor's Phone number",
+    "notes": "Optional Notes",
+    "sectionTitle": "Guarantor Information",
+    "status": {
+      "active": "Active & Involved",
+      "inactive": "Not currently involved",
+      "noGuarantor": "No standalone guarantor is linked to this debt"
+    },
+    "alert": "Customer is late on payment — Guarantor may now be activated",
+    "activateBtn": "Activate Guarantor",
+    "modal": {
+      "title": "Confirm Guarantor Activation",
+      "desc": "Are you sure you want to activate this guarantor? Future payment demands will be directed to them due to customer delinquency.",
+      "confirm": "Confirm Activation",
+      "cancel": "Cancel",
+      "success": "Guarantor has been successfully activated and notified!"
+    },
+    "page": {
+      "title": "Guarantors Registry",
+      "subtitle": "Manage and track guarantors for all open financial liabilities",
+      "searchPlaceholder": "Search by phone number or name...",
+      "stats": {
+        "total": "Total Guarantors",
+        "safe": "Reliable Guarantors",
+        "bouncing": "Late Payments",
+        "contracts": "Guaranteed Liabilities"
+      },
+      "columns": {
+        "name": "Guarantor",
+        "phone": "Contact Info",
+        "debtsCount": "Guaranteed Liabilities",
+        "totalCapital": "Total Guaranteed Capital",
+        "risk": "Risk Indicator",
+        "actions": "Details"
+      },
+      "list": {
+        "debts": "debts",
+        "view": "View",
+        "critical": "Critical Overdue",
+        "empty": "No guarantor records matched your search."
+      },
+      "riskLevels": {
+        "safe": "Safe & Regular",
+        "warning": "Warning - Late Payments"
+      }
+    }
+  },
+  "errors": {
+    "common": {
+      "unknown": "Something went wrong",
+      "notFound": "Resource not found",
+      "badRequest": "Bad request",
+      "internalServerError": "Internal server error"
+    },
+    "auth": {
+      "invalidCredentials": "Invalid email or password",
+      "emailAlreadyRegistered": "This email is already registered"
+    },
+    "validation": {
+      "invalid": "Invalid input"
+    }
+  }
+}

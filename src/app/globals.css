@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f0f7f9;
+  --foreground: #171717;
+  --primary: #00a3e0;
+  --secondary: #1b2b41;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --font-tajawal: var(--font-tajawal), ui-sans-serif, system-ui, sans-serif;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --primary: #00a3e0;
+  --secondary: #1e293b;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html {
+  font-size: 16px;
+}
+
+/* Scale up the entire interface on Tablets and Laptops */
+@media (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+/* Scale up further on large Desktop monitors */
+@media (min-width: 1280px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 1536px) {
+  html {
+    font-size: 20px;
+  }
+}
