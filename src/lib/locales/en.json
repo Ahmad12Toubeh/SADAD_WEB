@@ -20,6 +20,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "save": "Save",
+    "status": "Status",
     "loading": "Loading...",
     "error": "Something went wrong",
     "search": "Search...",
@@ -40,6 +41,7 @@
     "badDebt": "Bad Debt (Overdue)",
     "activeCustomers": "Active Customers",
     "currency": "SAR",
+    "recentActivity": "Recent Activity",
     "cashflowChart": "Cashflow & Accumulated Debt",
     "collectionChart": "Collection Rate (Paid Installments)"
   },
@@ -70,6 +72,7 @@
       "subtitle": "Add customer details to link their debts to their profile.",
       "typeIndividual": "Individual",
       "typeCompany": "Company / Establishment",
+      "name": "Name",
       "fullName": "Full Name",
       "companyName": "Company / Establishment Name",
       "namePlaceholderIndividual": "e.g., Khaled Mohammed Al-Otaibi",
@@ -90,6 +93,9 @@
       "paidAmount": "Paid Amount",
       "remainingAmount": "Remaining Amount",
       "totalDebt": "Total Indebtedness",
+      "table": {
+        "date": "Date"
+      },
       "transactionsTitle": "Debt Records",
       "editBtn": "Edit Data",
       "deleteBtn": "Delete Customer",

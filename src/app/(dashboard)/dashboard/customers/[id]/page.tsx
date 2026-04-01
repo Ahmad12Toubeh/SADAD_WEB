@@ -16,6 +16,7 @@ type Debt = {
   principalAmount: number;
   currency: string;
   planType: "one_time" | "installments";
+  type?: "invoice" | "loan" | "other";
   dueDate: string | null;
   category: string | null;
   status: string;
@@ -113,7 +114,11 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2 dark:border-slate-700" onClick={() => setIsEditModalOpen(true)}>
+          <Button
+            variant="outline"
+            className="gap-2 border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            onClick={() => setIsEditModalOpen(true)}
+          >
             <Edit2 size={16} /> {t("customers.details.editBtn")}
           </Button>
           <Button variant="destructive" className="gap-2" onClick={() => setShowDeleteConfirm(true)}>
@@ -162,7 +167,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
             <thead className="text-sm text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th className="px-6 py-4 font-semibold text-start">{t("customers.table.actions")}</th>
-                <th className="px-6 py-4 font-semibold text-start">{t("debts.new.s4.date") ?? "Date"}</th>
+                <th className="px-6 py-4 font-semibold text-start">{t("customers.details.table.date")}</th>
                 <th className="px-6 py-4 font-semibold text-start">{t("customers.table.type")}</th>
                 <th className="px-6 py-4 font-semibold text-start">{t("customers.table.totalDebt")}</th>
                 <th className="px-6 py-4 font-semibold text-start">{t("customers.table.status")}</th>
@@ -176,7 +181,11 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                   <td className="px-6 py-5 text-slate-600 dark:text-slate-400 font-medium">
                     {tx.createdAt ? new Date(tx.createdAt).toISOString().slice(0, 10) : "-"}
                   </td>
-                  <td className="px-6 py-5 font-bold text-slate-900 dark:text-white">{tx.category ?? "—"}</td>
+                  <td className="px-6 py-5 font-bold text-slate-900 dark:text-white">
+                    {tx.type
+                      ? t(`debts.new.s2.types.${tx.type === "invoice" ? "t1" : tx.type === "loan" ? "t2" : "t3"}`)
+                      : (tx.category ?? "-")}
+                  </td>
                   <td className="px-6 py-5 font-black text-slate-900 dark:text-white">
                     {tx.principalAmount.toLocaleString()} {t("dashboard.currency")}
                   </td>
@@ -192,7 +201,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                   <td className="px-6 py-5 text-center">
                     <Link href={`/dashboard/debts/${tx.id}`}>
                       <Button variant="ghost" className="text-primary hover:bg-primary/10 gap-2 h-9">
-                        <Eye size={16} /> {t("guarantors.page.list.view")}
+                        <Eye size={16} /> {t("guarantor.page.list.view")}
                       </Button>
                     </Link>
                   </td>

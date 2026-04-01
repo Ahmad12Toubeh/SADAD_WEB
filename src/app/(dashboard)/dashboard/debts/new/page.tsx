@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, UserCircle, Calculator, FileText, CheckCircle2, UserCheck } from "lucide-react";
@@ -36,6 +36,19 @@ export default function NewDebtWizard() {
   const [guarantorName, setGuarantorName] = useState("");
   const [guarantorPhone, setGuarantorPhone] = useState("");
   const [guarantorNotes, setGuarantorNotes] = useState("");
+
+  useEffect(() => {
+    if (currentStep !== 1) return;
+    if (customerResults.length > 0) return;
+    (async () => {
+      try {
+        const res = await listCustomers();
+        setCustomerResults(res.items ?? []);
+      } catch {
+        setCustomerResults([]);
+      }
+    })();
+  }, [currentStep, customerResults.length]);
 
   const steps = [
     { id: 1, title: t("debts.new.steps.step1"), icon: UserCircle },
@@ -143,7 +156,7 @@ export default function NewDebtWizard() {
                         const v = e.target.value;
                         setCustomerSearch(v);
                         try {
-                          const res = await listCustomers(v);
+                          const res = await listCustomers(v.trim() ? v : undefined);
                           setCustomerResults(res.items ?? []);
                         } catch {
                           setCustomerResults([]);
@@ -180,7 +193,10 @@ export default function NewDebtWizard() {
                       <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400">{t("debts.new.s1.or")}</span>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full border-dashed border-2 py-8 text-primary dark:border-slate-700 dark:hover:bg-slate-700 text-base font-bold">
+                  <Button
+                    variant="outline"
+                    className="w-full border-dashed border-2 py-8 text-primary border-primary/40 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/10 text-base font-bold"
+                  >
                     <UserCircle size={20} className="mr-2 rtl:ml-2 rtl:mr-0 inline" />
                     {t("debts.new.s1.addNew")}
                   </Button>

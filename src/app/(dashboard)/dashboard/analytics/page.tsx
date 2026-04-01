@@ -68,14 +68,40 @@ export default function AnalyticsPage() {
   }, [monthly, t]);
 
   const statusData = useMemo(() => {
-    // backend doesn't provide distribution yet; keep stable placeholders
+    const dist = summary?.statusDistribution ?? {};
     return [
-      { name: t("analytics.charts.status.paid"), value: 0 },
-      { name: t("analytics.charts.status.active"), value: 0 },
-      { name: t("analytics.charts.status.late"), value: 0 },
-      { name: t("analytics.charts.status.bad"), value: 0 },
+      { name: t("analytics.charts.status.paid"), value: dist.paid ?? 0 },
+      { name: t("analytics.charts.status.active"), value: dist.active ?? 0 },
+      { name: t("analytics.charts.status.late"), value: dist.late ?? 0 },
+      { name: t("analytics.charts.status.bad"), value: dist.bad ?? 0 },
     ];
-  }, [t]);
+  }, [summary, t]);
+
+  const collectionRateLabel = useMemo(() => {
+    if (!summary) return "-";
+    let value = summary.collectionRate;
+    if (value === undefined || value === 0) {
+      const last = monthly.length > 0 ? monthly[monthly.length - 1] : null;
+      if (last && last.debts > 0) {
+        value = (last.collected / last.debts) * 100;
+      } else {
+        value = 0;
+      }
+    }
+    const safeValue = Number.isFinite(value) ? value : 0;
+    return `${safeValue.toFixed(1)}%`;
+  }, [summary, monthly]);
+
+  const avgDebtLabel = useMemo(() => {
+    if (!summary) return "-";
+    let value = summary.avgDebtAmount;
+    if (value === undefined) {
+      const count = summary.activeDebtCount ?? 0;
+      value = count > 0 ? (summary.totalActiveDebt ?? 0) / count : 0;
+    }
+    const safeValue = Number.isFinite(value) ? value : 0;
+    return `${safeValue.toLocaleString()} ${t("dashboard.currency")}`;
+  }, [summary, t]);
 
   return (
     <div className="space-y-6 pb-12">
@@ -109,9 +135,9 @@ export default function AnalyticsPage() {
       {/* KPI Summary */}
       <div className="grid gap-5 grid-cols-2 md:grid-cols-4">
         {[
-          { label: t("analytics.kpis.rate"), value: "-", color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
+          { label: t("analytics.kpis.rate"), value: collectionRateLabel, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
           { label: t("analytics.kpis.revenue"), value: `${(summary?.totalActiveDebt ?? 0).toLocaleString()} ` + t("dashboard.currency"), color: "text-primary dark:text-blue-400", bg: "bg-primary/5 dark:bg-primary/10" },
-          { label: t("analytics.kpis.avg"), value: "-", color: "text-slate-700 dark:text-slate-300", bg: "bg-slate-50 dark:bg-slate-800" },
+          { label: t("analytics.kpis.avg"), value: avgDebtLabel, color: "text-slate-700 dark:text-slate-300", bg: "bg-slate-50 dark:bg-slate-800" },
           { label: t("analytics.kpis.badDebt"), value: `${(summary?.overdueAmount ?? 0).toLocaleString()} ` + t("dashboard.currency"), color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20" },
         ].map((kpi) => (
           <Card key={kpi.label} className={`${kpi.bg} border-0 shadow-sm rounded-2xl`}>

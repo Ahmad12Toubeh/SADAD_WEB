@@ -163,9 +163,36 @@ export default function CustomersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
-                      <MoreVertical size={18} />
-                    </button>
+                    <div className="relative inline-block text-start">
+                      <details className="group">
+                        <summary className="list-none cursor-pointer text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+                          <MoreVertical size={18} />
+                        </summary>
+                        <div className="absolute end-0 mt-2 w-44 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg z-10 overflow-hidden">
+                          <Link
+                            href={`/dashboard/customers/${c.id}`}
+                            className="block px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            onClick={(e) => {
+                              const details = (e.currentTarget.closest("details") as HTMLDetailsElement | null);
+                              details?.removeAttribute("open");
+                            }}
+                          >
+                            {t("guarantor.page.list.view")}
+                          </Link>
+                          <button
+                            type="button"
+                            className="w-full text-start px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            onClick={(e) => {
+                              navigator.clipboard?.writeText(c.phone ?? "");
+                              const details = (e.currentTarget.closest("details") as HTMLDetailsElement | null);
+                              details?.removeAttribute("open");
+                            }}
+                          >
+                            {t("customers.table.phone")}
+                          </button>
+                        </div>
+                      </details>
+                    </div>
                   </td>
                 </tr>
               ))}

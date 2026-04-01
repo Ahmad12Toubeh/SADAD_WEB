@@ -20,6 +20,7 @@
     "cancel": "إلغاء",
     "confirm": "تأكيد",
     "save": "حفظ",
+    "status": "الحالة",
     "loading": "جاري التحميل...",
     "error": "حدث خطأ ما",
     "search": "بحث...",
@@ -40,6 +41,7 @@
     "badDebt": "ديون متعثرة (متأخرة)",
     "activeCustomers": "العملاء النشطون",
     "currency": "ر.س",
+    "recentActivity": "النشاط الأخير",
     "cashflowChart": "التدفق المالي وتراكم الديون",
     "collectionChart": "معدل التحصيل (الأقساط المدفوعة)"
   },
@@ -70,6 +72,7 @@
       "subtitle": "أضف بيانات العميل ليتمكن النظام من ربط ديونه بصفحته.",
       "typeIndividual": "فرد",
       "typeCompany": "شركة / مؤسسة",
+      "name": "الاسم",
       "fullName": "الاسم الكامل",
       "companyName": "اسم الشركة / المؤسسة",
       "namePlaceholderIndividual": "مثال: خالد محمد العتيبي",
@@ -90,6 +93,9 @@
       "paidAmount": "المبلغ المُسدّد",
       "remainingAmount": "المبلغ المتبقي",
       "totalDebt": "إجمالي المديونية",
+      "table": {
+        "date": "التاريخ"
+      },
       "transactionsTitle": "سجل المديونيات",
       "editBtn": "تعديل البيانات",
       "deleteBtn": "حذف العميل",

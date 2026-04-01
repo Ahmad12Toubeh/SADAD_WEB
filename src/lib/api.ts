@@ -90,9 +90,19 @@ export type Association = {
 
 export type AnalyticsSummary = {
   totalActiveDebt: number;
+  activeDebtCount?: number;
   collectedThisMonth: number;
+  newDebtsThisMonth?: number;
   overdueAmount: number;
   activeCustomers: number;
+  avgDebtAmount?: number;
+  collectionRate?: number;
+  statusDistribution?: {
+    paid?: number;
+    active?: number;
+    late?: number;
+    bad?: number;
+  };
   currency: string;
 };
 
