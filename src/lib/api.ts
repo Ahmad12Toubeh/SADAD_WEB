@@ -79,11 +79,50 @@ export type Association = {
   id: string;
   name: string;
   members: number;
+  membersList?: Array<{
+    id?: string;
+    name?: string;
+    phone?: string;
+    turnOrder?: number;
+    isPaid?: boolean;
+    isReceiver?: boolean;
+  }>;
   monthlyAmount: number;
-  myTurn: number;
   currentMonth: number;
   status: string;
   totalValue: number;
+  associationKind?: "rotating" | "family";
+  lockOrder?: boolean;
+  cycleHistory?: Array<{
+    month: number;
+    receiverId?: string;
+    receiverName?: string;
+    paidMemberIds?: string[];
+    paidCount?: number;
+    totalCollected?: number;
+    createdAt?: string;
+  }>;
+  fundBalance?: number;
+  fundTransactions?: Array<{
+    id?: string;
+    type: "in" | "out";
+    amount: number;
+    note?: string;
+    memberId?: string;
+    status?: "pending" | "approved";
+    approvals?: string[];
+    createdAt?: string;
+  }>;
+  fundGuarantorMemberId?: string | null;
+  paymentLogs?: Array<{
+    id?: string;
+    memberId?: string;
+    memberName?: string;
+    amount?: number;
+    note?: string;
+    month?: number;
+    paidAt?: string;
+  }>;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -405,4 +444,20 @@ export async function getAssociation(id: string) {
 
 export async function patchAssociation(id: string, input: Partial<Association>) {
   return apiFetch<Association>(`/associations/${id}`, { method: "PATCH", body: JSON.stringify(input) });
+}
+
+export async function deleteAssociation(id: string) {
+  return apiFetch<{ ok: boolean }>(`/associations/${id}`, { method: "DELETE" });
+}
+
+export async function closeAssociationMonth(id: string) {
+  return apiFetch<Association>(`/associations/${id}/close-month`, { method: "POST" });
+}
+
+export async function addAssociationFundTransaction(id: string, input: { type: "in" | "out"; amount: number; note?: string; memberId?: string }) {
+  return apiFetch<Association>(`/associations/${id}/fund-transaction`, { method: "POST", body: JSON.stringify(input) });
+}
+
+export async function approveAssociationFundTransaction(id: string, input: { transactionId: string; memberId: string }) {
+  return apiFetch<Association>(`/associations/${id}/fund-transaction/approve`, { method: "POST", body: JSON.stringify(input) });
 }

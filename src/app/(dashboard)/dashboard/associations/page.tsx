@@ -8,7 +8,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Association, createAssociation, getAssociation, listAssociations, patchAssociation } from "@/lib/api";
+import { Association, createAssociation, listAssociations } from "@/lib/api";
+import Link from "next/link";
 
 export default function AssociationsPage() {
   const { t, i18n } = useTranslation();
@@ -17,18 +18,11 @@ export default function AssociationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [createForm, setCreateForm] = useState({
     name: "",
     members: "10",
     monthlyAmount: "500",
-    myTurn: "1",
-  });
-  const [editForm, setEditForm] = useState({
-    name: "",
-    members: "",
-    monthlyAmount: "",
-    myTurn: "",
+    associationKind: "rotating" as "rotating" | "family",
   });
 
   const reload = async () => {
@@ -69,11 +63,11 @@ export default function AssociationsPage() {
         name: createForm.name.trim(),
         members: Number(createForm.members),
         monthlyAmount: Number(createForm.monthlyAmount),
-        myTurn: Number(createForm.myTurn),
+        associationKind: createForm.associationKind,
       });
       await reload();
       setIsCreateOpen(false);
-      setCreateForm({ name: "", members: "10", monthlyAmount: "500", myTurn: "1" });
+      setCreateForm({ name: "", members: "10", monthlyAmount: "500", associationKind: "rotating" });
     } catch (err: any) {
       const key = err?.messageKey as string | undefined;
       setError(key ? t(key) : err?.message ?? "Failed to create association");
@@ -82,38 +76,6 @@ export default function AssociationsPage() {
     }
   };
 
-  const onSelectAssociation = async (assoc: Association) => {
-    setError(null);
-    setSelectedId(assoc.id);
-    setEditForm({
-      name: assoc.name ?? "",
-      members: String(assoc.members ?? ""),
-      monthlyAmount: String(assoc.monthlyAmount ?? ""),
-      myTurn: String(assoc.myTurn ?? ""),
-    });
-  };
-
-  const onUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedId) return;
-    setError(null);
-    setIsSaving(true);
-    try {
-      await patchAssociation(selectedId, {
-        name: editForm.name.trim(),
-        members: Number(editForm.members),
-        monthlyAmount: Number(editForm.monthlyAmount),
-        myTurn: Number(editForm.myTurn),
-      });
-      await reload();
-      setSelectedId(null);
-    } catch (err: any) {
-      const key = err?.messageKey as string | undefined;
-      setError(key ? t(key) : err?.message ?? "Failed to update association");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <div className="space-y-8 pb-12">
@@ -151,8 +113,15 @@ export default function AssociationsPage() {
                  <Input required type="number" min={1} placeholder="500" value={createForm.monthlyAmount} onChange={(e) => setCreateForm((f) => ({ ...f, monthlyAmount: e.target.value }))} className="bg-white dark:bg-slate-800" />
               </div>
               <div className="space-y-2">
-                 <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.turn")}</label>
-                 <Input required type="number" min={1} placeholder="1" value={createForm.myTurn} onChange={(e) => setCreateForm((f) => ({ ...f, myTurn: e.target.value }))} className="bg-white dark:bg-slate-800" />
+                 <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.kind")}</label>
+                 <select
+                   value={createForm.associationKind}
+                   onChange={(e) => setCreateForm((f) => ({ ...f, associationKind: e.target.value as any }))}
+                   className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3 text-sm"
+                 >
+                   <option value="rotating">{t("associations.form.kindRotating")}</option>
+                   <option value="family">{t("associations.form.kindFamily")}</option>
+                 </select>
               </div>
               <div className="md:col-span-2 pt-2">
                 <Button disabled={isSaving} type="submit" className="w-full sm:w-auto px-10 h-11 text-base">
@@ -166,8 +135,9 @@ export default function AssociationsPage() {
 
       <div className="grid gap-8 md:grid-cols-2">
         {(isLoading ? [] : items).map((assoc) => {
-          const progressPercent = Math.round((assoc.currentMonth / assoc.members) * 100);
-          const myTurnPassed = assoc.currentMonth >= assoc.myTurn;
+          const paidCount = (assoc.membersList ?? []).filter((m) => m.isPaid).length;
+          const progressPercent = assoc.members > 0 ? Math.round((paidCount / assoc.members) * 100) : 0;
+          const receiver = (assoc.membersList ?? []).find((m) => m.isReceiver);
 
           return (
             <Card key={assoc.id} className="border-0 shadow-lg shadow-slate-200/40 dark:shadow-slate-950/20 rounded-3xl overflow-hidden dark:bg-slate-800">
@@ -179,11 +149,13 @@ export default function AssociationsPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-white text-xl leading-tight">{assoc.name}</h3>
-                      <p className="text-slate-400 text-sm mt-1">{assoc.members} {t("associations.form.member")} • {assoc.monthlyAmount.toLocaleString()} {t("associations.form.currency")}</p>
+                      <p className="text-slate-400 text-sm mt-1">
+                        {assoc.members} {t("associations.form.member")} • {assoc.monthlyAmount.toLocaleString()} {t("associations.form.currency")}
+                      </p>
                     </div>
                   </div>
                   <span className="text-xs font-black bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full uppercase tracking-wider">
-                    {t("associations.page.active")}
+                    {assoc.associationKind === "family" ? t("associations.page.family") : t("associations.page.active")}
                   </span>
                 </div>
               </div>
@@ -192,7 +164,7 @@ export default function AssociationsPage() {
                 {/* Progress */}
                 <div>
                   <div className="flex justify-between text-sm mb-3 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">
-                    <span>{t("associations.page.progress")}: <strong className="text-slate-900 dark:text-white">{assoc.currentMonth}</strong> {t("associations.page.from")} <strong>{assoc.members}</strong></span>
+                    <span>{t("associations.page.progress")}: <strong className="text-slate-900 dark:text-white">{paidCount}</strong> {t("associations.page.from")} <strong>{assoc.members}</strong></span>
                     <span className="text-primary">{progressPercent}%</span>
                   </div>
                   <div className="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -208,8 +180,10 @@ export default function AssociationsPage() {
                   <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 flex items-center gap-4 border border-slate-100 dark:border-slate-700/50">
                     <div className="text-slate-400"><Calendar size={20} /></div>
                     <div>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">{t("associations.page.myTurn")}</p>
-                      <p className="font-black text-slate-900 dark:text-white text-lg">{assoc.myTurn}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">{t("associations.form.kind")}</p>
+                      <p className="font-black text-slate-900 dark:text-white text-lg">
+                        {assoc.associationKind === "family" ? t("associations.form.kindFamily") : t("associations.form.kindRotating")}
+                      </p>
                     </div>
                   </div>
                   <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 flex items-center gap-4 border border-slate-100 dark:border-slate-700/50">
@@ -222,76 +196,23 @@ export default function AssociationsPage() {
                 </div>
 
                 {/* Turn Status Alert */}
-                {myTurnPassed ? (
+                {receiver ? (
                   <div className="flex items-center gap-3 text-green-700 bg-green-50 dark:bg-green-500/10 px-5 py-4 rounded-2xl border border-green-100 dark:border-green-500/20">
                     <Trophy size={20} className="text-green-600" />
-                    <span className="font-black text-sm">{t("associations.page.received")}</span>
+                    <span className="font-black text-sm">{t("associations.page.currentReceiver")} {receiver.name || "-"}</span>
                   </div>
                 ) : (
                   <div className="bg-primary/5 dark:bg-primary/10 border border-primary/10 dark:border-primary/20 px-5 py-4 rounded-2xl text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-3">
                     <Clock size={18} className="text-primary hidden sm:block" />
-                    <span>
-                      {t("associations.page.remaining")} <strong className="text-primary font-black mx-1">{assoc.myTurn - assoc.currentMonth} {t("associations.page.months")}</strong> {t("associations.page.untilTurn")}
-                    </span>
+                    <span>{t("associations.page.noReceiver")}</span>
                   </div>
                 )}
 
-                <Button variant="outline" className="w-full h-11 font-bold dark:border-slate-700 dark:hover:bg-slate-700" onClick={() => onSelectAssociation(assoc)}>
-                  {t("associations.page.detailsBtn")}
-                </Button>
-
-                {selectedId === assoc.id && (
-                  <form onSubmit={onUpdate} className="space-y-4 border-t dark:border-slate-700 pt-6 animate-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-center justify-between mb-2">
-                       <h4 className="font-bold text-slate-900 dark:text-white">{t("associations.page.editTitle")}</h4>
-                       <button type="button" onClick={() => setSelectedId(null)} className="text-slate-400 hover:text-slate-600"><X size={18}/></button>
-                    </div>
-                    <Input
-                      required
-                      value={editForm.name}
-                      onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                      placeholder={t("associations.form.name")}
-                      className="dark:bg-slate-900"
-                    />
-                    <div className="grid grid-cols-3 gap-3">
-                      <Input
-                        required
-                        type="number"
-                        min={2}
-                        value={editForm.members}
-                        onChange={(e) => setEditForm((f) => ({ ...f, members: e.target.value }))}
-                        placeholder={t("associations.form.members")}
-                        className="dark:bg-slate-900"
-                      />
-                      <Input
-                        required
-                        type="number"
-                        min={1}
-                        value={editForm.monthlyAmount}
-                        onChange={(e) => setEditForm((f) => ({ ...f, monthlyAmount: e.target.value }))}
-                        placeholder={t("associations.form.amount")}
-                        className="dark:bg-slate-900"
-                      />
-                      <Input
-                        required
-                        type="number"
-                        min={1}
-                        value={editForm.myTurn}
-                        onChange={(e) => setEditForm((f) => ({ ...f, myTurn: e.target.value }))}
-                        placeholder={t("associations.form.turn")}
-                        className="dark:bg-slate-900"
-                      />
-                    </div>
-                    <div className="flex gap-3 pt-2">
-                      <Button type="submit" disabled={isSaving} className="flex-1">
-                        {isSaving ? t("associations.page.updating") : t("associations.page.saveChanges")}
-                      </Button>
-                      <Button type="button" variant="ghost" onClick={() => setSelectedId(null)} className="flex-1">
-                        {t("common.cancel")}
-                      </Button>
-                    </div>
-                  </form>
-                )}
+                <Link href={`/dashboard/associations/${assoc.id}`}>
+                  <Button variant="outline" className="w-full h-11 font-bold dark:border-slate-700 dark:hover:bg-slate-700">
+                    {t("associations.page.detailsBtn")}
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           );
