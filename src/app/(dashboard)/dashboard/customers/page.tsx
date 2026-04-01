@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, Search, MoreVertical, Phone, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -26,8 +26,9 @@ export default function CustomersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const latestRequestIdRef = useRef(0);
 
-  const fetchItems = async (page: number, q: string) => {
+  const fetchItems = async (page: number, q: string, reqId: number) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -35,26 +36,32 @@ export default function CustomersPage() {
       const res = await apiFetch<{ items: Customer[]; page: number; totalPages: number; total: number }>(
         `/customers?page=${page}&limit=20${qs}`
       );
+      if (reqId !== latestRequestIdRef.current) return;
       setItems(res.items);
       setPagination({ page: res.page, totalPages: res.totalPages, total: res.total });
     } catch (err: any) {
+      if (reqId !== latestRequestIdRef.current) return;
       const key = err?.messageKey as string | undefined;
       setError(key ? t(key) : err?.message ?? "Failed to load customers");
     } finally {
-      setIsLoading(false);
+      if (reqId === latestRequestIdRef.current) setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    const reqId = latestRequestIdRef.current + 1;
+    latestRequestIdRef.current = reqId;
     const timeout = setTimeout(() => {
-      fetchItems(1, search);
-    }, 300);
+      fetchItems(1, search, reqId);
+    }, 450);
     return () => clearTimeout(timeout);
   }, [search]);
 
   const onPageChange = (newPage: number) => {
     if (newPage < 1 || newPage > pagination.totalPages) return;
-    fetchItems(newPage, search);
+    const reqId = latestRequestIdRef.current + 1;
+    latestRequestIdRef.current = reqId;
+    fetchItems(newPage, search, reqId);
   };
 
   return (

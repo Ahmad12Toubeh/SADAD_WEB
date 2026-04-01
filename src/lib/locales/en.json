@@ -428,6 +428,31 @@
       "loading": "Creating account...",
       "hasAccount": "Already have an account?",
       "loginLink": "Log In"
+    },
+    "forgot": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email to generate a reset link.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@example.com",
+      "submit": "Send reset link",
+      "sending": "Sending...",
+      "checkEmail": "Check your email for reset instructions.",
+      "failed": "Failed to request password reset",
+      "backToLogin": "Back to login"
+    },
+    "reset": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password.",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Save password",
+      "saving": "Saving...",
+      "invalidLink": "Invalid reset link.",
+      "passwordMin": "Password must be at least 8 characters.",
+      "passwordMismatch": "Password confirmation does not match.",
+      "success": "Password updated successfully. Redirecting to login.",
+      "failed": "Failed to reset password",
+      "backToLogin": "Back to login"
     }
   },
   "guarantor": {

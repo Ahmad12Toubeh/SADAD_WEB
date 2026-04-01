@@ -5,6 +5,11 @@ export type ApiError = {
   messageKey?: string;
 };
 
+const GET_CACHE_TTL_MS = 15_000;
+const REQUEST_TIMEOUT_MS = 10_000;
+const getCache = new Map<string, { expiresAt: number; data: unknown }>();
+const inFlightGetRequests = new Map<string, Promise<unknown>>();
+
 export type CustomerType = "individual" | "company";
 export type CustomerStatus = "regular" | "late" | "defaulting";
 
@@ -126,6 +131,21 @@ export function clearAccessToken() {
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const url = `${getBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
   const token = getAccessToken();
+  const method = (init.method ?? "GET").toUpperCase();
+  const requestKey = `${method}:${url}:${token ?? ""}`;
+  const isGet = method === "GET";
+
+  if (isGet) {
+    const cached = getCache.get(requestKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data as T;
+    }
+
+    const inFlight = inFlightGetRequests.get(requestKey);
+    if (inFlight) {
+      return inFlight as Promise<T>;
+    }
+  }
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -133,25 +153,54 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
-  const res = await fetch(url, { ...init, headers });
-  const text = await res.text();
-  let data: any = null;
-  if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  const runRequest = async () => {
+    const res = await fetch(url, { ...init, headers, signal: controller.signal });
+    const text = await res.text();
+    let data: any = null;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = null;
+      }
     }
-  }
 
-  if (!res.ok) {
-    const message = (data && (data.message || data.error)) || res.statusText || "Request failed";
-    const messageKey = data?.messageKey;
-    const code = data?.code;
-    throw { status: res.status, message, messageKey, code } satisfies ApiError;
-  }
+    if (!res.ok) {
+      const message = (data && (data.message || data.error)) || res.statusText || "Request failed";
+      const messageKey = data?.messageKey;
+      const code = data?.code;
+      throw { status: res.status, message, messageKey, code } satisfies ApiError;
+    }
 
-  return data as T;
+    return data as T;
+  };
+
+  const requestPromise = runRequest()
+    .then((data) => {
+      if (isGet) {
+        getCache.set(requestKey, { data, expiresAt: Date.now() + GET_CACHE_TTL_MS });
+      } else {
+        // Mutations can invalidate stale cached lists/details.
+        getCache.clear();
+      }
+      return data;
+    })
+    .catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        throw { status: 408, message: "Request timed out" } satisfies ApiError;
+      }
+      throw error;
+    })
+    .finally(() => {
+      clearTimeout(timeout);
+      if (isGet) inFlightGetRequests.delete(requestKey);
+    });
+
+  if (isGet) inFlightGetRequests.set(requestKey, requestPromise as Promise<unknown>);
+  return requestPromise;
 }
 
 // Auth
@@ -171,6 +220,20 @@ export async function register(input: {
 }) {
   return apiFetch<{ id?: string; email: string; fullName: string }>(
     "/auth/register",
+    { method: "POST", body: JSON.stringify(input) },
+  );
+}
+
+export async function forgotPassword(input: { email: string }) {
+  return apiFetch<{ success: boolean; resetToken?: string; expiresAt?: string; message?: string }>(
+    "/auth/forgot-password",
+    { method: "POST", body: JSON.stringify(input) },
+  );
+}
+
+export async function resetPassword(input: { token: string; newPassword: string }) {
+  return apiFetch<{ success: boolean; message?: string }>(
+    "/auth/reset-password",
     { method: "POST", body: JSON.stringify(input) },
   );
 }

@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
 import { ShieldCheck, Bell, BarChart2, Users, Zap, Star } from "lucide-react";
 
 export function FeaturesSection() {
@@ -59,21 +58,16 @@ export function FeaturesSection() {
               color: "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400",
             },
           ].map((feat, idx) => (
-            <motion.div 
+            <div
               key={feat.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
-              className="bg-white dark:bg-slate-950 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm transition-all text-start"
+              className="bg-white dark:bg-slate-950 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg text-start"
             >
               <div className={`w-12 h-12 ${feat.color} rounded-xl flex items-center justify-center mb-4`}>
                 <feat.icon size={24} />
               </div>
               <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg mb-2">{feat.title}</h3>
               <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{feat.desc}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

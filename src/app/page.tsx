@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
 import { ArrowLeft, ArrowRight, ShieldCheck, Globe, Moon, Sun } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 
 import { HeroSection } from "@/components/landing/HeroSection";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
-import { PricingSection } from "@/components/landing/PricingSection";
-import { SupportSection } from "@/components/landing/SupportSection";
+
+const FeaturesSection = dynamic(() => import("@/components/landing/FeaturesSection").then((m) => m.FeaturesSection));
+const HowItWorksSection = dynamic(() => import("@/components/landing/HowItWorksSection").then((m) => m.HowItWorksSection));
+const PricingSection = dynamic(() => import("@/components/landing/PricingSection").then((m) => m.PricingSection));
+const SupportSection = dynamic(() => import("@/components/landing/SupportSection").then((m) => m.SupportSection));
 
 export default function Home() {
   const { t, i18n } = useTranslation();
