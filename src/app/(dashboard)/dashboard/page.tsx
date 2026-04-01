@@ -9,6 +9,8 @@ import dynamic from "next/dynamic";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { ArrowUpRight, ArrowDownRight, Users, Wallet, CreditCard, Activity } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 const DashboardCharts = dynamic(() => import("@/components/dashboard/DashboardCharts"), { ssr: false });
 
@@ -82,7 +84,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-900 dark:text-white">
-              {isLoading ? "…" : (summary?.totalActiveDebt ?? 0).toLocaleString()}{" "}
+              {isLoading ? <Skeleton className="h-7 w-28" /> : (
+                <span>{(summary?.totalActiveDebt ?? 0).toLocaleString()}{" "}</span>
+              )}
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
             </div>
           </CardContent>
@@ -97,7 +101,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-900 dark:text-white">
-              {isLoading ? "…" : (summary?.collectedThisMonth ?? 0).toLocaleString()}{" "}
+              {isLoading ? <Skeleton className="h-7 w-28" /> : (
+                <span>{(summary?.collectedThisMonth ?? 0).toLocaleString()}{" "}</span>
+              )}
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
             </div>
           </CardContent>
@@ -112,7 +118,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-900 dark:text-white">
-              {isLoading ? "…" : (summary?.overdueAmount ?? 0).toLocaleString()}{" "}
+              {isLoading ? <Skeleton className="h-7 w-28" /> : (
+                <span>{(summary?.overdueAmount ?? 0).toLocaleString()}{" "}</span>
+              )}
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("dashboard.currency")}</span>
             </div>
           </CardContent>
@@ -127,7 +135,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-900 dark:text-white">
-              {isLoading ? "…" : (summary?.activeCustomers ?? 0).toLocaleString()}
+              {isLoading ? <Skeleton className="h-7 w-16" /> : (summary?.activeCustomers ?? 0).toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -164,7 +172,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                {recent.map((debt) => (
+                {(isLoading ? [] : recent).map((debt) => (
                   <tr key={debt.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">
                       <Link href={`/dashboard/customers/${debt.customerId}`} className="hover:text-primary hover:underline">
@@ -191,10 +199,31 @@ export default function DashboardPage() {
                     </td>
                   </tr>
                 ))}
+                {isLoading && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8">
+                      <div className="space-y-3">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={`sk-${i}`} className="grid grid-cols-5 gap-4">
+                            <Skeleton className="h-4 col-span-2" />
+                            <Skeleton className="h-4 col-span-1" />
+                            <Skeleton className="h-4 col-span-1" />
+                            <Skeleton className="h-4 col-span-1" />
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 {recent.length === 0 && !isLoading && (
                   <tr>
                     <td colSpan={5} className="px-6 py-10 text-center text-slate-500 italic">
-                      {t("common.noResults")}
+                      <EmptyState
+                        title={t("common.noResults")}
+                        description={t("dashboard.recentActivity")}
+                        actionLabel={t("common.viewAll")}
+                        actionHref="/dashboard/debts"
+                      />
                     </td>
                   </tr>
                 )}

@@ -106,7 +106,7 @@ function getBaseUrl() {
     console.warn("WARNING: NEXT_PUBLIC_API_BASE_URL is missing in production. Falling back to relative path.");
     return "/api"; 
   }
-  return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+  return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api";
 }
 
 function getAccessToken() {
@@ -116,16 +116,13 @@ function getAccessToken() {
 
 export function setAccessToken(token: string) {
   if (typeof window === "undefined") return;
-  localStorage.setItem("accessToken", token);
-  // Also set cookie for middleware auth guard
-  document.cookie = `accessToken=${token}; path=/; max-age=604800; SameSite=Lax`;
+  // Deprecated: token is now stored in HttpOnly cookie set by the API.
+  localStorage.removeItem("accessToken");
 }
 
 export function clearAccessToken() {
   if (typeof window === "undefined") return;
   localStorage.removeItem("accessToken");
-  // Clear cookie too
-  document.cookie = "accessToken=; path=/; max-age=0";
 }
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -157,7 +154,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   const runRequest = async () => {
-    const res = await fetch(url, { ...init, headers, signal: controller.signal });
+    const res = await fetch(url, { ...init, headers, signal: controller.signal, credentials: "include" });
     const text = await res.text();
     let data: any = null;
     if (text) {
@@ -172,6 +169,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
       const message = (data && (data.message || data.error)) || res.statusText || "Request failed";
       const messageKey = data?.messageKey;
       const code = data?.code;
+      if (res.status === 401) {
+        handleUnauthorizedRedirect();
+      }
       throw { status: res.status, message, messageKey, code } satisfies ApiError;
     }
 
@@ -203,6 +203,17 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   return requestPromise;
 }
 
+function handleUnauthorizedRedirect() {
+  if (typeof window === "undefined") return;
+  const path = window.location.pathname + window.location.search;
+  if (path.startsWith("/login") || path.startsWith("/register") || path.startsWith("/forgot-password") || path.startsWith("/reset-password")) {
+    return;
+  }
+  const loginUrl = `/login?redirect=${encodeURIComponent(path)}`;
+  if (window.location.href.endsWith(loginUrl)) return;
+  window.location.href = loginUrl;
+}
+
 // Auth
 export async function login(input: { email: string; password: string }) {
   return apiFetch<{ accessToken: string; user: { id: string; email: string; fullName: string; role: string } }>(
@@ -222,6 +233,10 @@ export async function register(input: {
     "/auth/register",
     { method: "POST", body: JSON.stringify(input) },
   );
+}
+
+export async function logout() {
+  return apiFetch<{ success: boolean }>("/auth/logout", { method: "POST" });
 }
 
 export async function forgotPassword(input: { email: string }) {

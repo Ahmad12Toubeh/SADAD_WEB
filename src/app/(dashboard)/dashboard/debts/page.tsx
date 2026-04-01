@@ -7,6 +7,8 @@ import { Plus, Search, Eye, Calendar, CreditCard, Filter } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { apiFetch } from "@/lib/api";
 
 type Debt = {
@@ -128,11 +130,11 @@ export default function DebtsPage() {
                   <td className="px-6 py-5 text-slate-500 dark:text-slate-400 font-medium">
                     <div className="flex items-center gap-1.5">
                       <Calendar size={14} />
-                      {item.createdAt ? new Date(item.createdAt).toISOString().slice(0, 10) : "—"}
+                      {item.createdAt ? new Date(item.createdAt).toISOString().slice(0, 10) : "-"}
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="text-slate-600 dark:text-slate-300 font-medium">{item.category || "—"}</span>
+                    <span className="text-slate-600 dark:text-slate-300 font-medium">{item.category || "-"}</span>
                   </td>
                   <td className="px-6 py-5 font-black text-slate-900 dark:text-white text-[15px]">
                     <div className="flex items-center gap-1.5">
@@ -155,16 +157,30 @@ export default function DebtsPage() {
                 </tr>
               ))}
               {isLoading && (
-                <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
-                    {t("common.loading")}
-                  </td>
-                </tr>
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={`sk-${i}`} className="border-b border-slate-100 dark:border-slate-700">
+                    <td className="px-6 py-5" colSpan={7}>
+                      <div className="grid grid-cols-7 gap-4">
+                        <Skeleton className="h-4 col-span-1" />
+                        <Skeleton className="h-4 col-span-2" />
+                        <Skeleton className="h-4 col-span-1" />
+                        <Skeleton className="h-4 col-span-1" />
+                        <Skeleton className="h-4 col-span-1" />
+                        <Skeleton className="h-4 col-span-1" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
               {!isLoading && filtered.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
-                    {t("common.noResults")}
+                    <EmptyState
+                      title={t("common.noResults")}
+                      description={t("debts.page.subtitle")}
+                      actionLabel={t("debts.page.newDebt")}
+                      actionHref="/dashboard/debts/new"
+                    />
                   </td>
                 </tr>
               )}

@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
-import { login, setAccessToken } from "@/lib/api";
+import { login } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,8 +25,8 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const res = await login({ email, password });
-      setAccessToken(res.accessToken);
-      router.push("/dashboard");
+      const redirect = searchParams.get("redirect");
+      router.push(redirect ? decodeURIComponent(redirect) : "/dashboard");
     } catch (err: any) {
       const key = err?.messageKey as string | undefined;
       setError(key ? t(key) : err?.message ?? "Login failed");

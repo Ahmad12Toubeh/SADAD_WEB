@@ -7,6 +7,8 @@ import { Search, UserCheck, Phone, ShieldCheck, ShieldAlert, FileText, ArrowUpRi
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { listGuarantors } from "@/lib/api";
 
 export default function GuarantorsPage() {
@@ -87,9 +89,7 @@ export default function GuarantorsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.total")}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                  {isLoading ? "…" : stats.total}
-                </h3>
+                <div className="mt-1">\n                  {isLoading ? <Skeleton className="h-7 w-16" /> : (\n                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</h3>\n                  )}\n                </div>
               </div>
             </div>
           </CardContent>
@@ -102,9 +102,7 @@ export default function GuarantorsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.safe")}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                   {isLoading ? "…" : stats.safe}
-                </h3>
+                <div className="mt-1">\n                  {isLoading ? <Skeleton className="h-7 w-16" /> : (\n                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.safe}</h3>\n                  )}\n                </div>
               </div>
             </div>
           </CardContent>
@@ -117,9 +115,7 @@ export default function GuarantorsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.bouncing")}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                  {isLoading ? "…" : stats.bouncing}
-                </h3>
+                <div className="mt-1">\n                  {isLoading ? <Skeleton className="h-7 w-16" /> : (\n                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.bouncing}</h3>\n                  )}\n                </div>
               </div>
             </div>
           </CardContent>
@@ -132,9 +128,7 @@ export default function GuarantorsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.contracts")}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                  {isLoading ? "…" : stats.total}
-                </h3>
+                <div className="mt-1">\n                  {isLoading ? <Skeleton className="h-7 w-16" /> : (\n                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</h3>\n                  )}\n                </div>
               </div>
             </div>
           </CardContent>
@@ -154,7 +148,7 @@ export default function GuarantorsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredGuarantors.map((guarantor: any) => (
+              {(isLoading ? [] : filteredGuarantors).map((guarantor: any) => (
                 <tr key={guarantor.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -197,13 +191,30 @@ export default function GuarantorsPage() {
               ))}
             </tbody>
           </table>
+          {isLoading && (
+            <div className="p-6 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={`sk-${i}`} className="grid grid-cols-5 gap-4">
+                  <Skeleton className="h-4 col-span-2" />
+                  <Skeleton className="h-4 col-span-1" />
+                  <Skeleton className="h-4 col-span-1" />
+                  <Skeleton className="h-4 col-span-1" />
+                </div>
+              ))}
+            </div>
+          )}
           {!isLoading && filteredGuarantors.length === 0 && (
-             <div className="p-8 text-center text-slate-500 dark:text-slate-400 font-medium">
-               {t("guarantor.page.list.empty")}
-             </div>
+            <EmptyState
+              title={t("guarantor.page.list.empty")}
+              description={t("guarantor.page.subtitle")}
+              actionLabel={t("common.viewAll")}
+              actionHref="/dashboard/debts"
+            />
           )}
         </div>
       </div>
     </div>
   );
 }
+
+

@@ -4,6 +4,8 @@ import { Users, Calendar, DollarSign, Plus, Trophy, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Association, createAssociation, getAssociation, listAssociations, patchAssociation } from "@/lib/api";
@@ -294,9 +296,26 @@ export default function AssociationsPage() {
             </Card>
           );
         })}
+        {isLoading && (
+          <div className="md:col-span-2 grid gap-6 md:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <Card key={`sk-${i}`} className="border border-slate-200 dark:border-slate-800">
+                <CardContent className="p-6 space-y-4">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-4 w-56" />
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
         {!isLoading && items.length === 0 && (
-          <div className="p-12 text-center text-slate-500 dark:text-slate-400 font-medium border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl md:col-span-2">
-            {t("associations.page.empty")}
+          <div className="md:col-span-2">
+            <EmptyState
+              title={t("associations.page.empty")}
+              description={t("associations.page.subtitle")}
+            />
           </div>
         )}
       </div>

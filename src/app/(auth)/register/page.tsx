@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
-import { login, register as apiRegister, setAccessToken } from "@/lib/api";
+import { login, register as apiRegister } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,9 +28,9 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       await apiRegister({ email, password, fullName, phone, storeName });
-      const res = await login({ email, password });
-      setAccessToken(res.accessToken);
-      router.push("/dashboard");
+      await login({ email, password });
+      const redirect = searchParams.get("redirect");
+      router.push(redirect ? decodeURIComponent(redirect) : "/dashboard");
     } catch (err: any) {
       const key = err?.messageKey as string | undefined;
       setError(key ? t(key) : err?.message ?? "Register failed");

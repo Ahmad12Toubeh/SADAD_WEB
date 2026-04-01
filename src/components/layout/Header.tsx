@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useTheme } from "@/contexts/Providers";
 import { Bell, Search, UserCircle, Moon, Sun, Globe, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/Input";
-import { clearAccessToken } from "@/lib/api";
+import { logout } from "@/lib/api";
 
 export function Header() {
   const { t, i18n } = useTranslation();
@@ -30,9 +30,12 @@ export function Header() {
     localStorage.setItem("i18nextLng", newLang);
   };
 
-  const handleLogout = () => {
-    clearAccessToken();
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      window.location.href = "/login";
+    }
   };
 
   return (

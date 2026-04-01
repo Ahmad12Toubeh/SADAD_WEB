@@ -8,11 +8,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  if (typeof window !== "undefined" && !localStorage.getItem("accessToken")) {
-    window.location.href = "/login";
-    return null;
-  }
-
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden font-tajawal transition-colors">
       <Sidebar />

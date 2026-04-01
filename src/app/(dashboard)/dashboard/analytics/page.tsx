@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useTheme } from "@/contexts/Providers";
 import { useEffect, useMemo, useState } from "react";
 import { getAnalyticsMonthly, getAnalyticsSummary } from "@/lib/api";
@@ -107,30 +109,44 @@ export default function AnalyticsPage() {
       {/* KPI Summary */}
       <div className="grid gap-5 grid-cols-2 md:grid-cols-4">
         {[
-          { label: t("analytics.kpis.rate"), value: isLoading ? "…" : "—", color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
-          { label: t("analytics.kpis.revenue"), value: isLoading ? "…" : `${(summary?.totalActiveDebt ?? 0).toLocaleString()} ` + t("dashboard.currency"), color: "text-primary dark:text-blue-400", bg: "bg-primary/5 dark:bg-primary/10" },
-          { label: t("analytics.kpis.avg"), value: isLoading ? "…" : "—", color: "text-slate-700 dark:text-slate-300", bg: "bg-slate-50 dark:bg-slate-800" },
-          { label: t("analytics.kpis.badDebt"), value: isLoading ? "…" : `${(summary?.overdueAmount ?? 0).toLocaleString()} ` + t("dashboard.currency"), color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20" },
+          { label: t("analytics.kpis.rate"), value: "-", color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
+          { label: t("analytics.kpis.revenue"), value: `${(summary?.totalActiveDebt ?? 0).toLocaleString()} ` + t("dashboard.currency"), color: "text-primary dark:text-blue-400", bg: "bg-primary/5 dark:bg-primary/10" },
+          { label: t("analytics.kpis.avg"), value: "-", color: "text-slate-700 dark:text-slate-300", bg: "bg-slate-50 dark:bg-slate-800" },
+          { label: t("analytics.kpis.badDebt"), value: `${(summary?.overdueAmount ?? 0).toLocaleString()} ` + t("dashboard.currency"), color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20" },
         ].map((kpi) => (
           <Card key={kpi.label} className={`${kpi.bg} border-0 shadow-sm rounded-2xl`}>
             <CardContent className="p-5 text-start">
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">{kpi.label}</p>
-              <p className={`text-2xl font-black ${kpi.color}`}>{kpi.value}</p>
+              {isLoading ? (
+                <Skeleton className="h-7 w-24" />
+              ) : (
+                <p className={`text-2xl font-black ${kpi.color}`}>{kpi.value}</p>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <AnalyticsCharts
-        monthlyData={monthlyData}
-        statusData={statusData}
-        theme={theme}
-        isRtl={i18n.dir() === "rtl"}
-        trendTitle={t("analytics.charts.trend")}
-        statusTitle={t("analytics.charts.statusDistrib")}
-        debtsLabel={t("analytics.charts.newDebts")}
-        collectedLabel={t("analytics.charts.collected")}
-      />
+      {monthly.length === 0 && !isLoading ? (
+        <EmptyState
+          title={t("common.noResults")}
+          description={t("analytics.subtitle")}
+          actionLabel={t("debts.page.newDebt")}
+          actionHref="/dashboard/debts/new"
+        />
+      ) : (
+        <AnalyticsCharts
+          monthlyData={monthlyData}
+          statusData={statusData}
+          theme={theme}
+          isRtl={i18n.dir() === "rtl"}
+          trendTitle={t("analytics.charts.trend")}
+          statusTitle={t("analytics.charts.statusDistrib")}
+          debtsLabel={t("analytics.charts.newDebts")}
+          collectedLabel={t("analytics.charts.collected")}
+        />
+      )}
     </div>
   );
 }
+

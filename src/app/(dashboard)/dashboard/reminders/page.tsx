@@ -3,6 +3,8 @@
 import { Bell, Send, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getRemindersOverdue, getRemindersSent, getRemindersUpcoming, sendReminder } from "@/lib/api";
@@ -81,7 +83,7 @@ export default function RemindersPage() {
           </h2>
         </div>
         <div className="space-y-3">
-          {overdueItems.map((item) => (
+          {(isLoading ? [] : overdueItems).map((item) => (
             <Card key={item.installmentId ?? item.id} className="border-red-100 dark:border-red-900/30 bg-red-50/40 dark:bg-red-900/10 rounded-xl shadow-sm">
               <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
                 <div className="flex items-center gap-4">
@@ -117,8 +119,23 @@ export default function RemindersPage() {
               </CardContent>
             </Card>
           ))}
+          {isLoading && (
+            <div className="space-y-3">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Card key={`sk-over-${i}`} className="border-slate-200 dark:border-slate-800">
+                  <CardContent className="p-5 space-y-3">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
           {!isLoading && overdueItems.length === 0 && (
-            <div className="text-sm text-slate-500">{t("guarantors.page.list.empty")}</div>
+            <EmptyState
+              title={t("guarantor.page.list.empty")}
+              description={t("reminders.overdue.title")}
+            />
           )}
         </div>
       </div>
@@ -132,7 +149,7 @@ export default function RemindersPage() {
           </h2>
         </div>
         <div className="space-y-3">
-          {upcomingItems.map((item) => (
+          {(isLoading ? [] : upcomingItems).map((item) => (
             <Card key={item.installmentId ?? item.id} className="border-orange-100 dark:border-orange-900/30 bg-orange-50/30 dark:bg-orange-900/10 rounded-xl shadow-sm">
               <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
                 <div>
@@ -154,8 +171,23 @@ export default function RemindersPage() {
               </CardContent>
             </Card>
           ))}
+          {isLoading && (
+            <div className="space-y-3">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Card key={`sk-up-${i}`} className="border-slate-200 dark:border-slate-800">
+                  <CardContent className="p-5 space-y-3">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
           {!isLoading && upcomingItems.length === 0 && (
-            <div className="text-sm text-slate-500">{t("guarantors.page.list.empty")}</div>
+            <EmptyState
+              title={t("guarantor.page.list.empty")}
+              description={t("reminders.upcoming.title")}
+            />
           )}
         </div>
       </div>
@@ -167,7 +199,7 @@ export default function RemindersPage() {
           <h2 className="text-lg font-bold text-slate-700 dark:text-slate-300">{t("reminders.sent.title")}</h2>
         </div>
         <div className="space-y-3">
-          {sentItems.map((item) => (
+          {(isLoading ? [] : sentItems).map((item) => (
             <Card key={item.id} className="border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 rounded-xl shadow-sm">
               <CardContent className="flex items-center justify-between gap-4 p-5">
                 <div className="flex items-center gap-4">
@@ -185,11 +217,28 @@ export default function RemindersPage() {
               </CardContent>
             </Card>
           ))}
+          {isLoading && (
+            <div className="space-y-3">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Card key={`sk-sent-${i}`} className="border-slate-200 dark:border-slate-800">
+                  <CardContent className="p-5 space-y-3">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
           {!isLoading && sentItems.length === 0 && (
-            <div className="text-sm text-slate-500">{t("guarantors.page.list.empty")}</div>
+            <EmptyState
+              title={t("guarantor.page.list.empty")}
+              description={t("reminders.sent.title")}
+            />
           )}
         </div>
       </div>
     </div>
   );
 }
+
+

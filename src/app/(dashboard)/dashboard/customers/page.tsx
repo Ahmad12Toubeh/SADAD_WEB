@@ -7,6 +7,8 @@ import { Plus, Search, MoreVertical, Phone, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { apiFetch } from "@/lib/api";
 import { exportToCsv } from "@/lib/utils/export";
 
@@ -168,16 +170,29 @@ export default function CustomersPage() {
                 </tr>
               ))}
               {isLoading && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
-                    {t("auth.login.loading")}
-                  </td>
-                </tr>
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={`sk-${i}`} className="border-b border-slate-100 dark:border-slate-700">
+                    <td className="px-6 py-4" colSpan={6}>
+                      <div className="grid grid-cols-6 gap-4">
+                        <Skeleton className="h-4 col-span-2" />
+                        <Skeleton className="h-4 col-span-1" />
+                        <Skeleton className="h-4 col-span-1" />
+                        <Skeleton className="h-4 col-span-1" />
+                        <Skeleton className="h-4 col-span-1" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
               {!isLoading && items.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
-                    {t("common.noResults")}
+                    <EmptyState
+                      title={t("common.noResults")}
+                      description={t("customers.subtitle")}
+                      actionLabel={t("customers.addCustomer")}
+                      actionHref="/dashboard/customers/new"
+                    />
                   </td>
                 </tr>
               )}
