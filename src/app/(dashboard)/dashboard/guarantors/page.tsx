@@ -41,7 +41,7 @@ export default function GuarantorsPage() {
   const filteredGuarantors = useMemo(() => {
     const q = searchTerm.trim();
     if (!q) return items;
-    return items.filter((g) => (g?.name ?? "").includes(q) || (g?.phone ?? "").includes(q));
+    return items.filter((g) => String(g?.name ?? "").includes(q) || String(g?.phone ?? "").includes(q));
   }, [items, searchTerm]);
 
   const stats = useMemo(() => {
@@ -192,12 +192,34 @@ export default function GuarantorsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-end">
-                    <Link href={`/dashboard/debts/${guarantor.debtId}`}>
-                       <Button variant="ghost" className="h-9 px-3 text-primary dark:text-blue-400 hover:bg-primary/10 dark:hover:bg-primary/20">
-                        {t("guarantor.page.list.view")}
-                        <ArrowUpRight size={16} className="ml-1 rtl:mr-1 rtl:ml-0" />
-                      </Button>
-                    </Link>
+                    {(() => {
+                      const rawDebtId = guarantor?.debtId;
+                      const debtId =
+                        typeof rawDebtId === "string"
+                          ? rawDebtId
+                          : rawDebtId?._id?.toString?.() ?? rawDebtId?.id?.toString?.() ?? null;
+
+                      if (!debtId) {
+                        return (
+                          <Button
+                            variant="ghost"
+                            disabled
+                            className="h-9 px-3 text-slate-400 dark:text-slate-600"
+                          >
+                            {t("guarantor.page.list.view")}
+                          </Button>
+                        );
+                      }
+
+                      return (
+                        <Link href={`/dashboard/debts/${debtId}`}>
+                          <Button variant="ghost" className="h-9 px-3 text-primary dark:text-blue-400 hover:bg-primary/10 dark:hover:bg-primary/20">
+                            {t("guarantor.page.list.view")}
+                            <ArrowUpRight size={16} className="ml-1 rtl:mr-1 rtl:ml-0" />
+                          </Button>
+                        </Link>
+                      );
+                    })()}
                   </td>
                 </tr>
               ))}

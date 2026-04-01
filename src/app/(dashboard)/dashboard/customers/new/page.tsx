@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, User, Building2, Phone, Mail, MapPin, Save } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -15,6 +15,7 @@ import { createCustomer } from "@/lib/api";
 export default function NewCustomerPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [customerType, setCustomerType] = useState<"individual" | "company">("individual");
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export default function NewCustomerPage() {
     setError(null);
     setIsLoading(true);
     try {
-      await createCustomer({
+      const created = await createCustomer({
         type: customerType,
         name,
         phone,
@@ -39,6 +40,11 @@ export default function NewCustomerPage() {
         cr: cr || undefined,
         notes: notes || undefined,
       });
+      const returnTo = searchParams.get("returnTo");
+      if (returnTo === "debt" && created?.id) {
+        router.push(`/dashboard/debts/new?step=2&customerId=${created.id}`);
+        return;
+      }
       router.push("/dashboard/customers");
     } catch (err: any) {
       const key = err?.messageKey as string | undefined;

@@ -133,7 +133,7 @@ export default function RemindersPage() {
           )}
           {!isLoading && overdueItems.length === 0 && (
             <EmptyState
-              title={t("guarantor.page.list.empty")}
+              title={t("common.noResults")}
               description={t("reminders.overdue.title")}
             />
           )}
@@ -185,7 +185,7 @@ export default function RemindersPage() {
           )}
           {!isLoading && upcomingItems.length === 0 && (
             <EmptyState
-              title={t("guarantor.page.list.empty")}
+              title={t("common.noResults")}
               description={t("reminders.upcoming.title")}
             />
           )}
@@ -205,9 +205,9 @@ export default function RemindersPage() {
                 <div className="flex items-center gap-4">
                   <Bell size={18} className="text-slate-400" />
                   <div>
-                    <p className="font-bold text-slate-800 dark:text-white">{item.customer ?? "—"}</p>
+                    <p className="font-bold text-slate-800 dark:text-white">{item.customer ?? "-"}</p>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {item.channel} — {item.sentAt ?? "—"}
+                      {item.channel} - {item.sentAt ? new Date(item.sentAt).toISOString().slice(0, 16).replace("T", " ") : "-"}
                     </p>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export default function RemindersPage() {
           )}
           {!isLoading && sentItems.length === 0 && (
             <EmptyState
-              title={t("guarantor.page.list.empty")}
+              title={t("common.noResults")}
               description={t("reminders.sent.title")}
             />
           )}

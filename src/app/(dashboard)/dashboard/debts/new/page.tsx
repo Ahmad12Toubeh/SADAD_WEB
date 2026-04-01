@@ -243,6 +243,7 @@ export default function NewDebtWizard() {
                   <Button
                     variant="outline"
                     className="w-full border-dashed border-2 py-8 text-primary border-primary/40 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/10 text-base font-bold"
+                    onClick={() => router.push("/dashboard/customers/new?returnTo=debt")}
                   >
                     <UserCircle size={20} className="mr-2 rtl:ml-2 rtl:mr-0 inline" />
                     {t("debts.new.s1.addNew")}

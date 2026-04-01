@@ -70,6 +70,7 @@ export default function DebtDetailsPage() {
     const progress = total > 0 ? Math.round((paid / total) * 100) : 0;
     return { total, paid, remaining, progress };
   }, [debt, installments]);
+  const hasGuarantorInfo = Boolean(debt?.guarantor?.name || debt?.guarantor?.phone);
 
   const handleActivateGuarantor = async () => {
     if (!debtId) return;
@@ -352,19 +353,21 @@ export default function DebtDetailsPage() {
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3">
                 <User size={18} className="opacity-40" />
-                <span className="font-bold">{debt?.guarantor?.name || "—"}</span>
+                <span className="font-bold">{debt?.guarantor?.name || "-"}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={18} className="opacity-40" />
-                <span className="font-bold tracking-widest" dir="ltr">{debt?.guarantor?.phone || "—"}</span>
+                <span className="font-bold tracking-widest" dir="ltr">{debt?.guarantor?.phone || "-"}</span>
+              {!hasGuarantorInfo && <div className="text-sm opacity-70">{t("guarantor.status.noGuarantor")}</div>}
               </div>
             </div>
 
             <div className="mt-auto pt-8">
               {!isGuarantorActive ? (
                 <Button 
-                  className="w-full bg-white text-slate-900 hover:bg-slate-100 font-bold gap-2"
+                  className="w-full bg-white text-slate-900 hover:bg-slate-100 font-bold gap-2 disabled:opacity-60"
                   onClick={() => setShowActivateModal(true)}
+                  disabled={!hasGuarantorInfo}
                 >
                   {t("guarantor.activateBtn")}
                 </Button>
