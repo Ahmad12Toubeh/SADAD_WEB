@@ -85,7 +85,27 @@ export default function NewDebtWizard() {
     })();
   }, [currentStep, customerResults.length]);
 
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length));
+  const nextStep = () => {
+    setError(null);
+    if (currentStep === 1 && !customerId) {
+      setError(t("errors.validation.invalid"));
+      return;
+    }
+    if (currentStep === 2) {
+      const principalAmount = Number(amount);
+      if (!Number.isFinite(principalAmount) || principalAmount <= 0) {
+        setError(t("errors.validation.invalid"));
+        return;
+      }
+    }
+    if (currentStep === 3 && planType === "installments") {
+      if (!Number.isFinite(installmentCount) || installmentCount < 2 || installmentCount > 24) {
+        setError(t("errors.validation.invalid"));
+        return;
+      }
+    }
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length));
+  };
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
   const handleSubmit = async () => {
@@ -237,7 +257,17 @@ export default function NewDebtWizard() {
                     <div className="space-y-2 col-span-2">
                       <Label className="dark:text-slate-300">{t("debts.new.s2.amount")}</Label>
                       <div className="relative">
-                        <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="h-16 ps-14 text-2xl font-bold dark:bg-slate-900 dark:border-slate-700 text-end" dir="ltr" />
+                        <Input
+                          type="number"
+                          min={1}
+                          step="0.01"
+                          inputMode="decimal"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          placeholder="0.00"
+                          className="h-16 ps-14 text-2xl font-bold dark:bg-slate-900 dark:border-slate-700 text-end"
+                          dir="ltr"
+                        />
                         <span className="absolute start-4 top-1/2 -translate-y-1/2 text-slate-500 font-semibold text-lg">{t("dashboard.currency")}</span>
                       </div>
                     </div>
@@ -286,7 +316,20 @@ export default function NewDebtWizard() {
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-lg mt-4 grid grid-cols-2 gap-4 border border-slate-100 dark:border-slate-700 shadow-sm">
                     <div className="space-y-2">
                        <Label className="dark:text-slate-300">{t("debts.new.s3.count")}</Label>
-                       <Input type="number" value={installmentCount} onChange={(e) => setInstallmentCount(Number(e.target.value))} min={2} max={24} className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start" />
+                       <Input
+                         type="number"
+                         min={2}
+                         max={24}
+                         step={1}
+                         inputMode="numeric"
+                         value={installmentCount}
+                         onChange={(e) => {
+                           const v = Number(e.target.value);
+                           if (!Number.isFinite(v)) return;
+                           setInstallmentCount(Math.min(24, Math.max(2, Math.floor(v))));
+                         }}
+                         className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
+                       />
                     </div>
                     <div className="space-y-2">
                        <Label className="dark:text-slate-300">{t("debts.new.s3.period")}</Label>

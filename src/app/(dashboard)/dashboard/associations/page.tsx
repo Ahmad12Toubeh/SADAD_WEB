@@ -59,10 +59,17 @@ export default function AssociationsPage() {
     setError(null);
     setIsSaving(true);
     try {
+      const membersNum = Number(createForm.members);
+      const monthlyNum = Number(createForm.monthlyAmount);
+      if (!createForm.name.trim() || !Number.isFinite(membersNum) || membersNum < 2 || !Number.isFinite(monthlyNum) || monthlyNum < 1) {
+        setError(t("errors.validation.invalid"));
+        setIsSaving(false);
+        return;
+      }
       await createAssociation({
         name: createForm.name.trim(),
-        members: Number(createForm.members),
-        monthlyAmount: Number(createForm.monthlyAmount),
+        members: membersNum,
+        monthlyAmount: monthlyNum,
         associationKind: createForm.associationKind,
       });
       await reload();
@@ -106,11 +113,31 @@ export default function AssociationsPage() {
               </div>
               <div className="space-y-2">
                  <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.members")}</label>
-                 <Input required type="number" min={2} placeholder="10" value={createForm.members} onChange={(e) => setCreateForm((f) => ({ ...f, members: e.target.value }))} className="bg-white dark:bg-slate-800" />
+                 <Input
+                   required
+                   type="number"
+                   min={2}
+                   step={1}
+                   inputMode="numeric"
+                   placeholder="10"
+                   value={createForm.members}
+                   onChange={(e) => setCreateForm((f) => ({ ...f, members: e.target.value }))}
+                   className="bg-white dark:bg-slate-800"
+                 />
               </div>
               <div className="space-y-2">
                  <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.amount")}</label>
-                 <Input required type="number" min={1} placeholder="500" value={createForm.monthlyAmount} onChange={(e) => setCreateForm((f) => ({ ...f, monthlyAmount: e.target.value }))} className="bg-white dark:bg-slate-800" />
+                 <Input
+                   required
+                   type="number"
+                   min={1}
+                   step="0.01"
+                   inputMode="decimal"
+                   placeholder="500"
+                   value={createForm.monthlyAmount}
+                   onChange={(e) => setCreateForm((f) => ({ ...f, monthlyAmount: e.target.value }))}
+                   className="bg-white dark:bg-slate-800"
+                 />
               </div>
               <div className="space-y-2">
                  <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.kind")}</label>

@@ -226,7 +226,6 @@ export default function SettingsPage() {
                         className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-sm text-start"
                       >
                         <option value="JOD">دينار أردني (د.ا)</option>
-                        <option value="USD">دولار أمريكي ($)</option>
                       </select>
                     </div>
                   </div>

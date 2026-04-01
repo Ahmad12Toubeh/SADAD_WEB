@@ -27,6 +27,7 @@ export default function AssociationDetailsPage() {
   const [assoc, setAssoc] = useState<Association | null>(null);
   const [showDelete, setShowDelete] = useState(false);
   const [isClosingMonth, setIsClosingMonth] = useState(false);
+  const [isUpdatingPayments, setIsUpdatingPayments] = useState(false);
   const [fundForm, setFundForm] = useState({ type: "in", amount: "", note: "" });
   const [approvalMemberId, setApprovalMemberId] = useState<string>("");
 
@@ -87,10 +88,17 @@ export default function AssociationDetailsPage() {
     setIsSaving(true);
     setError(null);
     try {
+      const membersNum = Number(form.members);
+      const monthlyNum = Number(form.monthlyAmount);
+      if (!form.name.trim() || !Number.isFinite(membersNum) || membersNum < 2 || !Number.isFinite(monthlyNum) || monthlyNum < 1) {
+        setError(t("errors.validation.invalid"));
+        setIsSaving(false);
+        return;
+      }
       await patchAssociation(associationId, {
         name: form.name.trim(),
-        members: Number(form.members),
-        monthlyAmount: Number(form.monthlyAmount),
+        members: membersNum,
+        monthlyAmount: monthlyNum,
         associationKind: form.associationKind as any,
         fundGuarantorMemberId: assoc?.fundGuarantorMemberId ?? undefined,
         membersList: members.map((m, idx) => ({
@@ -140,7 +148,10 @@ export default function AssociationDetailsPage() {
   const onAddFundTransaction = async () => {
     if (!associationId) return;
     const amount = Number(fundForm.amount);
-    if (!Number.isFinite(amount) || amount <= 0) return;
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setError(t("errors.validation.invalid"));
+      return;
+    }
     try {
       await addAssociationFundTransaction(associationId, {
         type: fundForm.type as "in" | "out",
@@ -263,6 +274,41 @@ export default function AssociationDetailsPage() {
     });
   };
 
+  const saveMembersQuick = async (nextMembers: Member[]) => {
+    if (!associationId) return;
+    setIsUpdatingPayments(true);
+    setError(null);
+    try {
+      const updated = await patchAssociation(associationId, {
+        associationKind: form.associationKind as any,
+        membersList: nextMembers.map((m, idx) => ({
+          id: m.id,
+          name: m.name?.trim() || undefined,
+          phone: m.phone?.trim() || undefined,
+          turnOrder: m.turnOrder ?? idx + 1,
+          isPaid: Boolean(m.isPaid),
+          isReceiver: form.associationKind === "family" ? false : Boolean(m.isReceiver),
+        })),
+      });
+      setAssoc(updated);
+      setMembers(
+        (updated.membersList ?? []).map((m) => ({
+          id: m.id,
+          name: m.name ?? "",
+          phone: m.phone ?? "",
+          turnOrder: m.turnOrder ?? undefined,
+          isPaid: Boolean(m.isPaid),
+          isReceiver: Boolean(m.isReceiver),
+        }))
+      );
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to update payment state");
+    } finally {
+      setIsUpdatingPayments(false);
+    }
+  };
+
   const autoSortMembers = () => {
     setMembers((list) =>
       [...list].sort((a, b) => {
@@ -355,8 +401,26 @@ export default function AssociationDetailsPage() {
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder={t("associations.form.name")} className="dark:bg-slate-900" />
-          <Input type="number" min={2} value={form.members} onChange={(e) => setForm((f) => ({ ...f, members: e.target.value }))} placeholder={t("associations.form.members")} className="dark:bg-slate-900" />
-          <Input type="number" min={1} value={form.monthlyAmount} onChange={(e) => setForm((f) => ({ ...f, monthlyAmount: e.target.value }))} placeholder={t("associations.form.amount")} className="dark:bg-slate-900" />
+          <Input
+            type="number"
+            min={2}
+            step={1}
+            inputMode="numeric"
+            value={form.members}
+            onChange={(e) => setForm((f) => ({ ...f, members: e.target.value }))}
+            placeholder={t("associations.form.members")}
+            className="dark:bg-slate-900"
+          />
+          <Input
+            type="number"
+            min={1}
+            step="0.01"
+            inputMode="decimal"
+            value={form.monthlyAmount}
+            onChange={(e) => setForm((f) => ({ ...f, monthlyAmount: e.target.value }))}
+            placeholder={t("associations.form.amount")}
+            className="dark:bg-slate-900"
+          />
           <select
             value={form.associationKind}
             onChange={(e) => setForm((f) => ({ ...f, associationKind: e.target.value }))}
@@ -389,6 +453,8 @@ export default function AssociationDetailsPage() {
               <Input
                 type="number"
                 min={1}
+                step="0.01"
+                inputMode="decimal"
                 value={fundForm.amount}
                 onChange={(e) => setFundForm((f) => ({ ...f, amount: e.target.value }))}
                 placeholder={t("associations.page.fundAmount")}
@@ -489,6 +555,8 @@ export default function AssociationDetailsPage() {
               <Input
                 type="number"
                 min={1}
+                step={1}
+                inputMode="numeric"
                 className="col-span-2 dark:bg-slate-900"
                 placeholder={t("associations.page.turnOrder")}
                 value={m.turnOrder ?? idx + 1}
@@ -505,7 +573,12 @@ export default function AssociationDetailsPage() {
                       ? "border-green-300 text-green-600 bg-green-50 dark:bg-green-900/20 dark:border-green-700"
                       : "border-slate-200 text-slate-700 bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
                   }`}
-                  onClick={() => setMembers((list) => list.map((x, i) => (i === idx ? { ...x, isPaid: !x.isPaid } : x)))}
+                  onClick={async () => {
+                    const nextMembers = members.map((x, i) => (i === idx ? { ...x, isPaid: !x.isPaid } : x));
+                    setMembers(nextMembers);
+                    await saveMembersQuick(nextMembers);
+                  }}
+                  disabled={isUpdatingPayments}
                 >
                   {m.isPaid ? t("associations.page.paid") : t("associations.page.unpaid")}
                 </Button>
