@@ -88,8 +88,11 @@ export default function GuarantorsPage() {
                 <UserCheck size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.total")}</p>
-                <div className="mt-1">\n                  {isLoading ? <Skeleton className="h-7 w-16" /> : (\n                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</h3>\n                  )}\n                </div>
+                <div className="mt-1">
+                  {isLoading ? <Skeleton className="h-7 w-16" /> : (
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</h3>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -101,8 +104,11 @@ export default function GuarantorsPage() {
                 <ShieldCheck size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.safe")}</p>
-                <div className="mt-1">\n                  {isLoading ? <Skeleton className="h-7 w-16" /> : (\n                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.safe}</h3>\n                  )}\n                </div>
+                <div className="mt-1">
+                  {isLoading ? <Skeleton className="h-7 w-16" /> : (
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.safe}</h3>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -114,8 +120,11 @@ export default function GuarantorsPage() {
                 <ShieldAlert size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.bouncing")}</p>
-                <div className="mt-1">\n                  {isLoading ? <Skeleton className="h-7 w-16" /> : (\n                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.bouncing}</h3>\n                  )}\n                </div>
+                <div className="mt-1">
+                  {isLoading ? <Skeleton className="h-7 w-16" /> : (
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.bouncing}</h3>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -127,8 +136,11 @@ export default function GuarantorsPage() {
                 <FileText size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("guarantor.page.stats.contracts")}</p>
-                <div className="mt-1">\n                  {isLoading ? <Skeleton className="h-7 w-16" /> : (\n                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</h3>\n                  )}\n                </div>
+                <div className="mt-1">
+                  {isLoading ? <Skeleton className="h-7 w-16" /> : (
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</h3>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

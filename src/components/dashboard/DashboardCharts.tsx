@@ -35,7 +35,7 @@ export default function DashboardCharts({
           <CardTitle className="dark:text-white">{cashflowTitle}</CardTitle>
         </CardHeader>
         <CardContent className="px-2 h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} style={{ direction: "ltr" }}>
               <defs>
                 <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
@@ -66,7 +66,7 @@ export default function DashboardCharts({
           <CardTitle className="dark:text-white">{collectionTitle}</CardTitle>
         </CardHeader>
         <CardContent className="px-2 h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} style={{ direction: "ltr" }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === "dark" ? "#334155" : "#E2E8F0"} />
               <XAxis dataKey="name" stroke={theme === "dark" ? "#94a3b8" : "#888888"} fontSize={12} tickLine={false} axisLine={false} />

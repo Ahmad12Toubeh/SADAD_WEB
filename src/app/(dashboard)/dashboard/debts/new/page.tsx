@@ -22,6 +22,7 @@ export default function NewDebtWizard() {
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerResults, setCustomerResults] = useState<any[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [selectedCustomerName, setSelectedCustomerName] = useState<string | null>(null);
 
   const [amount, setAmount] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -156,7 +157,10 @@ export default function NewDebtWizard() {
                         <button
                           key={c.id}
                           type="button"
-                          onClick={() => setCustomerId(c.id)}
+                          onClick={() => {
+                            setCustomerId(c.id);
+                            setSelectedCustomerName(c.name);
+                          }}
                           className={`w-full text-start px-4 py-3 rounded-lg border ${
                             customerId === c.id ? "border-primary bg-primary/5" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                           }`}
@@ -315,7 +319,7 @@ export default function NewDebtWizard() {
                   <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-xl text-start mt-6 flex flex-col gap-4 shadow-sm">
                     <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
                       <span className="text-slate-500 dark:text-slate-400">{t("debts.new.s4.customer")}</span>
-                      <span className="font-semibold dark:text-white">{customerId ?? "-"}</span>
+                      <span className="font-semibold dark:text-white">{selectedCustomerName ?? customerId ?? "-"}</span>
                     </div>
                     {hasGuarantor && (
                       <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
@@ -329,7 +333,12 @@ export default function NewDebtWizard() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500 dark:text-slate-400">{t("debts.new.s4.plan")}</span>
-                      <span className="font-semibold text-primary text-lg">{planType === "installments" ? `${installmentCount} / ${installmentPeriod}` : t("debts.new.s3.oneTime")}</span>
+                      <span className="font-semibold text-primary text-lg">
+                        {planType === "installments" 
+                          ? `${installmentCount} ${t(`debts.new.s3.periods.${installmentPeriod}`)}` 
+                          : t("debts.new.s3.oneTime")
+                        }
+                      </span>
                     </div>
                   </div>
                 </div>

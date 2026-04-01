@@ -1,4 +1,7 @@
-import { proxy, config } from "./src/proxy";
+import { proxy } from "./src/proxy";
 
 export default proxy;
-export { config };
+
+export const config = {
+  matcher: ["/dashboard/:path*"],
+};

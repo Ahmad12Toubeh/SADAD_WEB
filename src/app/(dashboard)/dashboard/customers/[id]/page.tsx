@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useTranslation } from "react-i18next";
 import { getCustomer, getCustomerDebts, updateCustomer, deleteCustomer } from "@/lib/api";
 
@@ -22,7 +22,8 @@ type Debt = {
   createdAt?: string;
 };
 
-export default function CustomerDetailsPage({ params }: { params: { id: string } }) {
+export default function CustomerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const customerId = use(params).id;
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +43,7 @@ export default function CustomerDetailsPage({ params }: { params: { id: string }
     setIsLoading(true);
     setError(null);
     try {
-      const [c, d] = await Promise.all([getCustomer(params.id), getCustomerDebts(params.id)]);
+      const [c, d] = await Promise.all([getCustomer(customerId), getCustomerDebts(customerId)]);
       setCustomer(c);
       setDebts((d.items ?? []) as Debt[]);
       setEditForm({
@@ -61,12 +62,12 @@ export default function CustomerDetailsPage({ params }: { params: { id: string }
 
   useEffect(() => {
     fetchData();
-  }, [params.id, t]);
+  }, [customerId, t]);
 
   const handleUpdate = async () => {
     setIsSaving(true);
     try {
-      await updateCustomer(params.id, editForm);
+      await updateCustomer(customerId, editForm);
       setIsEditModalOpen(false);
       fetchData();
     } catch (err: any) {
@@ -78,7 +79,7 @@ export default function CustomerDetailsPage({ params }: { params: { id: string }
 
   const handleDelete = async () => {
     try {
-      await deleteCustomer(params.id);
+      await deleteCustomer(customerId);
       router.push("/dashboard/customers");
     } catch (err: any) {
       alert(err.message || "Delete failed");
