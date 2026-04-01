@@ -124,7 +124,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
           <Button variant="destructive" className="gap-2" onClick={() => setShowDeleteConfirm(true)}>
             <Trash2 size={16} /> {t("common.delete")}
           </Button>
-          <Link href="/dashboard/debts/new">
+          <Link href={`/dashboard/debts/new?step=2&customerId=${customerId}`}>
             <Button className="whitespace-nowrap">{t("sidebar.addDebt")} +</Button>
           </Link>
         </div>

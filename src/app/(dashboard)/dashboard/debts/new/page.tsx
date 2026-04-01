@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, UserCircle, Calculator, FileText, CheckCircle2, UserCheck } from "lucide-react";
@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
-import { createDebt, listCustomers } from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { createDebt, getCustomer, listCustomers } from "@/lib/api";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function NewDebtWizard() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initFromQuery = useRef(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasGuarantor, setHasGuarantor] = useState(false);
@@ -37,6 +39,39 @@ export default function NewDebtWizard() {
   const [guarantorPhone, setGuarantorPhone] = useState("");
   const [guarantorNotes, setGuarantorNotes] = useState("");
 
+  const steps = [
+    { id: 1, title: t("debts.new.steps.step1"), icon: UserCircle },
+    { id: 2, title: t("debts.new.steps.step2"), icon: FileText },
+    { id: 3, title: t("debts.new.steps.step3"), icon: Calculator },
+    { id: 4, title: t("guarantor.title"), icon: UserCheck },
+    { id: 5, title: t("debts.new.steps.step4"), icon: CheckCircle2 },
+  ];
+
+  useEffect(() => {
+    if (initFromQuery.current) return;
+    const stepParam = searchParams.get("step");
+    const customerParam = searchParams.get("customerId");
+    if (customerParam) {
+      setCustomerId(customerParam);
+      (async () => {
+        try {
+          const c = await getCustomer(customerParam);
+          setSelectedCustomerName(c?.name ?? null);
+        } catch {
+          setSelectedCustomerName(null);
+        }
+      })();
+    }
+    if (stepParam) {
+      const parsed = Number(stepParam);
+      if (Number.isFinite(parsed)) {
+        const clamped = Math.min(Math.max(parsed, 1), steps.length);
+        setCurrentStep(clamped);
+      }
+    }
+    initFromQuery.current = true;
+  }, [searchParams, steps.length]);
+
   useEffect(() => {
     if (currentStep !== 1) return;
     if (customerResults.length > 0) return;
@@ -49,14 +84,6 @@ export default function NewDebtWizard() {
       }
     })();
   }, [currentStep, customerResults.length]);
-
-  const steps = [
-    { id: 1, title: t("debts.new.steps.step1"), icon: UserCircle },
-    { id: 2, title: t("debts.new.steps.step2"), icon: FileText },
-    { id: 3, title: t("debts.new.steps.step3"), icon: Calculator },
-    { id: 4, title: t("guarantor.title"), icon: UserCheck },
-    { id: 5, title: t("debts.new.steps.step4"), icon: CheckCircle2 },
-  ];
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -72,7 +99,7 @@ export default function NewDebtWizard() {
       const res = await createDebt({
         customerId,
         principalAmount,
-        currency: "SAR",
+        currency: "JOD",
         planType,
         dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
         category: category || undefined,

@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { useTranslation } from "react-i18next";
-import { Association, addAssociationFundTransaction, approveAssociationFundTransaction, closeAssociationMonth, deleteAssociation, getAssociation, patchAssociation } from "@/lib/api";
+import { Association, addAssociationFundTransaction, approveAssociationFundTransaction, closeAssociationMonth, deleteAssociation, getAssociation, patchAssociation, reopenAssociationCycle } from "@/lib/api";
+import { exportToCsv } from "@/lib/utils/export";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -77,7 +78,8 @@ export default function AssociationDetailsPage() {
 
   const progressPercent = useMemo(() => {
     if (!assoc) return 0;
-    return assoc.members > 0 ? Math.round((assoc.currentMonth / assoc.members) * 100) : 0;
+    const paidCount = (assoc.membersList ?? []).filter((m) => m.isPaid).length;
+    return assoc.members > 0 ? Math.round((paidCount / assoc.members) * 100) : 0;
   }, [assoc]);
 
   const onSave = async () => {
@@ -121,6 +123,17 @@ export default function AssociationDetailsPage() {
       setError(key ? t(key) : err?.message ?? "Failed to close month");
     } finally {
       setIsClosingMonth(false);
+    }
+  };
+
+  const onReopenCycle = async () => {
+    if (!associationId) return;
+    try {
+      await reopenAssociationCycle(associationId);
+      await load();
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to reopen cycle");
     }
   };
 
@@ -293,6 +306,9 @@ export default function AssociationDetailsPage() {
           </Button>
           <Button variant="outline" onClick={onCloseMonth} disabled={isClosingMonth}>
             {isClosingMonth ? t("common.loading") : t("associations.page.closeMonth")}
+          </Button>
+          <Button variant="outline" onClick={onReopenCycle} disabled={!assoc?.lockOrder}>
+            {t("associations.page.reopenCycle")}
           </Button>
           <Button variant="outline" onClick={onDownloadReport}>
             <Download size={16} /> {t("associations.page.downloadReport")}
@@ -541,7 +557,22 @@ export default function AssociationDetailsPage() {
 
       <Card className="border-0 shadow-lg shadow-slate-200/40 dark:bg-slate-800">
         <CardHeader>
-          <CardTitle className="text-slate-900 dark:text-white">{t("associations.page.paymentsTitle")}</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-slate-900 dark:text-white">{t("associations.page.paymentsTitle")}</CardTitle>
+            <Button
+              variant="outline"
+              onClick={() =>
+                exportToCsv("association_payments", assoc?.paymentLogs ?? [], {
+                  memberName: t("associations.page.memberName"),
+                  amount: t("associations.page.fundAmount"),
+                  paidAt: t("associations.page.paymentsDate"),
+                  month: t("associations.page.historyMonth"),
+                } as any)
+              }
+            >
+              {t("associations.page.exportPayments")}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-2">
           {(assoc?.paymentLogs ?? []).length === 0 && (

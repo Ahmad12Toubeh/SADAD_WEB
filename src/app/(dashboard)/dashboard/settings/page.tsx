@@ -25,7 +25,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [profile, setProfile] = useState<any>({ fullName: "", phone: "", email: "" });
-  const [store, setStore] = useState<any>({ storeName: "", businessType: "", address: "", cr: "", currency: "SAR" });
+  const [store, setStore] = useState<any>({ storeName: "", businessType: "", address: "", cr: "", currency: "JOD" });
   const [notifications, setNotifications] = useState<any>({
     remindOnDelay: true,
     remindBeforeDue: true,
@@ -221,11 +221,11 @@ export default function SettingsPage() {
                     <div className="space-y-2">
                       <Label className="dark:text-slate-300">{t("settings.store.currency")}</Label>
                       <select
-                        value={store?.currency ?? "SAR"}
+                        value={store?.currency ?? "JOD"}
                         onChange={(e) => setStore((s: any) => ({ ...s, currency: e.target.value }))}
                         className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-sm text-start"
                       >
-                        <option value="SAR">ريال سعودي (ر.س)</option>
+                        <option value="JOD">دينار أردني (د.ا)</option>
                         <option value="USD">دولار أمريكي ($)</option>
                       </select>
                     </div>

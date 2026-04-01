@@ -461,3 +461,7 @@ export async function addAssociationFundTransaction(id: string, input: { type: "
 export async function approveAssociationFundTransaction(id: string, input: { transactionId: string; memberId: string }) {
   return apiFetch<Association>(`/associations/${id}/fund-transaction/approve`, { method: "POST", body: JSON.stringify(input) });
 }
+
+export async function reopenAssociationCycle(id: string) {
+  return apiFetch<Association>(`/associations/${id}/reopen-cycle`, { method: "POST" });
+}

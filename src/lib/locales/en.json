@@ -41,7 +41,7 @@
     "collectedThisMonth": "Collected This Month",
     "badDebt": "Bad Debt (Overdue)",
     "activeCustomers": "Active Customers",
-    "currency": "SAR",
+    "currency": "JOD",
     "recentActivity": "Recent Activity",
     "cashflowChart": "Cashflow & Accumulated Debt",
     "collectionChart": "Collection Rate (Paid Installments)"
@@ -425,6 +425,9 @@
       "approve": "Approve",
       "paymentsTitle": "Payment Log",
       "paymentsEmpty": "No payments logged yet.",
+      "paymentsDate": "Payment Date",
+      "exportPayments": "Export Payments",
+      "reopenCycle": "Reopen Cycle",
       "historyTitle": "Cycle History",
       "historyEmpty": "No cycles closed yet.",
       "historyMonth": "Month",
@@ -442,7 +445,7 @@
       "amount": "Monthly Amount",
       "turn": "My Receipt Turn",
       "member": "member",
-      "currency": "SAR / mo",
+      "currency": "JOD / mo",
       "kind": "Association Type",
       "kindRotating": "Rotating (Receiver Each Month)",
       "kindFamily": "Family Fund (No Receiver)"

@@ -307,19 +307,28 @@ export default function DebtDetailsPage() {
                 <div>
                   <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">{t("debts.new.s2.amount")}</p>
                   <p className="text-2xl font-black text-slate-900 dark:text-white">
-                    {stats.total.toLocaleString()} <span className="text-sm font-medium">{t("dashboard.currency")}</span>
+                    <span className="inline-flex items-baseline gap-2">
+                      <span>{stats.total.toLocaleString()}</span>
+                      <span className="text-sm font-medium">{t("dashboard.currency")}</span>
+                    </span>
                   </p>
                 </div>
                 <div>
                   <p className="text-green-500 text-xs font-bold uppercase tracking-widest mb-1">{t("debts.details.paidAmount")}</p>
                   <p className="text-2xl font-black text-green-600 dark:text-green-400">
-                    {stats.paid.toLocaleString()} <span className="text-sm font-medium">{t("dashboard.currency")}</span>
+                    <span className="inline-flex items-baseline gap-2">
+                      <span>{stats.paid.toLocaleString()}</span>
+                      <span className="text-sm font-medium">{t("dashboard.currency")}</span>
+                    </span>
                   </p>
                 </div>
                 <div className="col-span-2 pt-4 border-t border-slate-100 dark:border-slate-700">
                   <p className="text-orange-500 text-xs font-bold uppercase tracking-widest mb-1">{t("debts.details.remainingAmount")}</p>
                   <p className="text-3xl font-black text-orange-600 dark:text-orange-400">
-                    {stats.remaining.toLocaleString()} <span className="text-sm font-medium">{t("dashboard.currency")}</span>
+                    <span className="inline-flex items-baseline gap-2">
+                      <span>{stats.remaining.toLocaleString()}</span>
+                      <span className="text-sm font-medium">{t("dashboard.currency")}</span>
+                    </span>
                   </p>
                 </div>
               </div>
