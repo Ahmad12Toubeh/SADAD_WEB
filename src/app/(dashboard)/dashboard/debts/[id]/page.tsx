@@ -22,6 +22,8 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { activateGuarantor, deleteDebt, getDebt, payInstallment } from "@/lib/api";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export default function DebtDetailsPage() {
   const { t, i18n } = useTranslation();
@@ -37,6 +39,7 @@ export default function DebtDetailsPage() {
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [activationSuccess, setActivationSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const refresh = async () => {
     if (!debtId) return;
@@ -103,6 +106,104 @@ export default function DebtDetailsPage() {
     }
   };
 
+  const handleDownloadPdf = async () => {
+    if (!debt) return;
+    setIsDownloadingPdf(true);
+    const paid = installments.filter((i) => i.status === "paid").reduce((acc, i) => acc + (i.amount || 0), 0);
+    const remaining = (debt.principalAmount || 0) - paid;
+    const dueDate = debt.dueDate ? new Date(debt.dueDate).toISOString().slice(0, 10) : "-";
+    const title = `Debt-${debt.id?.slice(-6)?.toUpperCase?.() ?? ""}`;
+
+    const rows = installments.map((inst: any, idx: number) => `
+      <tr>
+        <td style="padding:8px;border:1px solid #e2e8f0;">${idx + 1}</td>
+        <td style="padding:8px;border:1px solid #e2e8f0;">${(inst.amount ?? 0).toLocaleString()} ${t("dashboard.currency")}</td>
+        <td style="padding:8px;border:1px solid #e2e8f0;">${inst.dueDate ? inst.dueDate.split("T")[0] : "-"}</td>
+        <td style="padding:8px;border:1px solid #e2e8f0;">${inst.status === "paid" ? t("analytics.charts.status.paid") : t("analytics.charts.status.active")}</td>
+      </tr>
+    `).join("");
+
+    const container = document.createElement("div");
+    container.dir = i18n.dir();
+    container.style.position = "fixed";
+    container.style.left = "-10000px";
+    container.style.top = "0";
+    container.style.width = "794px";
+    container.style.background = "#ffffff";
+    container.style.color = "#0f172a";
+    container.style.padding = "24px";
+    container.style.fontFamily = "Arial, sans-serif";
+
+    container.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:20px;font-weight:700;">${t("debts.details.downloadPdf")}</div>
+          <div style="color:#64748b;font-size:12px;margin-top:4px;">${title}</div>
+        </div>
+        <div style="text-align:end;font-size:12px;color:#64748b;">${t("common.dueDate")}: ${dueDate}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;">
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+          <div style="font-size:12px;color:#64748b;">${t("debts.new.s2.amount")}</div>
+          <div style="font-weight:700;margin-top:4px;">${(debt.principalAmount ?? 0).toLocaleString()} ${t("dashboard.currency")}</div>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+          <div style="font-size:12px;color:#64748b;">${t("debts.details.paidAmount")}</div>
+          <div style="font-weight:700;margin-top:4px;">${paid.toLocaleString()} ${t("dashboard.currency")}</div>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+          <div style="font-size:12px;color:#64748b;">${t("debts.details.remainingAmount")}</div>
+          <div style="font-weight:700;margin-top:4px;">${remaining.toLocaleString()} ${t("dashboard.currency")}</div>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+          <div style="font-size:12px;color:#64748b;">${t("debts.details.installment")}</div>
+          <div style="font-weight:700;margin-top:4px;">${installments.length}</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-top:16px;font-size:12px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("debts.details.installment")}</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("debts.new.s2.amount")}</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("common.dueDate")}</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("common.status")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    `;
+
+    document.body.appendChild(container);
+    try {
+      const canvas = await html2canvas(container, { scale: 2, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        pdf.addPage();
+        position = heightLeft - imgHeight;
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`${title}.pdf`);
+    } finally {
+      document.body.removeChild(container);
+      setIsDownloadingPdf(false);
+    }
+  };
+
   if (isLoading && !debt) {
     return <div className="p-8 text-center">{t("common.loading")}</div>;
   }
@@ -138,13 +239,22 @@ export default function DebtDetailsPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 gap-2 dark:border-red-900/30" onClick={() => setShowDeleteConfirm(true)}>
+          <Button
+            variant="outline"
+            className="text-red-500 border-red-200 bg-white hover:bg-red-50 gap-2 dark:bg-slate-900 dark:border-red-900/30 dark:hover:bg-red-900/20"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
              <Trash2 size={16} /> {t("common.delete")}
           </Button>
-          <Button variant="outline" className="gap-2 hidden sm:flex dark:border-slate-700 dark:hover:bg-slate-800">
-            <Download size={16} /> {t("debts.details.downloadPdf")}
+          <Button
+            variant="outline"
+            className="gap-2 hidden sm:flex border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            onClick={handleDownloadPdf}
+            disabled={isDownloadingPdf}
+          >
+            <Download size={16} /> {isDownloadingPdf ? t("common.loading") : t("debts.details.downloadPdf")}
           </Button>
-          <Button className="gap-2 shadow-sm shadow-primary/20">
+          <Button className="gap-2 shadow-sm shadow-primary/20 bg-primary text-white hover:bg-primary/90 dark:bg-primary dark:text-white">
             <FileSpreadsheet size={16} /> {t("debts.details.issueInvoice")}
           </Button>
         </div>
