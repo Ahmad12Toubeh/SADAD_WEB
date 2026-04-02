@@ -27,6 +27,7 @@ export default function NewDebtWizard() {
   const [selectedCustomerName, setSelectedCustomerName] = useState<string | null>(null);
 
   const [amount, setAmount] = useState("");
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [dueDate, setDueDate] = useState("");
   const [category, setCategory] = useState("");
   const [notes, setNotes] = useState("");
@@ -274,7 +275,13 @@ export default function NewDebtWizard() {
                     </div>
                     <div className="space-y-2">
                       <Label className="dark:text-slate-300">{t("debts.new.s2.dueDate")}</Label>
-                      <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-11 dark:bg-slate-900 dark:border-slate-700 text-start" />
+                      <Input
+                        type="date"
+                        min={today}
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
+                        className="h-11 dark:bg-slate-900 dark:border-slate-700 text-start"
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label className="dark:text-slate-300">{t("debts.new.s2.type")}</Label>

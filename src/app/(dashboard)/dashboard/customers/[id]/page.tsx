@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { useEffect, useState, use } from "react";
 import { useTranslation } from "react-i18next";
-import { getCustomer, getCustomerDebts, updateCustomer, deleteCustomer } from "@/lib/api";
+import { getCustomer, getCustomerDebts, updateCustomer, deleteCustomer, sendReminder } from "@/lib/api";
+import { ReminderActions } from "@/components/reminders/ReminderActions";
 
 type Debt = {
   id: string;
@@ -21,6 +22,7 @@ type Debt = {
   category: string | null;
   status: string;
   createdAt?: string;
+  channel?: string;
 };
 
 export default function CustomerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -75,6 +77,16 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
       alert(err.message || "Update failed");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleReminder = async (debtId: string, channel: "whatsapp" | "email") => {
+    try {
+      await sendReminder({ debtId, channel });
+      alert(channel === "whatsapp" ? t("reminders.actions.whatsapp") : t("reminders.actions.emailSent"));
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      alert(key ? t(key) : err?.message ?? "Failed to send");
     }
   };
 
@@ -199,11 +211,28 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                     </span>
                   </td>
                   <td className="px-6 py-5 text-center">
-                    <Link href={`/dashboard/debts/${tx.id}`}>
-                      <Button variant="ghost" className="text-primary hover:bg-primary/10 gap-2 h-9">
-                        <Eye size={16} /> {t("guarantor.page.list.view")}
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        size="sm"
+                        className="h-8 px-3 text-xs bg-[#25D366] text-white hover:bg-[#20b558] gap-1.5"
+                        onClick={() => handleReminder(tx.id, "whatsapp")}
+                      >
+                        ??
                       </Button>
-                    </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 px-3 text-xs gap-1.5"
+                        onClick={() => handleReminder(tx.id, "email")}
+                      >
+                        ??
+                      </Button>
+                      <Link href={`/dashboard/debts/${tx.id}`}>
+                        <Button variant="ghost" className="text-primary hover:bg-primary/10 gap-2 h-8 px-3 text-xs">
+                          <Eye size={16} /> {t("guarantor.page.list.view")}
+                        </Button>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

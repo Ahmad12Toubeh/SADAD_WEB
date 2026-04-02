@@ -594,7 +594,11 @@
     "actions": {
       "whatsapp": "واتساب",
       "sms": "SMS",
-      "preAlert": "تنبيه مسبق"
+      "preAlert": "تنبيه مسبق",
+      "email": "بريد",
+      "emailSent": "تم إرسال البريد بنجاح.",
+      "emailFailed": "فشل إرسال البريد.",
+      "whatsappFailed": "تعذر فتح واتساب لهذا العميل."
     }
   }
 }

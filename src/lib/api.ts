@@ -378,7 +378,12 @@ export async function getRemindersSent() {
   return apiFetch<{ items: any[] }>(`/reminders/sent`);
 }
 
-export async function sendReminder(input: { installmentId: string; channel: "whatsapp" | "sms" }) {
+export async function sendReminder(input: {
+  channel: "whatsapp" | "email";
+  installmentId?: string;
+  debtId?: string;
+  message?: string;
+}) {
   return apiFetch<any>("/reminders/send", {
     method: "POST",
     body: JSON.stringify(input),

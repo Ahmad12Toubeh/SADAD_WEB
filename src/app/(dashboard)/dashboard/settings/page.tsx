@@ -75,7 +75,6 @@ export default function SettingsPage() {
   const tabs = [
     { id: "profile", label: t("settings.tabs.profile"), icon: User },
     { id: "store", label: t("settings.tabs.store"), icon: Store },
-    { id: "notifications", label: t("settings.tabs.notifications"), icon: Bell },
     { id: "security", label: t("settings.tabs.security"), icon: Shield },
   ];
 
@@ -227,50 +226,6 @@ export default function SettingsPage() {
                       >
                         <option value="JOD">دينار أردني (د.ا)</option>
                       </select>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {activeTab === "notifications" && (
-                <>
-                  <CardHeader className="p-0">
-                    <CardTitle className="text-xl text-slate-900 dark:text-white flex items-center gap-2">
-                      <Bell size={20} className="text-primary" /> {t("settings.notifications.title")}
-                    </CardTitle>
-                  </CardHeader>
-                  <div className="space-y-4">
-                    {[
-                      { key: "remindOnDelay", label: t("settings.notifications.items.delay"), desc: t("settings.notifications.items.delayDesc") },
-                      { key: "remindBeforeDue", label: t("settings.notifications.items.before"), desc: t("settings.notifications.items.beforeDesc") },
-                      { key: "weeklySummary", label: t("settings.notifications.items.weekly"), desc: t("settings.notifications.items.weeklyDesc") },
-                      { key: "whatsappEnabled", label: t("settings.notifications.items.wa"), desc: t("settings.notifications.items.waDesc") },
-                    ].map((item) => (
-                      <div key={item.key} className="flex items-center justify-between p-4 border border-slate-100 dark:border-slate-700/50 rounded-xl hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                        <div className="text-start">
-                          <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{item.label}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.desc}</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer shrink-0 mx-4">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={Boolean((notifications as any)?.[item.key])}
-                            onChange={(e) => setNotifications((n: any) => ({ ...n, [item.key]: e.target.checked }))}
-                          />
-                          <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-primary transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"></div>
-                        </label>
-                      </div>
-                    ))}
-                    <div className="space-y-2 pt-2">
-                      <Label className="flex items-center gap-2 dark:text-slate-300"><Smartphone size={16} /> {t("settings.notifications.customWa")}</Label>
-                      <Input
-                        placeholder={t("settings.notifications.waPlaceholder")}
-                        dir="ltr"
-                        value={notifications?.customWhatsappNumber ?? ""}
-                        onChange={(e) => setNotifications((n: any) => ({ ...n, customWhatsappNumber: e.target.value }))}
-                        className="dark:bg-slate-900 dark:border-slate-700 text-start"
-                      />
                     </div>
                   </div>
                 </>

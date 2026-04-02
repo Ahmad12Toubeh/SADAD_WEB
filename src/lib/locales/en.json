@@ -297,7 +297,11 @@
       "desc": "<strong>SADAD</strong> platform helps you track your customers' debts, send smart WhatsApp reminders, and schedule installments — all in one place.",
       "ctaPrimary": "Create Free Account",
       "ctaSecondary": "How does it work?",
-      "tags": ["No Credit Card Needed", "2-Minute Setup", "14 Days Free"],
+      "tags": [
+        "No Credit Card Needed",
+        "2-Minute Setup",
+        "14 Days Free"
+      ],
       "dashboard": {
         "active": "Total Active Debts",
         "collected": "Collected This Month",
@@ -590,7 +594,11 @@
     "actions": {
       "whatsapp": "WhatsApp",
       "sms": "SMS",
-      "preAlert": "Pre-alert"
+      "preAlert": "Pre-alert",
+      "email": "Email",
+      "emailSent": "Email reminder sent.",
+      "emailFailed": "Failed to send email reminder.",
+      "whatsappFailed": "Could not open WhatsApp for this customer."
     }
   }
 }
