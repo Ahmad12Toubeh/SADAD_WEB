@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
-import { activateGuarantor, deleteDebt, getDebt, payInstallment } from "@/lib/api";
+import { activateGuarantor, deleteDebt, getCustomer, getDebt, getSettingsStore, payInstallment } from "@/lib/api";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -36,11 +36,14 @@ export default function DebtDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [debt, setDebt] = useState<any | null>(null);
   const [installments, setInstallments] = useState<any[]>([]);
+  const [customerName, setCustomerName] = useState<string | null>(null);
+  const [storeName, setStoreName] = useState<string | null>(null);
   const [isGuarantorActive, setIsGuarantorActive] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [activationSuccess, setActivationSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [isIssuingInvoice, setIsIssuingInvoice] = useState(false);
 
   const refresh = async () => {
     if (!debtId) return;
@@ -51,6 +54,13 @@ export default function DebtDetailsPage() {
       setDebt(data.debt);
       setInstallments(data.installments ?? []);
       setIsGuarantorActive(data.debt.guarantorActive ?? false);
+
+      const [customer, store] = await Promise.all([
+        data.debt?.customerId ? getCustomer(data.debt.customerId).catch(() => null) : Promise.resolve(null),
+        getSettingsStore().catch(() => null),
+      ]);
+      setCustomerName(customer?.name ?? null);
+      setStoreName(store?.storeName ?? null);
     } catch (err: any) {
       const key = err?.messageKey as string | undefined;
       setError(key ? t(key) : err?.message ?? "Failed to load debt");
@@ -108,13 +118,26 @@ export default function DebtDetailsPage() {
     }
   };
 
-  const handleDownloadPdf = async () => {
+  const buildDebtPdf = async (mode: "statement" | "invoice") => {
     if (!debt) return;
-    setIsDownloadingPdf(true);
+    if (mode === "invoice") {
+      setIsIssuingInvoice(true);
+    } else {
+      setIsDownloadingPdf(true);
+    }
     const paid = installments.filter((i) => i.status === "paid").reduce((acc, i) => acc + (i.amount || 0), 0);
     const remaining = (debt.principalAmount || 0) - paid;
     const dueDate = debt.dueDate ? new Date(debt.dueDate).toISOString().slice(0, 10) : "-";
-    const title = `Debt-${debt.id?.slice(-6)?.toUpperCase?.() ?? ""}`;
+    const code = debt.id?.slice(-6)?.toUpperCase?.() ?? "";
+    const title = mode === "invoice" ? `Invoice-${code}` : `Debt-${code}`;
+    const documentTitle = mode === "invoice" ? t("debts.details.issueInvoice") : t("debts.details.downloadPdf");
+    const issuedAt = new Date().toISOString().slice(0, 10);
+    const invoiceNo = `INV-${new Date().getFullYear()}-${code}`;
+    const resolvedStoreName = storeName || "SADAD";
+    const resolvedCustomerName = customerName || debt.customerName || `#${debt.customerId?.slice?.(-6) ?? "-"}`;
+    const statusLabel =
+      debt?.status === "paid" ? t("analytics.charts.status.paid") : debt?.status === "late" ? t("analytics.charts.status.late") : t("analytics.charts.status.active");
+    const categoryLabel = debt?.category || t("debts.new.s2.types.t1");
 
     const rows = installments.map((inst: any, idx: number) => `
       <tr>
@@ -136,46 +159,121 @@ export default function DebtDetailsPage() {
     container.style.padding = "24px";
     container.style.fontFamily = "Arial, sans-serif";
 
-    container.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-size:20px;font-weight:700;">${t("debts.details.downloadPdf")}</div>
-          <div style="color:#64748b;font-size:12px;margin-top:4px;">${title}</div>
+    if (mode === "invoice") {
+      container.innerHTML = `
+        <div style="border:1px solid #dbeafe;border-radius:24px;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:#fff;padding:28px 30px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;">
+              <div>
+                <div style="font-size:28px;font-weight:800;letter-spacing:0.5px;">${resolvedStoreName}</div>
+                <div style="font-size:13px;opacity:0.8;margin-top:6px;">SADAD Final Invoice</div>
+              </div>
+              <div style="text-align:end;">
+                <div style="font-size:24px;font-weight:800;">${documentTitle}</div>
+                <div style="font-size:13px;opacity:0.8;margin-top:6px;">${invoiceNo}</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:26px 30px;">
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;">
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                <div style="font-size:12px;color:#64748b;margin-bottom:8px;">اسم العميل</div>
+                <div style="font-size:18px;font-weight:700;">${resolvedCustomerName}</div>
+              </div>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                <div style="font-size:12px;color:#64748b;margin-bottom:8px;">نوع العملية</div>
+                <div style="font-size:18px;font-weight:700;">${categoryLabel}</div>
+              </div>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                <div style="font-size:12px;color:#64748b;margin-bottom:8px;">تاريخ الإصدار</div>
+                <div style="font-size:18px;font-weight:700;">${issuedAt}</div>
+              </div>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                <div style="font-size:12px;color:#64748b;margin-bottom:8px;">الحالة</div>
+                <div style="font-size:18px;font-weight:700;">${statusLabel}</div>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:18px;padding:18px 20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
+              <div>
+                <div style="font-size:12px;color:#64748b;">المبلغ الإجمالي</div>
+                <div style="font-size:24px;font-weight:800;margin-top:6px;">${(debt.principalAmount ?? 0).toLocaleString()} ${t("dashboard.currency")}</div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:#64748b;">المدفوع</div>
+                <div style="font-size:24px;font-weight:800;margin-top:6px;color:#15803d;">${paid.toLocaleString()} ${t("dashboard.currency")}</div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:#64748b;">المتبقي</div>
+                <div style="font-size:24px;font-weight:800;margin-top:6px;color:#c2410c;">${remaining.toLocaleString()} ${t("dashboard.currency")}</div>
+              </div>
+            </div>
+
+            <div style="margin-top:22px;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;">
+              <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                  <tr style="background:#f8fafc;">
+                    <th style="padding:12px;border-bottom:1px solid #e2e8f0;text-align:start;">${t("debts.details.installment")}</th>
+                    <th style="padding:12px;border-bottom:1px solid #e2e8f0;text-align:start;">${t("debts.new.s2.amount")}</th>
+                    <th style="padding:12px;border-bottom:1px solid #e2e8f0;text-align:start;">${t("common.dueDate")}</th>
+                    <th style="padding:12px;border-bottom:1px solid #e2e8f0;text-align:start;">${t("common.status")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:20px;">
+              <div style="font-size:12px;color:#64748b;">${title}</div>
+              <div style="font-size:12px;color:#64748b;">${t("common.dueDate")}: ${dueDate}</div>
+            </div>
+          </div>
         </div>
-        <div style="text-align:end;font-size:12px;color:#64748b;">${t("common.dueDate")}: ${dueDate}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;">
-        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
-          <div style="font-size:12px;color:#64748b;">${t("debts.new.s2.amount")}</div>
-          <div style="font-weight:700;margin-top:4px;">${(debt.principalAmount ?? 0).toLocaleString()} ${t("dashboard.currency")}</div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:20px;font-weight:700;">${documentTitle}</div>
+            <div style="color:#64748b;font-size:12px;margin-top:4px;">${title}</div>
+          </div>
+          <div style="text-align:end;font-size:12px;color:#64748b;">${t("common.dueDate")}: ${dueDate}</div>
         </div>
-        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
-          <div style="font-size:12px;color:#64748b;">${t("debts.details.paidAmount")}</div>
-          <div style="font-weight:700;margin-top:4px;">${paid.toLocaleString()} ${t("dashboard.currency")}</div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;">
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+            <div style="font-size:12px;color:#64748b;">${t("debts.new.s2.amount")}</div>
+            <div style="font-weight:700;margin-top:4px;">${(debt.principalAmount ?? 0).toLocaleString()} ${t("dashboard.currency")}</div>
+          </div>
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+            <div style="font-size:12px;color:#64748b;">${t("debts.details.paidAmount")}</div>
+            <div style="font-weight:700;margin-top:4px;">${paid.toLocaleString()} ${t("dashboard.currency")}</div>
+          </div>
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+            <div style="font-size:12px;color:#64748b;">${t("debts.details.remainingAmount")}</div>
+            <div style="font-weight:700;margin-top:4px;">${remaining.toLocaleString()} ${t("dashboard.currency")}</div>
+          </div>
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+            <div style="font-size:12px;color:#64748b;">${t("debts.details.installment")}</div>
+            <div style="font-weight:700;margin-top:4px;">${installments.length}</div>
+          </div>
         </div>
-        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
-          <div style="font-size:12px;color:#64748b;">${t("debts.details.remainingAmount")}</div>
-          <div style="font-weight:700;margin-top:4px;">${remaining.toLocaleString()} ${t("dashboard.currency")}</div>
-        </div>
-        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
-          <div style="font-size:12px;color:#64748b;">${t("debts.details.installment")}</div>
-          <div style="font-weight:700;margin-top:4px;">${installments.length}</div>
-        </div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;margin-top:16px;font-size:12px;">
-        <thead>
-          <tr style="background:#f8fafc;">
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("debts.details.installment")}</th>
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("debts.new.s2.amount")}</th>
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("common.dueDate")}</th>
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("common.status")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
-    `;
+        <table style="width:100%;border-collapse:collapse;margin-top:16px;font-size:12px;">
+          <thead>
+            <tr style="background:#f8fafc;">
+              <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("debts.details.installment")}</th>
+              <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("debts.new.s2.amount")}</th>
+              <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("common.dueDate")}</th>
+              <th style="padding:8px;border:1px solid #e2e8f0;text-align:start;">${t("common.status")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    }
 
     document.body.appendChild(container);
     try {
@@ -202,8 +300,20 @@ export default function DebtDetailsPage() {
       pdf.save(`${title}.pdf`);
     } finally {
       document.body.removeChild(container);
-      setIsDownloadingPdf(false);
+      if (mode === "invoice") {
+        setIsIssuingInvoice(false);
+      } else {
+        setIsDownloadingPdf(false);
+      }
     }
+  };
+
+  const handleDownloadPdf = async () => {
+    await buildDebtPdf("statement");
+  };
+
+  const handleIssueInvoice = async () => {
+    await buildDebtPdf("invoice");
   };
 
   if (isLoading && !debt) {
@@ -252,12 +362,16 @@ export default function DebtDetailsPage() {
             variant="outline"
             className="gap-2 hidden sm:flex border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             onClick={handleDownloadPdf}
-            disabled={isDownloadingPdf}
+            disabled={isDownloadingPdf || isIssuingInvoice}
           >
             <Download size={16} /> {isDownloadingPdf ? t("common.loading") : t("debts.details.downloadPdf")}
           </Button>
-          <Button className="gap-2 shadow-sm shadow-primary/20 bg-primary text-white hover:bg-primary/90 dark:bg-primary dark:text-white">
-            <FileSpreadsheet size={16} /> {t("debts.details.issueInvoice")}
+          <Button
+            className="gap-2 shadow-sm shadow-primary/20 bg-primary text-white hover:bg-primary/90 dark:bg-primary dark:text-white"
+            onClick={handleIssueInvoice}
+            disabled={isIssuingInvoice || isDownloadingPdf}
+          >
+            <FileSpreadsheet size={16} /> {isIssuingInvoice ? t("common.loading") : t("debts.details.issueInvoice")}
           </Button>
         </div>
       </div>
