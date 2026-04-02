@@ -52,7 +52,10 @@ export function AuthNavbar() {
 
         {/* Back Button */}
         <Link href="/" className="hidden sm:block">
-          <Button variant="outline" className="gap-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full px-5">
+          <Button
+            variant="outline"
+            className="gap-2 bg-white/90 dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-md transition-all hover:bg-white dark:hover:bg-slate-800 rounded-full px-5 font-semibold text-slate-700 dark:text-slate-100"
+          >
             {i18n.language === "ar" ? "العودة للرئيسية" : "Back to Home"}
             {i18n.dir() === 'rtl' ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
           </Button>

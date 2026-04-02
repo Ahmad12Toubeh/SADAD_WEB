@@ -38,7 +38,11 @@ export function HeroSection() {
               </Button>
             </Link>
             <a href="#how-it-works">
-              <Button size="lg" variant="outline" className="gap-2 px-8 dark:border-slate-700 dark:hover:bg-slate-800 dark:text-slate-300">
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 px-8 border-primary/40 text-primary font-semibold bg-white/95 hover:bg-primary/5 shadow-md shadow-primary/10 dark:border-primary/50 dark:text-primary dark:bg-slate-900/80 dark:hover:bg-primary/10"
+              >
                 {t("landing.hero.ctaSecondary")}
                 <ChevronDown size={18} />
               </Button>
