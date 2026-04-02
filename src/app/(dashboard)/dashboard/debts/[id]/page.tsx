@@ -14,6 +14,7 @@ import {
   Info,
   User,
   UserCheck,
+  Eye,
   Phone,
   ShieldAlert,
   Check,
@@ -360,6 +361,12 @@ export default function DebtDetailsPage() {
                 <span className="font-bold tracking-widest" dir="ltr">{debt?.guarantor?.phone || "-"}</span>
               {!hasGuarantorInfo && <div className="text-sm opacity-70">{t("guarantor.status.noGuarantor")}</div>}
               </div>
+              {debt?.guarantor?.proofImageUrl && (
+                <Link href={debt.guarantor.proofImageUrl} target="_blank" className={`inline-flex items-center gap-2 text-sm font-semibold ${isGuarantorActive ? "text-red-700 dark:text-red-300" : "text-primary"}`}>
+                  <Eye size={16} />
+                  عرض إثبات الضامن
+                </Link>
+              )}
             </div>
 
             <div className="mt-auto pt-8">

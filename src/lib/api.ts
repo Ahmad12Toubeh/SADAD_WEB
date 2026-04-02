@@ -22,6 +22,8 @@ export type Customer = {
   address?: string;
   cr?: string;
   notes?: string;
+  proofImageUrl?: string | null;
+  proofImagePublicId?: string | null;
   status: CustomerStatus;
   createdAt?: string;
   updatedAt?: string;
@@ -69,10 +71,21 @@ export type Guarantor = {
   name: string;
   phone: string;
   notes?: string;
+  proofImageUrl?: string | null;
+  proofImagePublicId?: string | null;
   status: GuarantorStatus;
   activatedAt?: string;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type UploadedImage = {
+  url: string;
+  publicId: string;
+  width?: number;
+  height?: number;
+  bytes?: number;
+  originalFilename?: string;
 };
 
 export type Association = {
@@ -300,6 +313,45 @@ export async function resetPassword(input: { token: string; newPassword: string 
     "/auth/reset-password",
     { method: "POST", body: JSON.stringify(input) },
   );
+}
+
+export async function uploadImage(file: File, folder?: string) {
+  const url = `${getBaseUrl()}/uploads/image`;
+  const token = getAccessToken();
+  const formData = new FormData();
+  formData.append("file", file);
+  if (folder) {
+    formData.append("folder", folder);
+  }
+
+  const res = await fetch(url, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+
+  const text = await res.text();
+  let data: any = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = null;
+    }
+  }
+
+  if (!res.ok) {
+    const message = (data && (data.message || data.error)) || res.statusText || "Upload failed";
+    const messageKey = data?.messageKey;
+    const code = data?.code;
+    if (res.status === 401) {
+      handleUnauthorizedRedirect();
+    }
+    throw { status: res.status, message, messageKey, code } satisfies ApiError;
+  }
+
+  return data as UploadedImage;
 }
 
 // Customers

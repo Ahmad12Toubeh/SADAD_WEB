@@ -1,8 +1,7 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, User, Building2, Phone, Mail, MapPin, Save } from "lucide-react";
@@ -10,9 +9,10 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
-import { createCustomer } from "@/lib/api";
+import { ImageUploadField } from "@/components/ui/ImageUploadField";
+import { createCustomer, uploadImage } from "@/lib/api";
 
-export default function NewCustomerPage() {
+function NewCustomerPageContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,6 +25,24 @@ export default function NewCustomerPage() {
   const [address, setAddress] = useState("");
   const [cr, setCr] = useState("");
   const [notes, setNotes] = useState("");
+  const [proofImageUrl, setProofImageUrl] = useState<string | null>(null);
+  const [proofImagePublicId, setProofImagePublicId] = useState<string | null>(null);
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
+
+  const handleProofUpload = async (file: File) => {
+    setError(null);
+    setIsUploadingProof(true);
+    try {
+      const uploaded = await uploadImage(file, "sadad/customers");
+      setProofImageUrl(uploaded.url);
+      setProofImagePublicId(uploaded.publicId);
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to upload proof image");
+    } finally {
+      setIsUploadingProof(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +57,8 @@ export default function NewCustomerPage() {
         address: address || undefined,
         cr: cr || undefined,
         notes: notes || undefined,
+        proofImageUrl: proofImageUrl || undefined,
+        proofImagePublicId: proofImagePublicId || undefined,
       });
       const returnTo = searchParams.get("returnTo");
       if (returnTo === "debt" && created?.id) {
@@ -194,8 +214,21 @@ export default function NewCustomerPage() {
               />
             </div>
 
+            <ImageUploadField
+              inputId="customer-proof-image"
+              label="إثبات شخصي أو صورة الهوية (اختياري)"
+              hint="ارفع صورة الهوية أو أي إثبات مناسب بصيغة صورة."
+              previewUrl={proofImageUrl}
+              isUploading={isUploadingProof}
+              onFileSelect={handleProofUpload}
+              onRemove={() => {
+                setProofImageUrl(null);
+                setProofImagePublicId(null);
+              }}
+            />
+
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1 gap-2" disabled={isLoading}>
+              <Button type="submit" className="flex-1 gap-2" disabled={isLoading || isUploadingProof}>
                 <Save size={18} />
                 {isLoading ? t("customers.new.saving") : t("customers.new.save")}
               </Button>
@@ -207,5 +240,13 @@ export default function NewCustomerPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function NewCustomerPage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto space-y-6 pb-12" />}>
+      <NewCustomerPageContent />
+    </Suspense>
   );
 }

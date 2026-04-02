@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, UserCircle, Calculator, FileText, CheckCircle2, UserCheck } from "lucide-react";
@@ -8,10 +9,11 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
-import { createDebt, getCustomer, listCustomers } from "@/lib/api";
+import { ImageUploadField } from "@/components/ui/ImageUploadField";
+import { createDebt, getCustomer, listCustomers, uploadImage } from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function NewDebtWizard() {
+function NewDebtWizardContent() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,6 +41,9 @@ export default function NewDebtWizard() {
   const [guarantorName, setGuarantorName] = useState("");
   const [guarantorPhone, setGuarantorPhone] = useState("");
   const [guarantorNotes, setGuarantorNotes] = useState("");
+  const [guarantorProofImageUrl, setGuarantorProofImageUrl] = useState<string | null>(null);
+  const [guarantorProofImagePublicId, setGuarantorProofImagePublicId] = useState<string | null>(null);
+  const [isUploadingGuarantorProof, setIsUploadingGuarantorProof] = useState(false);
 
   const steps = [
     { id: 1, title: t("debts.new.steps.step1"), icon: UserCircle },
@@ -109,6 +114,21 @@ export default function NewDebtWizard() {
   };
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
+  const handleGuarantorProofUpload = async (file: File) => {
+    setError(null);
+    setIsUploadingGuarantorProof(true);
+    try {
+      const uploaded = await uploadImage(file, "sadad/guarantors");
+      setGuarantorProofImageUrl(uploaded.url);
+      setGuarantorProofImagePublicId(uploaded.publicId);
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to upload proof image");
+    } finally {
+      setIsUploadingGuarantorProof(false);
+    }
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
@@ -127,7 +147,15 @@ export default function NewDebtWizard() {
         notes: notes || undefined,
         installmentsPlan: planType === "installments" ? { count: installmentCount, period: installmentPeriod } : undefined,
         hasGuarantor,
-        guarantor: hasGuarantor ? { name: guarantorName, phone: guarantorPhone, notes: guarantorNotes || undefined } : undefined,
+        guarantor: hasGuarantor
+          ? {
+              name: guarantorName,
+              phone: guarantorPhone,
+              notes: guarantorNotes || undefined,
+              proofImageUrl: guarantorProofImageUrl || undefined,
+              proofImagePublicId: guarantorProofImagePublicId || undefined,
+            }
+          : undefined,
       });
       router.push(`/dashboard/debts/${res.debt.id}`);
     } catch (err: any) {
@@ -395,6 +423,19 @@ export default function NewDebtWizard() {
                             <Label className="dark:text-slate-300">{t("guarantor.notes")}</Label>
                             <Input value={guarantorNotes} onChange={(e) => setGuarantorNotes(e.target.value)} className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start" />
                           </div>
+
+                          <ImageUploadField
+                            inputId="guarantor-proof-image"
+                            label="إثبات شخصي أو صورة الهوية للضامن (اختياري)"
+                            hint="ارفع صورة واضحة لهوية الضامن أو أي إثبات شخصي."
+                            previewUrl={guarantorProofImageUrl}
+                            isUploading={isUploadingGuarantorProof}
+                            onFileSelect={handleGuarantorProofUpload}
+                            onRemove={() => {
+                              setGuarantorProofImageUrl(null);
+                              setGuarantorProofImagePublicId(null);
+                            }}
+                          />
                         </div>
                       </motion.div>
                     )}
@@ -416,9 +457,16 @@ export default function NewDebtWizard() {
                       <span className="font-semibold dark:text-white">{selectedCustomerName ?? customerId ?? "-"}</span>
                     </div>
                     {hasGuarantor && (
-                      <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 gap-4">
                         <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1"><UserCheck size={16}/> {t("guarantor.title")}</span>
-                        <span className="font-semibold text-primary">{t("guarantor.status.active")}</span>
+                        <div className="flex items-center gap-3">
+                          {guarantorProofImageUrl && (
+                            <Link href={guarantorProofImageUrl} target="_blank" className="text-sm font-semibold text-primary hover:underline">
+                              عرض الإثبات
+                            </Link>
+                          )}
+                          <span className="font-semibold text-primary">{t("guarantor.status.active")}</span>
+                        </div>
                       </div>
                     )}
                     <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
@@ -460,12 +508,20 @@ export default function NewDebtWizard() {
             {i18n.dir() === 'rtl' ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
           </Button>
         ) : (
-          <Button onClick={handleSubmit} className="gap-2 px-8 h-11 text-base font-semibold bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white shadow-md shadow-green-500/20" disabled={isSubmitting}>
+          <Button onClick={handleSubmit} className="gap-2 px-8 h-11 text-base font-semibold bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white shadow-md shadow-green-500/20" disabled={isSubmitting || isUploadingGuarantorProof}>
             {isSubmitting ? t("debts.new.nav.saving") : t("debts.new.nav.confirm")}
             <Check size={18} />
           </Button>
         )}
       </div>
     </div>
+  );
+}
+
+export default function NewDebtWizard() {
+  return (
+    <Suspense fallback={<div className="max-w-4xl mx-auto space-y-8 pb-12" />}>
+      <NewDebtWizardContent />
+    </Suspense>
   );
 }

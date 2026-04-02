@@ -122,6 +122,11 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                <span className="flex items-center gap-1"><Phone size={14} /> <span dir="ltr">{customer?.phone ?? "-"}</span></span>
                {customer?.email && <span className="flex items-center gap-1"><Mail size={14} /> {customer.email}</span>}
                {customer?.address && <span className="flex items-center gap-1"><MapPin size={14} /> {customer.address}</span>}
+               {customer?.proofImageUrl && (
+                 <Link href={customer.proofImageUrl} target="_blank" className="flex items-center gap-1 text-primary hover:underline">
+                   <Eye size={14} /> عرض الإثبات
+                 </Link>
+               )}
             </p>
           </div>
         </div>
