@@ -6,11 +6,15 @@ import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/contexts/Providers";
-import { Bell, Search, Moon, Sun, Globe, LogOut } from "lucide-react";
+import { Bell, Search, Moon, Sun, Globe, LogOut, Menu } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { getSettingsProfile, getSettingsStore, logout } from "@/lib/api";
 
-export function Header() {
+type HeaderProps = {
+  onMenuClick?: () => void;
+};
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
 
@@ -85,27 +89,37 @@ export function Header() {
   const userInitial = (userFullName || storeName || "S").trim().charAt(0).toUpperCase();
 
   return (
-    <header className="h-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-8 justify-between transition-colors">
-      {/* Search */}
-      <div className="w-96 relative">
-        <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={handleSearch}
-          placeholder={t("header.searchPlaceholder")}
-          className="pe-10 bg-slate-50 border-transparent focus-visible:bg-white dark:bg-slate-800 dark:focus-visible:bg-slate-700"
-        />
-      </div>
+    <header className="border-b border-slate-200 bg-white px-4 py-3 transition-colors dark:border-slate-800 dark:bg-slate-900 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 lg:hidden"
+            aria-label="Open sidebar"
+          >
+            <Menu size={20} />
+          </button>
 
-      {/* Actions */}
-      <div className="flex items-center gap-4 md:gap-5">
+          <div className="relative min-w-0 flex-1 lg:w-96 lg:flex-none">
+            <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={handleSearch}
+              placeholder={t("header.searchPlaceholder")}
+              className="pe-10 bg-slate-50 border-transparent focus-visible:bg-white dark:bg-slate-800 dark:focus-visible:bg-slate-700"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-4 md:gap-5">
         {/* Modern Toggles */}
-        <div className="flex items-center gap-2 mr-2 rtl:ml-2 rtl:mr-0">
+        <div className="flex items-center gap-2 rtl:ml-2 rtl:mr-0">
           <button
             onClick={toggleTheme}
             title={theme === "light" ? t("sidebar.darkMode") : t("sidebar.lightMode")}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all shadow-sm border border-slate-200 dark:border-slate-700"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-600 shadow-sm transition-all hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} className="text-yellow-400" />}
           </button>
@@ -127,9 +141,9 @@ export function Header() {
         </button>
 
         {/* Profile & Logout */}
-        <div className="flex items-center gap-4 ps-4 border-s border-slate-200 dark:border-slate-700">
-          <Link href="/dashboard/settings" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="text-end hidden sm:block">
+        <div className="flex min-w-0 items-center gap-3 border-s border-slate-200 ps-3 dark:border-slate-700 sm:gap-4 sm:ps-4">
+          <Link href="/dashboard/settings" className="flex min-w-0 items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="min-w-0 text-end hidden sm:block">
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{storeName || t("header.storeName")}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{userRole ? formatRole(userRole) : t("header.role")}</p>
             </div>
@@ -145,11 +159,12 @@ export function Header() {
           <button
             onClick={handleLogout}
             title={t("sidebar.logout")}
-            className="p-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors ms-2"
+            className="ms-1 rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 sm:ms-2"
           >
             <LogOut size={20} />
           </button>
         </div>
+      </div>
       </div>
     </header>
   );
