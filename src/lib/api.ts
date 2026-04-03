@@ -462,7 +462,7 @@ export async function getSettingsProfile() {
   return apiFetch<any>(`/settings/profile`);
 }
 
-export async function patchSettingsProfile(input: { fullName?: string; phone?: string }) {
+export async function patchSettingsProfile(input: { fullName?: string; phone?: string; avatarUrl?: string; avatarPublicId?: string }) {
   return apiFetch<any>(`/settings/profile`, { method: "PATCH", body: JSON.stringify(input) });
 }
 

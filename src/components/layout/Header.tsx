@@ -1,11 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/contexts/Providers";
-import { Bell, Search, UserCircle, Moon, Sun, Globe, LogOut } from "lucide-react";
+import { Bell, Search, Moon, Sun, Globe, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { getSettingsProfile, getSettingsStore, logout } from "@/lib/api";
 
@@ -16,24 +17,40 @@ export function Header() {
   const [search, setSearch] = useState("");
   const [storeName, setStoreName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
+  const [userFullName, setUserFullName] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+
+    const loadHeaderProfile = async () => {
       try {
         const [profile, store] = await Promise.all([getSettingsProfile(), getSettingsStore()]);
         if (cancelled) return;
         setStoreName((store?.storeName ?? "").trim());
         setUserRole((profile?.role ?? "").trim());
+        setUserFullName((profile?.fullName ?? "").trim());
+        setAvatarUrl((profile?.avatarUrl ?? "").trim());
       } catch {
         if (cancelled) return;
         setStoreName("");
         setUserRole("");
+        setUserFullName("");
+        setAvatarUrl("");
       }
-    })();
+    };
+
+    loadHeaderProfile();
+
+    const handleProfileRefresh = () => {
+      void loadHeaderProfile();
+    };
+
+    window.addEventListener("sadad-profile-updated", handleProfileRefresh);
     return () => {
       cancelled = true;
+      window.removeEventListener("sadad-profile-updated", handleProfileRefresh);
     };
   }, []);
 
@@ -64,6 +81,8 @@ export function Header() {
     if (normalized === "owner" || normalized === "admin") return t("header.role");
     return role;
   };
+
+  const userInitial = (userFullName || storeName || "S").trim().charAt(0).toUpperCase();
 
   return (
     <header className="h-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-8 justify-between transition-colors">
@@ -114,7 +133,13 @@ export function Header() {
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{storeName || t("header.storeName")}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{userRole ? formatRole(userRole) : t("header.role")}</p>
             </div>
-            <UserCircle size={38} className="text-slate-300 dark:text-slate-600" strokeWidth={1.5} />
+            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-primary/10 dark:bg-primary/20 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-primary font-bold">
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt={userFullName || "Avatar"} fill className="object-cover" unoptimized />
+              ) : (
+                <span>{userInitial}</span>
+              )}
+            </div>
           </Link>
 
           <button

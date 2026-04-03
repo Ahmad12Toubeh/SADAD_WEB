@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Save, User, Store, Bell, Shield, Smartphone, ChevronLeft, ChevronRight } from "lucide-react";
+import { Save, User, Store, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ImageUploadField } from "@/components/ui/ImageUploadField";
 import {
   changePassword,
   getSettingsNotifications,
@@ -15,6 +17,7 @@ import {
   patchSettingsNotifications,
   patchSettingsProfile,
   patchSettingsStore,
+  uploadImage,
 } from "@/lib/api";
 
 export default function SettingsPage() {
@@ -23,8 +26,15 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
-  const [profile, setProfile] = useState<any>({ fullName: "", phone: "", email: "" });
+  const [profile, setProfile] = useState<any>({
+    fullName: "",
+    phone: "",
+    email: "",
+    avatarUrl: "",
+    avatarPublicId: "",
+  });
   const [store, setStore] = useState<any>({ storeName: "", businessType: "", address: "", cr: "", currency: "JOD" });
   const [notifications, setNotifications] = useState<any>({
     remindOnDelay: true,
@@ -68,15 +78,30 @@ export default function SettingsPage() {
     };
   }, [t]);
 
-  const handleSave = () => {
-    // will be handled per-tab
-  };
-
   const tabs = [
     { id: "profile", label: t("settings.tabs.profile"), icon: User },
     { id: "store", label: t("settings.tabs.store"), icon: Store },
     { id: "security", label: t("settings.tabs.security"), icon: Shield },
   ];
+
+  const handleAvatarUpload = async (file: File) => {
+    setError(null);
+    setIsUploadingAvatar(true);
+    try {
+      const uploaded = await uploadImage(file, "sadad/avatars");
+      setProfile((current: any) => ({
+        ...current,
+        avatarUrl: uploaded.url,
+        avatarPublicId: uploaded.publicId,
+      }));
+      window.dispatchEvent(new Event("sadad-profile-updated"));
+    } catch (err: any) {
+      const key = err?.messageKey as string | undefined;
+      setError(key ? t(key) : err?.message ?? "Failed to upload avatar");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -86,7 +111,6 @@ export default function SettingsPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar Tabs */}
         <div className="md:w-56 shrink-0">
           <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none dark:bg-slate-800 rounded-2xl p-2">
             <nav className="space-y-1">
@@ -102,16 +126,18 @@ export default function SettingsPage() {
                 >
                   <tab.icon size={18} />
                   {tab.label}
-                  {activeTab !== tab.id && (
-                    i18n.dir() === "rtl" ? <ChevronLeft size={14} className="mr-auto text-slate-400 dark:text-slate-500" /> : <ChevronRight size={14} className="ml-auto text-slate-400 dark:text-slate-500" />
-                  )}
+                  {activeTab !== tab.id &&
+                    (i18n.dir() === "rtl" ? (
+                      <ChevronLeft size={14} className="mr-auto text-slate-400 dark:text-slate-500" />
+                    ) : (
+                      <ChevronRight size={14} className="ml-auto text-slate-400 dark:text-slate-500" />
+                    ))}
                 </button>
               ))}
             </nav>
           </Card>
         </div>
 
-        {/* Content Area */}
         <div className="flex-1">
           <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none dark:bg-slate-800 rounded-2xl">
             <CardContent className="p-8 space-y-6">
@@ -128,20 +154,48 @@ export default function SettingsPage() {
                       <User size={20} className="text-primary" /> {t("settings.profile.title")}
                     </CardTitle>
                   </CardHeader>
+
                   <div className="flex items-center gap-5 mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
-                    <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center text-primary font-black text-2xl">م</div>
+                    <div className="relative w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center text-primary font-black text-2xl overflow-hidden">
+                      {profile?.avatarUrl ? (
+                        <Image src={profile.avatarUrl} alt={profile?.fullName ?? "Avatar"} fill className="object-cover" unoptimized />
+                      ) : (
+                        <span>{(profile?.fullName ?? "م").trim().charAt(0) || "م"}</span>
+                      )}
+                    </div>
                     <div className="text-start">
                       <p className="font-bold text-slate-900 dark:text-white">{profile?.fullName ?? t("settings.profile.name")}</p>
                       <p className="text-sm text-slate-500 dark:text-slate-400">{t("settings.profile.role")}</p>
-                      <button className="text-xs text-primary font-medium mt-1 hover:underline">{t("settings.profile.changePic")}</button>
+                      <label htmlFor="profile-avatar-upload" className="text-xs text-primary font-medium mt-1 hover:underline cursor-pointer inline-block">
+                        {isUploadingAvatar ? t("common.loading") : t("settings.profile.changePic")}
+                      </label>
                     </div>
                   </div>
+
+                  <ImageUploadField
+                    inputId="profile-avatar-upload"
+                    label="الصورة الشخصية"
+                    hint="ارفع صورة شخصية واضحة ليتم عرضها في الحساب."
+                    previewUrl={profile?.avatarUrl ?? null}
+                    isUploading={isUploadingAvatar}
+                    onFileSelect={handleAvatarUpload}
+                    onRemove={() => {
+                      setProfile((current: any) => ({ ...current, avatarUrl: null, avatarPublicId: null }));
+                      window.dispatchEvent(new Event("sadad-profile-updated"));
+                    }}
+                  />
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="dark:text-slate-300">{t("settings.profile.firstName")}</Label>
                       <Input
                         value={(profile?.fullName ?? "").split(" ")[0] ?? ""}
-                        onChange={(e) => setProfile((p: any) => ({ ...p, fullName: `${e.target.value} ${(p?.fullName ?? "").split(" ").slice(1).join(" ")}`.trim() }))}
+                        onChange={(e) =>
+                          setProfile((p: any) => ({
+                            ...p,
+                            fullName: `${e.target.value} ${(p?.fullName ?? "").split(" ").slice(1).join(" ")}`.trim(),
+                          }))
+                        }
                         className="dark:bg-slate-900 dark:border-slate-700 text-start"
                       />
                     </div>
@@ -149,7 +203,12 @@ export default function SettingsPage() {
                       <Label className="dark:text-slate-300">{t("settings.profile.lastName")}</Label>
                       <Input
                         value={(profile?.fullName ?? "").split(" ").slice(1).join(" ")}
-                        onChange={(e) => setProfile((p: any) => ({ ...p, fullName: `${(p?.fullName ?? "").split(" ")[0] ?? ""} ${e.target.value}`.trim() }))}
+                        onChange={(e) =>
+                          setProfile((p: any) => ({
+                            ...p,
+                            fullName: `${(p?.fullName ?? "").split(" ")[0] ?? ""} ${e.target.value}`.trim(),
+                          }))
+                        }
                         className="dark:bg-slate-900 dark:border-slate-700 text-start"
                       />
                     </div>
@@ -258,13 +317,20 @@ export default function SettingsPage() {
                 </>
               )}
 
-              {/* Save Button */}
               <div className="flex justify-start pt-4 border-t border-slate-100 dark:border-slate-700/50">
                 <Button
                   onClick={async () => {
                     setError(null);
                     try {
-                      if (activeTab === "profile") await patchSettingsProfile({ fullName: profile.fullName, phone: profile.phone });
+                      if (activeTab === "profile") {
+                        await patchSettingsProfile({
+                          fullName: profile.fullName,
+                          phone: profile.phone,
+                          avatarUrl: profile.avatarUrl ?? undefined,
+                          avatarPublicId: profile.avatarPublicId ?? undefined,
+                        });
+                        window.dispatchEvent(new Event("sadad-profile-updated"));
+                      }
                       if (activeTab === "store") await patchSettingsStore(store);
                       if (activeTab === "notifications") await patchSettingsNotifications(notifications);
                       if (activeTab === "security") {
@@ -282,7 +348,7 @@ export default function SettingsPage() {
                     }
                   }}
                   className="gap-2 px-8"
-                  disabled={saved || isLoading}
+                  disabled={saved || isLoading || isUploadingAvatar}
                 >
                   <Save size={18} />
                   {saved ? t("settings.savedBtn") : t("settings.saveBtn")}
