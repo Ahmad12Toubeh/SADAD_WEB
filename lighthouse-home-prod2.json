@@ -460,7 +460,7 @@
           },
           {
             "url": "http://localhost:3000/_next/static/chunks/0v9eaqfk83~1-.js",
-            "total": 1836.207999999991,
+            "total": 1836.20799999991,
             "scripting": 1543.6999999999912,
             "scriptParseCompile": 53.87200000000001
           },
@@ -659,7 +659,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3000/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 176.3759999871254,
@@ -1101,7 +1101,7 @@
             "url": "http://localhost:3000/_next/static/chunks/0ek0i8ek7vfy0.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
-            "rendererStartTime": 182.0799999833107,
+            "rendererStartTime": 182.079999833107,
             "networkRequestTime": 820.1509999930859,
             "networkEndTime": 1065.9619999825954,
             "finished": true,
@@ -3285,7 +3285,7 @@
             "name": "http://localhost:3000/_next/static/chunks/turbopack-0h71itpbimn4b.js",
             "resourceBytes": 10541,
             "encodedBytes": 4173,
-            "unusedBytes": 4079
+            "unusedBytes": 407
           },
           {
             "name": "http://localhost:3000/_next/static/chunks/125rf.n7osr.n.js",
@@ -6568,7 +6568,7 @@
         "entryType": "measure"
       },
       {
-        "startTime": 23079.97,
+        "startTime": 2307.97,
         "name": "lh:computed:TraceEngineResult:insights:FontDisplay",
         "duration": 0.71,
         "entryType": "measure"

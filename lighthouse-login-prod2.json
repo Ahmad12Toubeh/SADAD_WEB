@@ -660,12 +660,12 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3000/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 908.5909999608994,
             "networkRequestTime": 915.5479999780655,
-            "networkEndTime": 1102.324999988079,
+            "networkEndTime": 1102.32499998807,
             "finished": true,
             "transferSize": 10528,
             "resourceSize": 10228,
@@ -2932,7 +2932,7 @@
             "name": "http://localhost:3000/_next/static/chunks/0e3i9r43ejkm3.js",
             "resourceBytes": 11152,
             "encodedBytes": 3694,
-            "unusedBytes": 10797
+            "unusedBytes": 1077
           },
           {
             "name": "http://localhost:3000/_next/static/chunks/0ek0i8ek7vfy0.js",
@@ -3045,7 +3045,7 @@
             "totalBytes": 10812
           },
           {
-            "url": "http://localhost:3000/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3000/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "totalBytes": 10528
           }
         ],

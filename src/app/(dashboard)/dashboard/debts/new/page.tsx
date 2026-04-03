@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { ImageUploadField } from "@/components/ui/ImageUploadField";
 import { createDebt, getCustomer, listCustomers, uploadImage } from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
+import { isValidJordan07Phone, JORDAN_07_PHONE_HINT, sanitizeJordan07PhoneInput } from "@/lib/phone";
 
 function NewDebtWizardContent() {
   const { t, i18n } = useTranslation();
@@ -44,6 +45,10 @@ function NewDebtWizardContent() {
   const [guarantorProofImageUrl, setGuarantorProofImageUrl] = useState<string | null>(null);
   const [guarantorProofImagePublicId, setGuarantorProofImagePublicId] = useState<string | null>(null);
   const [isUploadingGuarantorProof, setIsUploadingGuarantorProof] = useState(false);
+
+  const handleGuarantorPhoneChange = (value: string) => {
+    setGuarantorPhone(sanitizeJordan07PhoneInput(value));
+  };
 
   const steps = [
     { id: 1, title: t("debts.new.steps.step1"), icon: UserCircle },
@@ -110,6 +115,10 @@ function NewDebtWizardContent() {
         return;
       }
     }
+    if (currentStep === 4 && hasGuarantor && !isValidJordan07Phone(guarantorPhone)) {
+      setError(JORDAN_07_PHONE_HINT);
+      return;
+    }
     setCurrentStep((prev) => Math.min(prev + 1, steps.length));
   };
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -149,12 +158,12 @@ function NewDebtWizardContent() {
         hasGuarantor,
         guarantor: hasGuarantor
           ? {
-              name: guarantorName,
-              phone: guarantorPhone,
-              notes: guarantorNotes || undefined,
-              proofImageUrl: guarantorProofImageUrl || undefined,
-              proofImagePublicId: guarantorProofImagePublicId || undefined,
-            }
+            name: guarantorName,
+            phone: guarantorPhone,
+            notes: guarantorNotes || undefined,
+            proofImageUrl: guarantorProofImageUrl || undefined,
+            proofImagePublicId: guarantorProofImagePublicId || undefined,
+          }
           : undefined,
       });
       router.push(`/dashboard/debts/${res.debt.id}`);
@@ -176,23 +185,22 @@ function NewDebtWizardContent() {
       {/* Stepper Progress */}
       <div className="relative">
         <div className="absolute top-5 w-full h-0.5 bg-slate-200 dark:bg-slate-700 -z-10"></div>
-        <div 
+        <div
           className="absolute top-5 h-0.5 bg-primary -z-10 transition-all duration-500"
           style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`, [i18n.dir() === 'rtl' ? 'right' : 'left']: 0 }}
         ></div>
-        
+
         <div className="flex justify-between">
           {steps.map((step) => {
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
-            
+
             return (
               <div key={step.id} className="flex flex-col items-center">
-                <div 
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
-                    isActive ? "bg-primary text-white ring-4 ring-primary/20" :
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${isActive ? "bg-primary text-white ring-4 ring-primary/20" :
                     isCompleted ? "bg-primary text-white" : "bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-400"
-                  }`}
+                    }`}
                 >
                   {isCompleted ? <Check size={20} /> : <step.icon size={20} />}
                 </div>
@@ -250,9 +258,8 @@ function NewDebtWizardContent() {
                             setCustomerId(c.id);
                             setSelectedCustomerName(c.name);
                           }}
-                          className={`w-full text-start px-4 py-3 rounded-lg border ${
-                            customerId === c.id ? "border-primary bg-primary/5" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
-                          }`}
+                          className={`w-full text-start px-4 py-3 rounded-lg border ${customerId === c.id ? "border-primary bg-primary/5" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                            }`}
                         >
                           <div className="font-semibold text-slate-900 dark:text-white">{c.name}</div>
                           <div className="text-xs text-slate-500" dir="ltr">{c.phone}</div>
@@ -348,28 +355,28 @@ function NewDebtWizardContent() {
                       </div>
                     </label>
                   </div>
-                  
+
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-lg mt-4 grid grid-cols-2 gap-4 border border-slate-100 dark:border-slate-700 shadow-sm">
                     <div className="space-y-2">
-                       <Label className="dark:text-slate-300">{t("debts.new.s3.count")}</Label>
-                       <Input
-                         type="number"
-                         min={2}
-                         max={24}
-                         step={1}
-                         inputMode="numeric"
-                         value={installmentCount}
-                         onChange={(e) => {
-                           const v = Number(e.target.value);
-                           if (!Number.isFinite(v)) return;
-                           setInstallmentCount(Math.min(24, Math.max(2, Math.floor(v))));
-                         }}
-                         className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
-                       />
+                      <Label className="dark:text-slate-300">{t("debts.new.s3.count")}</Label>
+                      <Input
+                        type="number"
+                        min={2}
+                        max={24}
+                        step={1}
+                        inputMode="numeric"
+                        value={installmentCount}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          if (!Number.isFinite(v)) return;
+                          setInstallmentCount(Math.min(24, Math.max(2, Math.floor(v))));
+                        }}
+                        className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
+                      />
                     </div>
                     <div className="space-y-2">
-                       <Label className="dark:text-slate-300">{t("debts.new.s3.period")}</Label>
-                       <select value={installmentPeriod} onChange={(e) => setInstallmentPeriod(e.target.value as any)} className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-sm text-start">
+                      <Label className="dark:text-slate-300">{t("debts.new.s3.period")}</Label>
+                      <select value={installmentPeriod} onChange={(e) => setInstallmentPeriod(e.target.value as any)} className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-sm text-start">
                         <option value="monthly">{t("debts.new.s3.periods.monthly")}</option>
                         <option value="weekly">{t("debts.new.s3.periods.weekly")}</option>
                       </select>
@@ -417,7 +424,7 @@ function NewDebtWizardContent() {
                           </div>
                           <div className="space-y-2">
                             <Label className="dark:text-slate-300">{t("guarantor.phone")}</Label>
-                            <Input value={guarantorPhone} onChange={(e) => setGuarantorPhone(e.target.value)} type="tel" placeholder="05X XXX XXXX" dir="ltr" className="h-11 text-start dark:bg-slate-950 dark:border-slate-800" />
+                            <Input value={guarantorPhone} onChange={(e) => handleGuarantorPhoneChange(e.target.value)} type="tel" placeholder="07XXXXXXXX" dir="ltr" maxLength={10} className="h-11 text-start dark:bg-slate-950 dark:border-slate-800" />
                           </div>
                           <div className="space-y-2">
                             <Label className="dark:text-slate-300">{t("guarantor.notes")}</Label>
@@ -450,7 +457,7 @@ function NewDebtWizardContent() {
                   </div>
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{t("debts.new.stepTitles.s4")}</h2>
                   <p className="text-slate-500 dark:text-slate-400">{t("debts.new.s4.desc")}</p>
-                  
+
                   <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-xl text-start mt-6 flex flex-col gap-4 shadow-sm">
                     <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
                       <span className="text-slate-500 dark:text-slate-400">{t("debts.new.s4.customer")}</span>
@@ -458,7 +465,7 @@ function NewDebtWizardContent() {
                     </div>
                     {hasGuarantor && (
                       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 gap-4">
-                        <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1"><UserCheck size={16}/> {t("guarantor.title")}</span>
+                        <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1"><UserCheck size={16} /> {t("guarantor.title")}</span>
                         <div className="flex items-center gap-3">
                           {guarantorProofImageUrl && (
                             <Link href={guarantorProofImageUrl} target="_blank" className="text-sm font-semibold text-primary hover:underline">
@@ -476,8 +483,8 @@ function NewDebtWizardContent() {
                     <div className="flex justify-between">
                       <span className="text-slate-500 dark:text-slate-400">{t("debts.new.s4.plan")}</span>
                       <span className="font-semibold text-primary text-lg">
-                        {planType === "installments" 
-                          ? `${installmentCount} ${t(`debts.new.s3.periods.${installmentPeriod}`)}` 
+                        {planType === "installments"
+                          ? `${installmentCount} ${t(`debts.new.s3.periods.${installmentPeriod}`)}`
                           : t("debts.new.s3.oneTime")
                         }
                       </span>
@@ -492,9 +499,9 @@ function NewDebtWizardContent() {
 
       {/* Navigation Buttons */}
       <div className="flex justify-between items-center pt-2">
-        <Button 
-          variant="ghost" 
-          onClick={prevStep} 
+        <Button
+          variant="ghost"
+          onClick={prevStep}
           disabled={currentStep === 1 || isSubmitting}
           className="gap-2 dark:hover:bg-slate-800 dark:text-slate-300 h-11 px-6 font-semibold"
         >

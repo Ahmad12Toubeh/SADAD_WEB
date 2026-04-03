@@ -74,7 +74,7 @@
       "description": "Speed Index shows how quickly the contents of a page are visibly populated. [Learn more about the Speed Index metric](https://developer.chrome.com/docs/lighthouse/performance/speed-index/).",
       "score": 0.37,
       "scoreDisplayMode": "numeric",
-      "numericValue": 6601.626439007902,
+      "numericValue": 6601.62643900702,
       "numericUnit": "millisecond",
       "displayValue": "6.6 s",
       "scoringOptions": {
@@ -654,7 +654,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3001/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3001/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 473.4810000061989,
@@ -2900,7 +2900,7 @@
             "totalBytes": 10812
           },
           {
-            "url": "http://localhost:3001/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3001/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "totalBytes": 10528
           }
         ],
@@ -6253,7 +6253,7 @@
         "entryType": "measure"
       },
       {
-        "startTime": 29079.67,
+        "startTime": 2907.67,
         "name": "lh:audit:network-requests",
         "duration": 8.73,
         "entryType": "measure"
@@ -6902,7 +6902,7 @@
         },
         {
           "values": {
-            "timeInMs": 6601.626439007902
+            "timeInMs": 6601.62643900702
           },
           "path": "audits[speed-index].displayValue"
         },

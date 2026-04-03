@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
 import { ImageUploadField } from "@/components/ui/ImageUploadField";
 import { createCustomer, uploadImage } from "@/lib/api";
+import { isValidJordan07Phone, JORDAN_07_PHONE_HINT, sanitizeJordan07PhoneInput } from "@/lib/phone";
 
 function NewCustomerPageContent() {
   const { t } = useTranslation();
@@ -28,6 +29,10 @@ function NewCustomerPageContent() {
   const [proofImageUrl, setProofImageUrl] = useState<string | null>(null);
   const [proofImagePublicId, setProofImagePublicId] = useState<string | null>(null);
   const [isUploadingProof, setIsUploadingProof] = useState(false);
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(sanitizeJordan07PhoneInput(value));
+  };
 
   const handleProofUpload = async (file: File) => {
     setError(null);
@@ -47,6 +52,10 @@ function NewCustomerPageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!isValidJordan07Phone(phone)) {
+      setError(JORDAN_07_PHONE_HINT);
+      return;
+    }
     setIsLoading(true);
     try {
       const created = await createCustomer({
@@ -93,11 +102,10 @@ function NewCustomerPageContent() {
         <button
           type="button"
           onClick={() => setCustomerType("individual")}
-          className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 font-semibold transition-all ${
-            customerType === "individual"
-              ? "border-primary bg-primary/5 text-primary dark:bg-primary/20"
-              : "border-slate-200 text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200"
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 font-semibold transition-all ${customerType === "individual"
+            ? "border-primary bg-primary/5 text-primary dark:bg-primary/20"
+            : "border-slate-200 text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200"
+            }`}
         >
           <User size={20} />
           {t("customers.new.typeIndividual")}
@@ -105,11 +113,10 @@ function NewCustomerPageContent() {
         <button
           type="button"
           onClick={() => setCustomerType("company")}
-          className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 font-semibold transition-all ${
-            customerType === "company"
-              ? "border-primary bg-primary/5 text-primary dark:bg-primary/20"
-              : "border-slate-200 text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200"
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 font-semibold transition-all ${customerType === "company"
+            ? "border-primary bg-primary/5 text-primary dark:bg-primary/20"
+            : "border-slate-200 text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200"
+            }`}
         >
           <Building2 size={20} />
           {t("customers.new.typeCompany")}
@@ -150,9 +157,10 @@ function NewCustomerPageContent() {
                     id="phone"
                     required
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="05xxxxxxxx"
+                    onChange={(e) => handlePhoneChange(e.target.value)}
+                    placeholder="07XXXXXXXX"
                     dir="ltr"
+                    maxLength={10}
                     className="pe-10 dark:bg-slate-900 dark:border-slate-700 text-start"
                   />
                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Calendar, DollarSign, Plus, Trophy, X } from "lucide-react";
+import { Users, Calendar, DollarSign, Plus, Trophy, X, Trash2, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -20,10 +20,13 @@ export default function AssociationsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: "",
-    members: "10",
     monthlyAmount: "500",
     associationKind: "rotating" as "rotating" | "family",
   });
+  const [draftMembers, setDraftMembers] = useState([
+    { id: "member-1", name: "", phone: "", isReceiver: true },
+    { id: "member-2", name: "", phone: "", isReceiver: false },
+  ]);
 
   const reload = async () => {
     try {
@@ -59,22 +62,40 @@ export default function AssociationsPage() {
     setError(null);
     setIsSaving(true);
     try {
-      const membersNum = Number(createForm.members);
       const monthlyNum = Number(createForm.monthlyAmount);
-      if (!createForm.name.trim() || !Number.isFinite(membersNum) || membersNum < 2 || !Number.isFinite(monthlyNum) || monthlyNum < 1) {
+      const normalizedMembers = draftMembers
+        .map((member, index) => ({
+          id: member.id,
+          name: member.name.trim(),
+          phone: member.phone.trim() || undefined,
+          isReceiver: createForm.associationKind === "family" ? false : member.isReceiver,
+          turnOrder: index + 1,
+        }))
+        .filter((member) => member.name);
+
+      if (!createForm.name.trim() || !Number.isFinite(monthlyNum) || monthlyNum < 1) {
         setError(t("errors.validation.invalid"));
+        setIsSaving(false);
+        return;
+      }
+      if (normalizedMembers.length < 2) {
+        setError("لازم تضيف عضوين على الأقل قبل إنشاء الجمعية.");
         setIsSaving(false);
         return;
       }
       await createAssociation({
         name: createForm.name.trim(),
-        members: membersNum,
         monthlyAmount: monthlyNum,
         associationKind: createForm.associationKind,
+        membersList: normalizedMembers,
       });
       await reload();
       setIsCreateOpen(false);
-      setCreateForm({ name: "", members: "10", monthlyAmount: "500", associationKind: "rotating" });
+      setCreateForm({ name: "", monthlyAmount: "500", associationKind: "rotating" });
+      setDraftMembers([
+        { id: "member-1", name: "", phone: "", isReceiver: true },
+        { id: "member-2", name: "", phone: "", isReceiver: false },
+      ]);
     } catch (err: any) {
       const key = err?.messageKey as string | undefined;
       setError(key ? t(key) : err?.message ?? "Failed to create association");
@@ -112,20 +133,6 @@ export default function AssociationsPage() {
                  <Input required placeholder={t("associations.form.name")} value={createForm.name} onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))} className="bg-white dark:bg-slate-800" />
               </div>
               <div className="space-y-2">
-                 <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.members")}</label>
-                 <Input
-                   required
-                   type="number"
-                   min={2}
-                   step={1}
-                   inputMode="numeric"
-                   placeholder="10"
-                   value={createForm.members}
-                   onChange={(e) => setCreateForm((f) => ({ ...f, members: e.target.value }))}
-                   className="bg-white dark:bg-slate-800"
-                 />
-              </div>
-              <div className="space-y-2">
                  <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.amount")}</label>
                  <Input
                    required
@@ -143,13 +150,112 @@ export default function AssociationsPage() {
                  <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.kind")}</label>
                  <select
                    value={createForm.associationKind}
-                   onChange={(e) => setCreateForm((f) => ({ ...f, associationKind: e.target.value as any }))}
+                   onChange={(e) => {
+                     const nextKind = e.target.value as "rotating" | "family";
+                     setCreateForm((f) => ({ ...f, associationKind: nextKind }));
+                     setDraftMembers((current) =>
+                       current.map((member, index) => ({
+                         ...member,
+                         isReceiver: nextKind === "family" ? false : index === 0,
+                       })),
+                     );
+                   }}
                    className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3 text-sm"
                  >
                    <option value="rotating">{t("associations.form.kindRotating")}</option>
                    <option value="family">{t("associations.form.kindFamily")}</option>
                  </select>
               </div>
+              <div className="space-y-3 md:col-span-2">
+                <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/70 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-200">الأعضاء</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      أضف أعضاء الجمعية قبل الحفظ. سيتم اعتماد أول مستلم تلقائيًا في الجمعية الدوارة.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+                      {draftMembers.filter((member) => member.name.trim()).length} عضو
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                      onClick={() =>
+                        setDraftMembers((current) => [
+                          ...current,
+                          { id: `member-${Date.now()}-${current.length + 1}`, name: "", phone: "", isReceiver: false },
+                        ])
+                      }
+                    >
+                      <Plus size={16} /> إضافة عضو
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {draftMembers.map((member, index) => (
+                    <div key={member.id} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+                      <div className="grid gap-3 md:grid-cols-12 md:items-center">
+                        <div className="text-xs font-bold text-slate-400 md:col-span-1">{index + 1}</div>
+                        <Input
+                          value={member.name}
+                          onChange={(e) =>
+                            setDraftMembers((current) =>
+                              current.map((item) => (item.id === member.id ? { ...item, name: e.target.value } : item)),
+                            )
+                          }
+                          placeholder="اسم العضو"
+                          className="md:col-span-4 dark:bg-slate-900"
+                        />
+                        <Input
+                          value={member.phone}
+                          onChange={(e) =>
+                            setDraftMembers((current) =>
+                              current.map((item) => (item.id === member.id ? { ...item, phone: e.target.value } : item)),
+                            )
+                          }
+                          placeholder="رقم الجوال (اختياري)"
+                          dir="ltr"
+                          className="md:col-span-4 dark:bg-slate-900"
+                        />
+                        <div className="flex flex-wrap gap-2 md:col-span-3 md:justify-end">
+                          {createForm.associationKind === "rotating" && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className={member.isReceiver ? "border-primary bg-primary/10 text-primary" : ""}
+                              onClick={() =>
+                                setDraftMembers((current) =>
+                                  current.map((item) => ({ ...item, isReceiver: item.id === member.id })),
+                                )
+                              }
+                            >
+                              <UserCheck size={16} />
+                              {member.isReceiver ? "المستلم الحالي" : "تحديد كمستلم"}
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="text-red-500"
+                            onClick={() =>
+                              setDraftMembers((current) =>
+                                current.length <= 2 ? current : current.filter((item) => item.id !== member.id),
+                              )
+                            }
+                            disabled={draftMembers.length <= 2}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="md:col-span-2 pt-2">
                 <Button disabled={isSaving} type="submit" className="w-full sm:w-auto px-10 h-11 text-base">
                   {isSaving ? t("common.loading") : t("associations.page.saveBtn")}

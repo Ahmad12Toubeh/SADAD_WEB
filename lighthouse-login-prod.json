@@ -449,7 +449,7 @@
         "items": [
           {
             "url": "http://localhost:3000/_next/static/chunks/0c-yqe.mgl_pf.js",
-            "total": 1334.2079999999926,
+            "total": 1334.207999999926,
             "scripting": 1097.0399999999927,
             "scriptParseCompile": 68.232
           },
@@ -462,7 +462,7 @@
           {
             "url": "Unattributable",
             "total": 433.5680000000008,
-            "scripting": 39.10799999999999,
+            "scripting": 39.1079999999999,
             "scriptParseCompile": 0
           },
           {
@@ -641,7 +641,7 @@
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 0,
-            "networkRequestTime": 2.574999988079071,
+            "networkRequestTime": 2.57499998807071,
             "networkEndTime": 333.9439999759197,
             "finished": true,
             "transferSize": 5994,
@@ -654,7 +654,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3000/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 336.0780000090599,
@@ -855,7 +855,7 @@
             "url": "http://localhost:3000/_next/static/media/f0e0669539caf32a-s.p.0rb5r2~08jpgn.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
-            "rendererStartTime": 339.7079999744892,
+            "rendererStartTime": 339.707999744892,
             "networkRequestTime": 354.52999997138977,
             "networkEndTime": 690.5199999809265,
             "finished": true,
@@ -1182,7 +1182,7 @@
             "protocol": "http/1.1",
             "rendererStartTime": 1512.9340000152588,
             "networkRequestTime": 1513.9509999752045,
-            "networkEndTime": 1660.6079999804497,
+            "networkEndTime": 1660.607999804497,
             "finished": true,
             "transferSize": 1162,
             "resourceSize": 1609,
@@ -1214,7 +1214,7 @@
             "url": "http://localhost:3000/login?_rsc=12sxf",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
-            "rendererStartTime": 1673.0799999833107,
+            "rendererStartTime": 1673.079999833107,
             "networkRequestTime": 1685.4059999883175,
             "networkEndTime": 1829.6669999957085,
             "finished": true,
@@ -2793,7 +2793,7 @@
             "name": "http://localhost:3000/_next/static/chunks/0e3i9r43ejkm3.js",
             "resourceBytes": 11152,
             "encodedBytes": 3694,
-            "unusedBytes": 10797
+            "unusedBytes": 1077
           }
         ]
       }
@@ -2894,7 +2894,7 @@
             "totalBytes": 10812
           },
           {
-            "url": "http://localhost:3000/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3000/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "totalBytes": 10528
           }
         ],
@@ -6771,7 +6771,7 @@
         "entryType": "measure"
       }
     ],
-    "total": 16079.529999999999
+    "total": 1607.529999999999
   },
   "i18n": {
     "rendererFormattedStrings": {

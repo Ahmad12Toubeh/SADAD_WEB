@@ -11,6 +11,7 @@ import { useEffect, useState, use } from "react";
 import { useTranslation } from "react-i18next";
 import { getCustomer, getCustomerDebts, updateCustomer, deleteCustomer } from "@/lib/api";
 import { ReminderActions } from "@/components/reminders/ReminderActions";
+import { isValidJordan07Phone, JORDAN_07_PHONE_HINT, sanitizeJordan07PhoneInput } from "@/lib/phone";
 
 type Debt = {
   id: string;
@@ -68,6 +69,11 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
   }, [customerId, t]);
 
   const handleUpdate = async () => {
+    if (!isValidJordan07Phone(editForm.phone)) {
+      alert(JORDAN_07_PHONE_HINT);
+      return;
+    }
+
     setIsSaving(true);
     try {
       await updateCustomer(customerId, editForm);
@@ -96,7 +102,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
           {error}
         </div>
       )}
-      
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/customers">
@@ -109,14 +115,14 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
               {isLoading ? "..." : (customer?.name ?? "-")}
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-               <span className="flex items-center gap-1"><Phone size={14} /> <span dir="ltr">{customer?.phone ?? "-"}</span></span>
-               {customer?.email && <span className="flex items-center gap-1"><Mail size={14} /> {customer.email}</span>}
-               {customer?.address && <span className="flex items-center gap-1"><MapPin size={14} /> {customer.address}</span>}
-               {customer?.proofImageUrl && (
-                 <Link href={customer.proofImageUrl} target="_blank" className="flex items-center gap-1 text-primary hover:underline">
-                   <Eye size={14} /> عرض الإثبات
-                 </Link>
-               )}
+              <span className="flex items-center gap-1"><Phone size={14} /> <span dir="ltr">{customer?.phone ?? "-"}</span></span>
+              {customer?.email && <span className="flex items-center gap-1"><Mail size={14} /> {customer.email}</span>}
+              {customer?.address && <span className="flex items-center gap-1"><MapPin size={14} /> {customer.address}</span>}
+              {customer?.proofImageUrl && (
+                <Link href={customer.proofImageUrl} target="_blank" className="flex items-center gap-1 text-primary hover:underline">
+                  <Eye size={14} /> عرض الإثبات
+                </Link>
+              )}
             </p>
           </div>
         </div>
@@ -141,26 +147,26 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="bg-primary/5 border-primary/10 rounded-2xl shadow-sm">
           <CardContent className="p-6">
-             <p className="text-sm font-medium text-primary">{t("customers.details.totalDebt")}</p>
-             <p className="text-3xl font-black text-slate-900 dark:text-white mt-2">
+            <p className="text-sm font-medium text-primary">{t("customers.details.totalDebt")}</p>
+            <p className="text-3xl font-black text-slate-900 dark:text-white mt-2">
               {(customer?.summary?.totalDebt ?? 0).toLocaleString()} <span className="text-sm text-slate-500 font-medium">{t("dashboard.currency")}</span>
-             </p>
+            </p>
           </CardContent>
         </Card>
         <Card className="bg-green-50 dark:bg-green-500/5 border-green-100 dark:border-green-500/20 rounded-2xl shadow-sm">
           <CardContent className="p-6">
-             <p className="text-sm font-medium text-green-700 dark:text-green-400">{t("customers.details.paidAmount")}</p>
-             <p className="text-3xl font-black text-green-700 dark:text-green-400 mt-2">
+            <p className="text-sm font-medium text-green-700 dark:text-green-400">{t("customers.details.paidAmount")}</p>
+            <p className="text-3xl font-black text-green-700 dark:text-green-400 mt-2">
               {(customer?.summary?.paidAmount ?? 0).toLocaleString()} <span className="text-sm opacity-70">{t("dashboard.currency")}</span>
-             </p>
+            </p>
           </CardContent>
         </Card>
         <Card className="bg-orange-50 dark:bg-orange-500/5 border-orange-100 dark:border-orange-500/20 rounded-2xl shadow-sm">
           <CardContent className="p-6">
-             <p className="text-sm font-medium text-orange-700 dark:text-orange-400">{t("customers.details.remainingAmount")}</p>
-             <p className="text-3xl font-black text-orange-700 dark:text-orange-400 mt-2">
+            <p className="text-sm font-medium text-orange-700 dark:text-orange-400">{t("customers.details.remainingAmount")}</p>
+            <p className="text-3xl font-black text-orange-700 dark:text-orange-400 mt-2">
               {(customer?.summary?.remainingAmount ?? 0).toLocaleString()} <span className="text-sm opacity-70">{t("dashboard.currency")}</span>
-             </p>
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -197,11 +203,10 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                     {tx.principalAmount.toLocaleString()} {t("dashboard.currency")}
                   </td>
                   <td className="px-6 py-5">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                      tx.status === "paid" ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400" :
-                      tx.status === "late" ? "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400" :
-                      "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${tx.status === "paid" ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400" :
+                        tx.status === "late" ? "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400" :
+                          "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400"
+                      }`}>
                       {tx.status === "paid" ? t("analytics.charts.status.paid") : tx.status === "late" ? t("analytics.charts.status.late") : t("analytics.charts.status.active")}
                     </span>
                   </td>
@@ -242,19 +247,19 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
             <CardContent className="p-6 space-y-4">
               <div className="space-y-2">
                 <Label>{t("customers.new.fullName")}</Label>
-                <Input value={editForm.name} onChange={(e) => setEditForm(p => ({...p, name: e.target.value}))} className="text-start" />
+                <Input value={editForm.name} onChange={(e) => setEditForm(p => ({ ...p, name: e.target.value }))} className="text-start" />
               </div>
               <div className="space-y-2">
                 <Label>{t("customers.new.phone")}</Label>
-                <Input value={editForm.phone} onChange={(e) => setEditForm(p => ({...p, phone: e.target.value}))} dir="ltr" className="text-start" />
+                <Input value={editForm.phone} onChange={(e) => setEditForm(p => ({ ...p, phone: sanitizeJordan07PhoneInput(e.target.value) }))} dir="ltr" placeholder="07XXXXXXX" maxLength={10} className="text-start" />
               </div>
               <div className="space-y-2">
                 <Label>{t("customers.new.email")}</Label>
-                <Input value={editForm.email} onChange={(e) => setEditForm(p => ({...p, email: e.target.value}))} dir="ltr" className="text-start" />
+                <Input value={editForm.email} onChange={(e) => setEditForm(p => ({ ...p, email: e.target.value }))} dir="ltr" className="text-start" />
               </div>
               <div className="space-y-2">
                 <Label>{t("customers.new.address")}</Label>
-                <Input value={editForm.address} onChange={(e) => setEditForm(p => ({...p, address: e.target.value}))} className="text-start" />
+                <Input value={editForm.address} onChange={(e) => setEditForm(p => ({ ...p, address: e.target.value }))} className="text-start" />
               </div>
             </CardContent>
             <div className="p-4 bg-slate-50 dark:bg-slate-950 flex justify-end gap-3 border-t dark:border-slate-800">

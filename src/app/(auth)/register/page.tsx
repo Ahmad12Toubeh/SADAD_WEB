@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
 import { login, register as apiRegister } from "@/lib/api";
+import { isValidJordan07Phone, JORDAN_07_PHONE_HINT, sanitizeJordan07PhoneInput } from "@/lib/phone";
 
 function RegisterPageContent() {
   const router = useRouter();
@@ -22,8 +23,16 @@ function RegisterPageContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const handlePhoneChange = (value: string) => {
+    setPhone(sanitizeJordan07PhoneInput(value));
+  };
+
   const handleRegister = async () => {
     setError(null);
+    if (!isValidJordan07Phone(phone)) {
+      setError(JORDAN_07_PHONE_HINT);
+      return;
+    }
     setIsLoading(true);
     try {
       await apiRegister({ email, password, fullName, phone, storeName });
@@ -100,9 +109,10 @@ function RegisterPageContent() {
                 type="tel"
                 required
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="05X XXX XXXX"
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                placeholder="07XXXXXXXX"
                 dir="ltr"
+                maxLength={10}
                 className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
               />
             </div>
@@ -120,7 +130,7 @@ function RegisterPageContent() {
                 className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password" className="dark:text-slate-300">{t("auth.register.passwordLabel")}</Label>
               <Input

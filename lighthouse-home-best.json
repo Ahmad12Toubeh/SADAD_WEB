@@ -643,10 +643,10 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3001/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3001/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
-            "rendererStartTime": 563.3249999880791,
+            "rendererStartTime": 563.324999988071,
             "networkRequestTime": 571.306999951601,
             "networkEndTime": 708.5269999802113,
             "finished": true,
@@ -754,7 +754,7 @@
             "url": "http://localhost:3001/_next/static/media/80c3108817f102b0-s.p.0w4u-xqw-ehj2.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
-            "rendererStartTime": 571.0079999864101,
+            "rendererStartTime": 571.007999864101,
             "networkRequestTime": 575.9879999756813,
             "networkEndTime": 977.3879999816418,
             "finished": true,
@@ -917,7 +917,7 @@
             "protocol": "http/1.1",
             "rendererStartTime": 572.8509999513626,
             "networkRequestTime": 980.3059999644756,
-            "networkEndTime": 1456.0799999535084,
+            "networkEndTime": 1456.079999535084,
             "finished": true,
             "transferSize": 9266,
             "resourceSize": 31323,
@@ -3080,7 +3080,7 @@
             "name": "http://localhost:3001/_next/static/chunks/turbopack-0bozvfj2vedcw.js",
             "resourceBytes": 10541,
             "encodedBytes": 4173,
-            "unusedBytes": 4079
+            "unusedBytes": 407
           },
           {
             "name": "http://localhost:3001/_next/static/chunks/10uu-26bhcw8v.js",
@@ -7358,7 +7358,7 @@
         "entryType": "measure"
       },
       {
-        "startTime": 32079.23,
+        "startTime": 3207.23,
         "name": "lh:audit:inp-breakdown-insight",
         "duration": 4.63,
         "entryType": "measure"

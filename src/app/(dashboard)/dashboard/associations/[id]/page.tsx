@@ -83,32 +83,51 @@ export default function AssociationDetailsPage() {
     return assoc.members > 0 ? Math.round((paidCount / assoc.members) * 100) : 0;
   }, [assoc]);
 
+  const completedMembers = useMemo(() => members.filter((member) => member.name?.trim()).length, [members]);
+  const hasReceiverSelected = useMemo(
+    () => form.associationKind === "family" || members.some((member) => member.isReceiver),
+    [form.associationKind, members],
+  );
+  const hasPaidMembers = useMemo(() => members.some((member) => member.isPaid), [members]);
+
   const onSave = async () => {
     if (!associationId) return;
     setIsSaving(true);
     setError(null);
     try {
-      const membersNum = Number(form.members);
       const monthlyNum = Number(form.monthlyAmount);
-      if (!form.name.trim() || !Number.isFinite(membersNum) || membersNum < 2 || !Number.isFinite(monthlyNum) || monthlyNum < 1) {
+      const normalizedMembers = members
+        .map((member, index) => ({
+          id: member.id,
+          name: member.name?.trim() || undefined,
+          phone: member.phone?.trim() || undefined,
+          turnOrder: member.turnOrder ?? index + 1,
+          isPaid: Boolean(member.isPaid),
+          isReceiver: form.associationKind === "family" ? false : Boolean(member.isReceiver),
+        }))
+        .filter((member) => member.name);
+
+      if (!form.name.trim() || !Number.isFinite(monthlyNum) || monthlyNum < 1) {
         setError(t("errors.validation.invalid"));
+        setIsSaving(false);
+        return;
+      }
+      if (normalizedMembers.length < 2) {
+        setError("لازم يكون في عضوين على الأقل بأسماء واضحة.");
+        setIsSaving(false);
+        return;
+      }
+      if (form.associationKind !== "family" && !normalizedMembers.some((member) => member.isReceiver)) {
+        setError("حدد مستلمًا حاليًا واحدًا قبل الحفظ.");
         setIsSaving(false);
         return;
       }
       await patchAssociation(associationId, {
         name: form.name.trim(),
-        members: membersNum,
         monthlyAmount: monthlyNum,
         associationKind: form.associationKind as any,
         fundGuarantorMemberId: assoc?.fundGuarantorMemberId ?? undefined,
-        membersList: members.map((m, idx) => ({
-          id: m.id,
-          name: m.name?.trim() || undefined,
-          phone: m.phone?.trim() || undefined,
-          turnOrder: m.turnOrder ?? idx + 1,
-          isPaid: Boolean(m.isPaid),
-          isReceiver: form.associationKind === "family" ? false : Boolean(m.isReceiver),
-        })),
+        membersList: normalizedMembers,
       });
       await load();
     } catch (err: any) {
@@ -121,6 +140,18 @@ export default function AssociationDetailsPage() {
 
   const onCloseMonth = async () => {
     if (!associationId) return;
+    if (completedMembers < 2) {
+      setError("لا يمكن إغلاق الشهر قبل إضافة عضوين على الأقل.");
+      return;
+    }
+    if (!hasPaidMembers) {
+      setError("لا يمكن إغلاق الشهر بدون أي دفعات مسجلة.");
+      return;
+    }
+    if (form.associationKind !== "family" && !hasReceiverSelected) {
+      setError("حدد المستلم الحالي قبل إغلاق الشهر.");
+      return;
+    }
     setIsClosingMonth(true);
     setError(null);
     try {
@@ -401,16 +432,9 @@ export default function AssociationDetailsPage() {
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder={t("associations.form.name")} className="dark:bg-slate-900" />
-          <Input
-            type="number"
-            min={2}
-            step={1}
-            inputMode="numeric"
-            value={form.members}
-            onChange={(e) => setForm((f) => ({ ...f, members: e.target.value }))}
-            placeholder={t("associations.form.members")}
-            className="dark:bg-slate-900"
-          />
+          <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+            {t("associations.form.members")}: {completedMembers}
+          </div>
           <Input
             type="number"
             min={1}
@@ -423,7 +447,17 @@ export default function AssociationDetailsPage() {
           />
           <select
             value={form.associationKind}
-            onChange={(e) => setForm((f) => ({ ...f, associationKind: e.target.value }))}
+            onChange={(e) => {
+              const nextKind = e.target.value as "rotating" | "family";
+              setForm((f) => ({ ...f, associationKind: nextKind }));
+              setMembers((current) => {
+                const selectedId = current.find((member) => member.isReceiver)?.id ?? current[0]?.id;
+                return current.map((member) => ({
+                  ...member,
+                  isReceiver: nextKind === "family" ? false : member.id === selectedId,
+                }));
+              });
+            }}
             className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 text-sm"
           >
             <option value="rotating">{t("associations.form.kindRotating")}</option>

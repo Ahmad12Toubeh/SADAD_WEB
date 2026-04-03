@@ -951,7 +951,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3000/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 537.1310000121593,
@@ -972,7 +972,7 @@
             "url": "http://localhost:3000/_next/static/media/3a179c97f46f8d27-s.p.17_by_dmu-29g.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
-            "rendererStartTime": 546.6079999804497,
+            "rendererStartTime": 546.607999804497,
             "networkRequestTime": 548.5450000166893,
             "networkEndTime": 711.6579999923706,
             "finished": true,
@@ -1224,7 +1224,7 @@
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 600.4730000197887,
-            "networkRequestTime": 2675.50799998641,
+            "networkRequestTime": 2675.5079998641,
             "networkEndTime": 5677.803999990225,
             "finished": true,
             "transferSize": 218415,

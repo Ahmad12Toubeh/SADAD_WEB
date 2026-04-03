@@ -595,7 +595,7 @@
           {
             "url": "Unattributable",
             "total": 1149.0039999999753,
-            "scripting": 13.079999999999998,
+            "scripting": 13.07999999999998,
             "scriptParseCompile": 0
           },
           {
@@ -625,7 +625,7 @@
           {
             "url": "http://localhost:3000/_next/static/chunks/0xw2_10zvaw~._.js",
             "total": 122.99199999999999,
-            "scripting": 21.807999999999993,
+            "scripting": 21.80799999999993,
             "scriptParseCompile": 100.512
           },
           {
@@ -817,7 +817,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/_next/static/media/1d2cc0c079997359-s.p.184z4t8qnm46e.woff2",
+            "url": "http://localhost:3000/_next/static/media/1d2cc0c07997359-s.p.184z4t8qnm46e.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 1803.3860000371933,
@@ -2108,7 +2108,7 @@
           },
           {
             "duration": 43.996,
-            "startTime": 8450.079
+            "startTime": 8450.07
           },
           {
             "duration": 7.571,
@@ -6773,25 +6773,25 @@
         "entryType": "measure"
       },
       {
-        "startTime": 40791.01,
+        "startTime": 4071.01,
         "name": "lh:runner:audit",
         "duration": 5457.46,
         "entryType": "measure"
       },
       {
-        "startTime": 40791.56,
+        "startTime": 4071.56,
         "name": "lh:runner:auditing",
         "duration": 5455.95,
         "entryType": "measure"
       },
       {
-        "startTime": 40796.19,
+        "startTime": 4076.19,
         "name": "lh:audit:viewport",
         "duration": 9.15,
         "entryType": "measure"
       },
       {
-        "startTime": 40797.35,
+        "startTime": 4077.35,
         "name": "lh:computed:ViewportMeta",
         "duration": 1.85,
         "entryType": "measure"

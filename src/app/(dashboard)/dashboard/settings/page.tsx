@@ -19,6 +19,7 @@ import {
   patchSettingsStore,
   uploadImage,
 } from "@/lib/api";
+import { isValidJordan07Phone, JORDAN_07_PHONE_HINT, sanitizeJordan07PhoneInput } from "@/lib/phone";
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
@@ -118,11 +119,10 @@ export default function SettingsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                    activeTab === tab.id
-                      ? "bg-primary text-white shadow-md shadow-primary/25 dark:shadow-primary/10"
-                      : "text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-200"
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === tab.id
+                    ? "bg-primary text-white shadow-md shadow-primary/25 dark:shadow-primary/10"
+                    : "text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-200"
+                    }`}
                 >
                   <tab.icon size={18} />
                   {tab.label}
@@ -220,8 +220,10 @@ export default function SettingsPage() {
                       <Label className="dark:text-slate-300">{t("settings.profile.phone")}</Label>
                       <Input
                         value={profile?.phone ?? ""}
-                        onChange={(e) => setProfile((p: any) => ({ ...p, phone: e.target.value }))}
+                        onChange={(e) => setProfile((p: any) => ({ ...p, phone: sanitizeJordan07PhoneInput(e.target.value) }))}
                         dir="ltr"
+                        placeholder="07XXXXXXXX"
+                        maxLength={10}
                         className="dark:bg-slate-900 dark:border-slate-700 text-start"
                       />
                     </div>
@@ -323,6 +325,9 @@ export default function SettingsPage() {
                     setError(null);
                     try {
                       if (activeTab === "profile") {
+                        if (profile?.phone && !isValidJordan07Phone(profile.phone)) {
+                          throw new Error(JORDAN_07_PHONE_HINT);
+                        }
                         await patchSettingsProfile({
                           fullName: profile.fullName,
                           phone: profile.phone,
