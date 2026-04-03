@@ -91,7 +91,7 @@ export default function AssociationsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("associations.page.title")}</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">{t("associations.page.subtitle")}</p>
         </div>
-        <Button className="gap-2 shadow-lg shadow-primary/20" onClick={() => setIsCreateOpen((v) => !v)}>
+        <Button className="w-full shadow-lg shadow-primary/20 sm:w-auto" onClick={() => setIsCreateOpen((v) => !v)}>
           {isCreateOpen ? <X size={18} /> : <Plus size={18} />}
           {isCreateOpen ? t("associations.page.closeBtn") : t("associations.page.createBtn")}
         </Button>
@@ -105,7 +105,7 @@ export default function AssociationsPage() {
 
       {isCreateOpen && (
         <Card className="border-0 shadow-2xl shadow-primary/5 rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-          <CardContent className="p-8">
+          <CardContent className="p-5 sm:p-8">
             <form onSubmit={onCreate} className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                  <label className="text-sm font-bold text-slate-500 dark:text-slate-400">{t("associations.form.name")}</label>
@@ -160,7 +160,7 @@ export default function AssociationsPage() {
         </Card>
       )}
 
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:gap-8">
         {(isLoading ? [] : items).map((assoc) => {
           const paidCount = (assoc.membersList ?? []).filter((m) => m.isPaid).length;
           const progressPercent = assoc.members > 0 ? Math.round((paidCount / assoc.members) * 100) : 0;
@@ -168,29 +168,29 @@ export default function AssociationsPage() {
 
           return (
             <Card key={assoc.id} className="border-0 shadow-lg shadow-slate-200/40 dark:shadow-slate-950/20 rounded-3xl overflow-hidden dark:bg-slate-800">
-              <div className="bg-slate-900 dark:bg-slate-950 px-8 py-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+              <div className="bg-slate-900 dark:bg-slate-950 px-5 py-5 sm:px-8 sm:py-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-4 sm:items-center">
                     <div className="bg-primary/20 p-3 rounded-2xl">
                       <Users size={24} className="text-primary" />
                     </div>
-                    <div>
-                      <h3 className="font-bold text-white text-xl leading-tight">{assoc.name}</h3>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-white text-xl leading-tight break-words">{assoc.name}</h3>
                       <p className="text-slate-400 text-sm mt-1">
                         {assoc.members} {t("associations.form.member")} • {assoc.monthlyAmount.toLocaleString()} {t("associations.form.currency")}
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs font-black bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full uppercase tracking-wider">
+                  <span className="inline-flex w-fit text-xs font-black bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full uppercase tracking-wider">
                     {assoc.associationKind === "family" ? t("associations.page.family") : t("associations.page.active")}
                   </span>
                 </div>
               </div>
 
-              <CardContent className="p-8 space-y-7">
+              <CardContent className="p-5 space-y-6 sm:p-8 sm:space-y-7">
                 {/* Progress */}
                 <div>
-                  <div className="flex justify-between text-sm mb-3 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">
+                  <div className="mb-3 flex flex-col gap-2 text-sm font-bold uppercase tracking-tight text-slate-500 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
                     <span>{t("associations.page.progress")}: <strong className="text-slate-900 dark:text-white">{paidCount}</strong> {t("associations.page.from")} <strong>{assoc.members}</strong></span>
                     <span className="text-primary">{progressPercent}%</span>
                   </div>
@@ -203,7 +203,7 @@ export default function AssociationsPage() {
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 flex items-center gap-4 border border-slate-100 dark:border-slate-700/50">
                     <div className="text-slate-400"><Calendar size={20} /></div>
                     <div>

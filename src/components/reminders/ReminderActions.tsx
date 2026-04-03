@@ -48,21 +48,21 @@ export function ReminderActions({ installmentId, debtId, customerName, customerE
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-center gap-2">
       <Button
         size="sm"
-        className="gap-1.5 bg-[#25D366] hover:bg-[#20b558] text-white"
+        className="min-w-[96px] rounded-full bg-[#25D366] px-3 text-white hover:bg-[#20b558]"
         onClick={() => handleSend("whatsapp")}
         disabled={!hasTarget || loadingChannel !== null}
         title={customerName ? `${t("reminders.actions.whatsapp")} - ${customerName}` : t("reminders.actions.whatsapp")}
       >
         <MessageCircle size={14} />
-        {loadingChannel === "whatsapp" ? t("common.loading") : t("reminders.actions.whatsapp")}
+        <span>{loadingChannel === "whatsapp" ? t("common.loading") : t("reminders.actions.whatsapp")}</span>
       </Button>
       <Button
         size="sm"
         variant="outline"
-        className="gap-1.5 border-slate-200 bg-white text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        className="min-w-[88px] rounded-full border-slate-200 bg-white px-3 text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
         onClick={() => handleSend("email")}
         disabled={!hasTarget || loadingChannel !== null || !hasEmail}
         title={
@@ -74,7 +74,7 @@ export function ReminderActions({ installmentId, debtId, customerName, customerE
         }
       >
         <Mail size={14} />
-        {loadingChannel === "email" ? t("common.loading") : t("reminders.actions.email")}
+        <span>{loadingChannel === "email" ? t("common.loading") : t("reminders.actions.email")}</span>
       </Button>
     </div>
   );

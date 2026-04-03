@@ -13,7 +13,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl font-medium leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] touch-manipulation";
 
   const variants = {
     primary: "bg-primary text-white hover:bg-primary/90",
@@ -24,9 +24,9 @@ export function Button({
   };
 
   const sizes = {
-    sm: "h-9 px-3 text-sm",
-    md: "h-10 px-4 py-2",
-    lg: "h-11 px-8 text-lg",
+    sm: "min-h-10 px-3 text-sm",
+    md: "min-h-11 px-4 py-2 text-sm sm:text-base",
+    lg: "min-h-12 px-6 text-base sm:px-8 sm:text-lg",
   };
 
   return (

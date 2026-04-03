@@ -67,13 +67,13 @@ export default function DebtsPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("debts.page.title")}</h1>
           <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">{t("debts.page.subtitle")}</p>
         </div>
-        <Link href="/dashboard/debts/new">
-          <Button className="gap-2">
+        <Link href="/dashboard/debts/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus size={18} />
             {t("debts.page.newDebt")}
           </Button>
@@ -81,20 +81,21 @@ export default function DebtsPage() {
       </div>
 
       <Card className="border-0 shadow-lg shadow-slate-200/40 rounded-2xl overflow-hidden dark:bg-slate-800">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-700 py-5 bg-white dark:bg-slate-800">
+        <CardHeader className="flex flex-col justify-between gap-4 border-b border-slate-100 bg-white py-5 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center">
           <CardTitle className="text-lg text-slate-900 dark:text-white">{t("debts.page.allDebts")}</CardTitle>
-          <div className="flex gap-2 mt-4 sm:mt-0">
-            <div className="relative">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative min-w-0 flex-1 sm:w-64">
               <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <Input 
                 placeholder={t("debts.page.searchPlaceholder")} 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pe-10 h-10 w-full sm:w-64 text-sm bg-slate-50 dark:bg-slate-900 border-transparent dark:border-slate-700 focus-visible:bg-white" 
+                className="h-11 w-full pe-10 bg-slate-50 text-sm dark:border-slate-700 dark:bg-slate-900 focus-visible:bg-white" 
               />
             </div>
-            <Button variant="outline" size="sm" className="gap-2 h-10 w-10 sm:w-auto px-0 sm:px-4 flex items-center justify-center dark:border-slate-700">
+            <Button variant="outline" size="sm" className="w-full justify-center dark:border-slate-700 sm:w-auto">
               <Filter size={16} /> <span className="hidden sm:inline">{t("customers.filter")}</span>
+              <span className="sm:hidden">{t("customers.filter")}</span>
             </Button>
           </div>
         </CardHeader>

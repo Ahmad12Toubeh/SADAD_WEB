@@ -39,12 +39,13 @@ export default function AnalyticsCharts({
 }: Props) {
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      <Card className="md:col-span-2 border-0 shadow-lg shadow-slate-200/50 dark:shadow-none dark:bg-slate-800 rounded-2xl">
+      <Card className="min-w-0 rounded-2xl border-0 shadow-lg shadow-slate-200/50 dark:bg-slate-800 dark:shadow-none md:col-span-2">
         <CardHeader>
           <CardTitle className="dark:text-white">{trendTitle}</CardTitle>
         </CardHeader>
-        <CardContent className="h-[320px] px-2">
-          <ResponsiveContainer width="100%" height="100%">
+        <CardContent className="min-w-0 px-2">
+          <div className="h-[260px] min-w-0 sm:h-[320px]">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <AreaChart data={monthlyData} style={{ direction: "ltr" }} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorDebts" x1="0" y1="0" x2="0" y2="1">
@@ -72,15 +73,17 @@ export default function AnalyticsCharts({
               <Area type="monotone" dataKey="collected" name={collectedLabel} stroke="#22c55e" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCollected)" />
             </AreaChart>
           </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none dark:bg-slate-800 rounded-2xl">
+      <Card className="min-w-0 rounded-2xl border-0 shadow-lg shadow-slate-200/50 dark:bg-slate-800 dark:shadow-none">
         <CardHeader>
           <CardTitle className="dark:text-white">{statusTitle}</CardTitle>
         </CardHeader>
-        <CardContent className="h-[320px] flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
+        <CardContent className="min-w-0">
+          <div className="flex h-[260px] min-w-0 items-center justify-center sm:h-[320px]">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <PieChart>
               <Pie data={statusData} cx="50%" cy="45%" innerRadius={65} outerRadius={100} paddingAngle={4} dataKey="value" stroke="none">
                 {statusData.map((_, index) => (
@@ -98,6 +101,7 @@ export default function AnalyticsCharts({
               <Legend iconType="circle" iconSize={10} wrapperStyle={{ color: theme === "dark" ? "#cbd5e1" : "#475569" }} />
             </PieChart>
           </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
     </div>

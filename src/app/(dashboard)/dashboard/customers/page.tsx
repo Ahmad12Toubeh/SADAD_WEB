@@ -68,15 +68,15 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("customers.title")}</h1>
           <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">{t("customers.subtitle")}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
           <Button 
             variant="outline" 
-            className="gap-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            className="w-full border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 sm:w-auto"
             onClick={() => exportToCsv("customers", items, {
               name: t("customers.table.customer"),
               phone: t("customers.table.phone"),
@@ -88,8 +88,8 @@ export default function CustomersPage() {
             <Download size={18} />
             {t("common.export")}
           </Button>
-          <Link href="/dashboard/customers/new">
-            <Button className="gap-2">
+          <Link href="/dashboard/customers/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
               <Plus size={18} />
               {t("customers.addCustomer")}
             </Button>
@@ -99,8 +99,8 @@ export default function CustomersPage() {
 
       <Card className="p-4 dark:bg-slate-800 dark:border-slate-700">
         {/* Toolbar */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1 sm:max-w-md">
             <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <Input
               placeholder={t("customers.searchPlaceholder")}
@@ -109,7 +109,7 @@ export default function CustomersPage() {
               className="pe-10 dark:bg-slate-900 dark:border-slate-700 text-start"
             />
           </div>
-          <Button variant="outline" className="dark:border-slate-700 dark:hover:bg-slate-700">{t("customers.filter")}</Button>
+          <Button variant="outline" className="w-full dark:border-slate-700 dark:hover:bg-slate-700 sm:w-auto">{t("customers.filter")}</Button>
         </div>
 
         {error && (
@@ -228,9 +228,9 @@ export default function CustomersPage() {
         </div>
         
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-6 text-sm text-slate-500 dark:text-slate-400 px-2">
+        <div className="mt-6 flex flex-col gap-3 px-2 text-sm text-slate-500 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <span>{t("customers.pagination")} - {pagination.total} {t("customers.title")}</span>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button 
               variant="outline" 
               size="sm" 

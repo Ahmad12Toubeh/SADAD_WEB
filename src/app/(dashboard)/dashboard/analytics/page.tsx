@@ -105,14 +105,14 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("analytics.title")}</h1>
           <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">{t("analytics.subtitle")}</p>
         </div>
         <Button 
           variant="outline" 
-          className="gap-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          className="w-full border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 sm:w-auto"
           onClick={() => exportToCsv("analytics_monthly", monthly, {
             year: "Year",
             month: "Month",

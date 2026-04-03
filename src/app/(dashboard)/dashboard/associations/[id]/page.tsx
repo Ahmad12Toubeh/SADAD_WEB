@@ -328,38 +328,38 @@ export default function AssociationDetailsPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex items-start gap-3">
           <Link href="/dashboard/associations">
             <Button variant="ghost" className="px-2">
               <ArrowRight size={22} className="text-slate-500 hover:text-slate-900 dark:hover:text-white" />
             </Button>
           </Link>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               {assoc?.name ?? (isLoading ? "..." : "-")}
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm">{t("associations.page.subtitle")}</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap lg:justify-end">
           <Button
             variant="outline"
-            className="text-red-500 border-red-200 bg-white hover:bg-red-50 gap-2 dark:bg-slate-900 dark:border-red-900/30 dark:hover:bg-red-900/20"
+            className="w-full text-red-500 border-red-200 bg-white hover:bg-red-50 dark:bg-slate-900 dark:border-red-900/30 dark:hover:bg-red-900/20 sm:w-auto"
             onClick={() => setShowDelete(true)}
           >
             <Trash2 size={16} /> {t("common.delete")}
           </Button>
-          <Button variant="outline" onClick={onCloseMonth} disabled={isClosingMonth}>
+          <Button variant="outline" className="w-full sm:w-auto" onClick={onCloseMonth} disabled={isClosingMonth}>
             {isClosingMonth ? t("common.loading") : t("associations.page.closeMonth")}
           </Button>
-          <Button variant="outline" onClick={onReopenCycle} disabled={!assoc?.lockOrder}>
+          <Button variant="outline" className="w-full sm:w-auto" onClick={onReopenCycle} disabled={!assoc?.lockOrder}>
             {t("associations.page.reopenCycle")}
           </Button>
-          <Button variant="outline" onClick={onDownloadReport}>
+          <Button variant="outline" className="w-full sm:w-auto" onClick={onDownloadReport}>
             <Download size={16} /> {t("associations.page.downloadReport")}
           </Button>
-          <Button onClick={onSave} disabled={isSaving}>
+          <Button className="w-full sm:w-auto" onClick={onSave} disabled={isSaving}>
             {isSaving ? t("associations.page.updating") : t("associations.page.saveChanges")}
           </Button>
         </div>
@@ -441,7 +441,7 @@ export default function AssociationDetailsPage() {
             <div className="text-lg font-bold text-slate-900 dark:text-white">
               {t("associations.page.fundBalance")}: {(assoc?.fundBalance ?? 0).toLocaleString()} {t("dashboard.currency")}
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid gap-3 md:grid-cols-3">
               <select
                 value={fundForm.type}
                 onChange={(e) => setFundForm((f) => ({ ...f, type: e.target.value }))}
@@ -467,9 +467,9 @@ export default function AssociationDetailsPage() {
                 className="dark:bg-slate-900"
               />
             </div>
-            <Button variant="outline" onClick={onAddFundTransaction}>{t("associations.page.addTransaction")}</Button>
+            <Button variant="outline" className="w-full sm:w-auto" onClick={onAddFundTransaction}>{t("associations.page.addTransaction")}</Button>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 md:grid-cols-2">
               <select
                 value={assoc?.fundGuarantorMemberId ?? ""}
                 onChange={(e) => setAssoc((a) => (a ? { ...a, fundGuarantorMemberId: e.target.value || null } : a))}
@@ -494,14 +494,14 @@ export default function AssociationDetailsPage() {
 
             <div className="space-y-2">
               {(assoc?.fundTransactions ?? []).map((tx, idx) => (
-                <div key={tx.id ?? idx} className="flex items-center justify-between text-sm">
+                <div key={tx.id ?? idx} className="flex flex-col gap-2 rounded-xl border border-slate-100 p-3 text-sm dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-slate-500">{tx.type === "in" ? t("associations.page.fundIn") : t("associations.page.fundOut")}</span>
                   <span className="font-semibold">{tx.amount} {t("dashboard.currency")}</span>
                   <span className={`text-xs ${tx.status === "approved" ? "text-green-600" : "text-orange-500"}`}>
                     {tx.status === "approved" ? t("associations.page.approved") : t("associations.page.pending")}
                   </span>
                   {tx.type === "out" && tx.status !== "approved" && (
-                    <Button variant="outline" className="h-8 px-2" onClick={() => onApproveTransaction(tx.id ?? "")}>
+                    <Button variant="outline" className="w-full sm:w-auto" onClick={() => onApproveTransaction(tx.id ?? "")}>
                       {t("associations.page.approve")}
                     </Button>
                   )}
@@ -513,12 +513,12 @@ export default function AssociationDetailsPage() {
       )}
 
       <Card className="border-0 shadow-lg shadow-slate-200/40 dark:bg-slate-800">
-        <CardHeader className="flex items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-slate-900 dark:text-white">{t("associations.page.membersTitle")}</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Button
               variant="outline"
-              className="h-10 px-4 text-sm font-semibold border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="w-full border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:w-auto"
               onClick={autoSortMembers}
               disabled={assoc?.lockOrder}
             >
@@ -526,7 +526,7 @@ export default function AssociationDetailsPage() {
             </Button>
             <Button
               variant="outline"
-              className="h-10 px-4 text-sm font-semibold border-primary/40 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary"
+              className="w-full border-primary/40 px-4 text-sm font-semibold text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary sm:w-auto"
               onClick={() => setMembers((list) => [...list, { name: "", phone: "", turnOrder: list.length + 1, isPaid: false, isReceiver: false }])}
             >
               <Plus size={16} /> {t("associations.page.addMember")}
@@ -538,16 +538,17 @@ export default function AssociationDetailsPage() {
             <div className="text-sm text-slate-500 dark:text-slate-400">{t("associations.page.noMembers")}</div>
           )}
           {members.map((m, idx) => (
-            <div key={m.id ?? idx} className="grid grid-cols-12 gap-2 items-center">
-              <div className="col-span-1 text-xs text-slate-400 text-center">{idx + 1}</div>
+            <div key={m.id ?? idx} className="rounded-2xl border border-slate-100 p-3 dark:border-slate-700">
+              <div className="mb-3 text-xs text-slate-400">{idx + 1}</div>
+              <div className="grid gap-3 md:grid-cols-12 md:items-center">
               <Input
-                className="col-span-4 dark:bg-slate-900"
+                className="md:col-span-4 dark:bg-slate-900"
                 placeholder={t("associations.page.memberName")}
                 value={m.name ?? ""}
                 onChange={(e) => setMembers((list) => list.map((x, i) => (i === idx ? { ...x, name: e.target.value } : x)))}
               />
               <Input
-                className="col-span-3 dark:bg-slate-900"
+                className="md:col-span-3 dark:bg-slate-900"
                 placeholder={t("associations.page.memberPhone")}
                 value={m.phone ?? ""}
                 onChange={(e) => setMembers((list) => list.map((x, i) => (i === idx ? { ...x, phone: e.target.value } : x)))}
@@ -557,7 +558,7 @@ export default function AssociationDetailsPage() {
                 min={1}
                 step={1}
                 inputMode="numeric"
-                className="col-span-2 dark:bg-slate-900"
+                className="md:col-span-2 dark:bg-slate-900"
                 placeholder={t("associations.page.turnOrder")}
                 value={m.turnOrder ?? idx + 1}
                 onChange={(e) =>
@@ -565,10 +566,10 @@ export default function AssociationDetailsPage() {
                 }
                 disabled={assoc?.lockOrder}
               />
-              <div className="col-span-2 flex gap-1 justify-end">
+              <div className="flex flex-wrap gap-2 md:col-span-3 md:justify-end">
                 <Button
                   variant="outline"
-                  className={`h-9 px-3 text-xs font-bold rounded-lg border ${
+                  className={`min-h-10 px-3 text-xs font-bold rounded-lg border ${
                     m.isPaid
                       ? "border-green-300 text-green-600 bg-green-50 dark:bg-green-900/20 dark:border-green-700"
                       : "border-slate-200 text-slate-700 bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
@@ -585,7 +586,7 @@ export default function AssociationDetailsPage() {
                 {form.associationKind !== "family" && (
                   <Button
                     variant="outline"
-                    className={`h-9 px-3 text-xs font-bold rounded-lg border ${
+                    className={`min-h-10 px-3 text-xs font-bold rounded-lg border ${
                       m.isReceiver
                         ? "border-blue-300 text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700"
                         : "border-slate-200 text-slate-700 bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
@@ -599,30 +600,31 @@ export default function AssociationDetailsPage() {
                     {t("associations.page.receiver")}
                   </Button>
                 )}
-                <Button
-                  variant="outline"
-                  className="h-9 w-9 p-0 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
-                  onClick={() => moveMember(idx, -1)}
-                  disabled={assoc?.lockOrder}
-                >
+              <Button
+                variant="outline"
+                className="h-10 w-10 p-0 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
+                onClick={() => moveMember(idx, -1)}
+                disabled={assoc?.lockOrder}
+              >
                   <ChevronUp size={16} />
                 </Button>
-                <Button
-                  variant="outline"
-                  className="h-9 w-9 p-0 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
-                  onClick={() => moveMember(idx, 1)}
-                  disabled={assoc?.lockOrder}
-                >
+              <Button
+                variant="outline"
+                className="h-10 w-10 p-0 rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
+                onClick={() => moveMember(idx, 1)}
+                disabled={assoc?.lockOrder}
+              >
                   <ChevronDown size={16} />
                 </Button>
-                <Button
-                  variant="outline"
-                  className="h-9 w-9 p-0 rounded-lg text-red-500 border-red-200 bg-white hover:bg-red-50 dark:bg-slate-900 dark:border-red-900/30"
-                  onClick={() => setMembers((list) => list.filter((_, i) => i !== idx))}
-                >
-                  <Trash2 size={16} />
-                </Button>
+              <Button
+                variant="outline"
+                className="h-10 w-10 p-0 rounded-lg text-red-500 border-red-200 bg-white hover:bg-red-50 dark:bg-slate-900 dark:border-red-900/30"
+                onClick={() => setMembers((list) => list.filter((_, i) => i !== idx))}
+              >
+                <Trash2 size={16} />
+              </Button>
               </div>
+            </div>
             </div>
           ))}
         </CardContent>
@@ -630,10 +632,11 @@ export default function AssociationDetailsPage() {
 
       <Card className="border-0 shadow-lg shadow-slate-200/40 dark:bg-slate-800">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-slate-900 dark:text-white">{t("associations.page.paymentsTitle")}</CardTitle>
             <Button
               variant="outline"
+              className="w-full sm:w-auto"
               onClick={() =>
                 exportToCsv("association_payments", assoc?.paymentLogs ?? [], {
                   memberName: t("associations.page.memberName"),
@@ -652,7 +655,7 @@ export default function AssociationDetailsPage() {
             <div className="text-sm text-slate-500 dark:text-slate-400">{t("associations.page.paymentsEmpty")}</div>
           )}
           {(assoc?.paymentLogs ?? []).map((p, idx) => (
-            <div key={p.id ?? idx} className="flex items-center justify-between text-sm border-b border-slate-100 dark:border-slate-700/50 pb-2">
+            <div key={p.id ?? idx} className="flex flex-col gap-1 border-b border-slate-100 pb-3 text-sm dark:border-slate-700/50 sm:flex-row sm:items-center sm:justify-between">
               <div className="font-semibold">{p.memberName ?? "-"}</div>
               <div className="text-slate-500">{p.amount ?? 0} {t("dashboard.currency")}</div>
               <div className="text-slate-500">{p.paidAt ? p.paidAt.slice(0, 10) : "-"}</div>
@@ -670,7 +673,7 @@ export default function AssociationDetailsPage() {
             <div className="text-sm text-slate-500 dark:text-slate-400">{t("associations.page.historyEmpty")}</div>
           )}
           {(assoc?.cycleHistory ?? []).map((h, idx) => (
-            <div key={`${h.month}-${idx}`} className="flex items-center justify-between text-sm border-b border-slate-100 dark:border-slate-700/50 pb-2">
+            <div key={`${h.month}-${idx}`} className="flex flex-col gap-1 border-b border-slate-100 pb-3 text-sm dark:border-slate-700/50 sm:flex-row sm:items-center sm:justify-between">
               <div className="font-semibold">{t("associations.page.historyMonth")} {h.month}</div>
               <div className="text-slate-500">{t("associations.page.historyReceiver")} {h.receiverName ?? "-"}</div>
               <div className="text-slate-500">{t("associations.page.historyPaidCount")} {h.paidCount ?? 0}</div>

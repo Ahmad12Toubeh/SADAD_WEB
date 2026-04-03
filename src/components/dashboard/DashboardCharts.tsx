@@ -30,11 +30,12 @@ export default function DashboardCharts({
 }: DashboardChartsProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Card className="col-span-1 border-slate-200 dark:bg-slate-800 dark:border-slate-700 shadow-sm">
+      <Card className="col-span-1 min-w-0 border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <CardHeader>
           <CardTitle className="dark:text-white">{cashflowTitle}</CardTitle>
         </CardHeader>
-        <CardContent className="px-2 h-[350px]">
+        <CardContent className="min-w-0 px-2">
+          <div className="h-[280px] min-w-0 sm:h-[350px]">
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} style={{ direction: "ltr" }}>
               <defs>
@@ -58,14 +59,16 @@ export default function DashboardCharts({
               <Area type="monotone" dataKey="total" name={totalDebtLabel} stroke="#00A3E0" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
             </AreaChart>
           </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 
-      <Card className="col-span-1 border-slate-200 dark:bg-slate-800 dark:border-slate-700 shadow-sm">
+      <Card className="col-span-1 min-w-0 border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <CardHeader>
           <CardTitle className="dark:text-white">{collectionTitle}</CardTitle>
         </CardHeader>
-        <CardContent className="px-2 h-[350px]">
+        <CardContent className="min-w-0 px-2">
+          <div className="h-[280px] min-w-0 sm:h-[350px]">
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }} style={{ direction: "ltr" }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === "dark" ? "#334155" : "#E2E8F0"} />
@@ -84,6 +87,7 @@ export default function DashboardCharts({
               <Bar dataKey="collected" name={collectedLabel} fill="#00A3E0" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
     </div>
