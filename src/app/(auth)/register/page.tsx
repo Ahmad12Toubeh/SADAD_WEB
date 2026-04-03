@@ -22,8 +22,7 @@ function RegisterPageContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegister = async () => {
     setError(null);
     setIsLoading(true);
     try {
@@ -58,7 +57,13 @@ function RegisterPageContent() {
       <Card className="border-0 shadow-2xl shadow-slate-200/50 dark:shadow-none dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl overflow-hidden">
         <div className="h-1.5 w-full bg-gradient-to-r from-primary to-blue-600"></div>
         <CardContent className="p-8">
-          <form className="space-y-5" onSubmit={handleRegister}>
+          <form
+            className="space-y-5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleRegister();
+            }}
+          >
             {error && (
               <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-medium dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
                 {error}
@@ -130,7 +135,12 @@ function RegisterPageContent() {
               />
             </div>
 
-            <Button type="submit" className="w-full h-11 text-base shadow-xl shadow-primary/20 mt-4 active:scale-95 transition-transform" disabled={isLoading}>
+            <Button
+              type="button"
+              onClick={() => void handleRegister()}
+              className="w-full h-11 text-base shadow-xl shadow-primary/20 mt-4 active:scale-95 transition-transform"
+              disabled={isLoading}
+            >
               {isLoading ? t("auth.register.loading") : t("auth.register.submit")}
             </Button>
           </form>
