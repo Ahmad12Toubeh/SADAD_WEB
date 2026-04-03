@@ -164,10 +164,11 @@ export type AnalyticsMonthly = {
 };
 
 function getBaseUrl() {
-  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_BASE_URL) {
-    console.warn("WARNING: NEXT_PUBLIC_API_BASE_URL is missing in production. Falling back to relative path.");
-    return "/api"; 
+  if (process.env.NODE_ENV === "production") {
+    // Use same-origin API calls in production so auth cookies live on the frontend domain.
+    return process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
   }
+
   return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api";
 }
 
