@@ -309,7 +309,7 @@ export async function forgotPassword(input: { email: string }) {
   );
 }
 
-export async function resetPassword(input: { token: string; newPassword: string }) {
+export async function resetPassword(input: { code: string; newPassword: string }) {
   return apiFetch<{ success: boolean; message?: string }>(
     "/auth/reset-password",
     { method: "POST", body: JSON.stringify(input) },

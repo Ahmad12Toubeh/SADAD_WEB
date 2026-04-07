@@ -12,26 +12,28 @@ import { forgotPassword } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
     setIsLoading(true);
     try {
-      const res = await forgotPassword({ email });
-      if (!res.resetToken) {
-        setSuccess(t("auth.forgot.checkEmail"));
-        return;
-      }
-      router.push(`/reset-password?token=${encodeURIComponent(res.resetToken)}`);
+      await forgotPassword({ email });
+      router.push("/reset-password");
     } catch (err: any) {
-      setError(err?.message ?? t("auth.forgot.failed"));
+      if (err?.status === 404) {
+        setError(
+          i18n.language.startsWith("ar")
+            ? "لا يوجد حساب بهذا البريد الإلكتروني."
+            : "No account found with this email address."
+        );
+      } else {
+        setError(err?.message ?? t("auth.forgot.failed"));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -41,7 +43,11 @@ export default function ForgotPasswordPage() {
     <main className="w-full max-w-md mx-auto relative z-10">
       <div className="flex flex-col items-center mb-10 text-center">
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">{t("auth.forgot.title")}</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2">{t("auth.forgot.subtitle")}</p>
+        <p className="text-slate-500 dark:text-slate-400 mt-2">
+          {i18n.language.startsWith("ar")
+            ? "اكتب بريدك الإلكتروني لنرسل لك رمز تحقق لإعادة تعيين كلمة المرور."
+            : "Enter your email to receive a 4-digit reset code."}
+        </p>
       </div>
 
       <Card className="border-0 shadow-2xl shadow-slate-200/50 dark:shadow-none dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl overflow-hidden">
@@ -51,11 +57,6 @@ export default function ForgotPasswordPage() {
             {error && (
               <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-medium dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
                 {error}
-              </div>
-            )}
-            {success && (
-              <div className="rounded-lg border border-green-200 bg-green-50 text-green-700 px-4 py-3 text-sm font-medium dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-200">
-                {success}
               </div>
             )}
             <div className="space-y-2">
@@ -72,8 +73,15 @@ export default function ForgotPasswordPage() {
               />
             </div>
             <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
-              {isLoading ? t("auth.forgot.sending") : t("auth.forgot.submit")}
+              {isLoading
+                ? i18n.language.startsWith("ar") ? "جاري الإرسال..." : "Sending..."
+                : i18n.language.startsWith("ar") ? "إرسال الرمز" : "Send code"}
             </Button>
+            <div className="text-center text-sm text-slate-500 dark:text-slate-400">
+              <Link href="/reset-password" className="font-semibold text-primary hover:underline">
+                {i18n.language.startsWith("ar") ? "أدخل الرمز" : "Enter code"}
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

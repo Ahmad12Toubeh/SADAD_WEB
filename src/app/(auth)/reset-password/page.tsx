@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -12,9 +12,8 @@ import { resetPassword } from "@/lib/api";
 
 function ResetPasswordContent() {
   const router = useRouter();
-  const { t } = useTranslation();
-  const params = useSearchParams();
-  const token = useMemo(() => params.get("token") ?? "", [params]);
+  const { t, i18n } = useTranslation();
+  const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,8 +25,8 @@ function ResetPasswordContent() {
     setError(null);
     setSuccess(null);
 
-    if (!token) {
-      setError(t("auth.reset.invalidLink"));
+    if (!/^\d{4}$/.test(code)) {
+      setError(i18n.language.startsWith("ar") ? "أدخل رمز مكوّن من 4 أرقام." : "Enter a 4-digit code.");
       return;
     }
     if (newPassword.length < 8) {
@@ -41,7 +40,7 @@ function ResetPasswordContent() {
 
     setIsLoading(true);
     try {
-      await resetPassword({ token, newPassword });
+      await resetPassword({ code, newPassword });
       setSuccess(t("auth.reset.success"));
       setTimeout(() => router.push("/login"), 1200);
     } catch (err: any) {
@@ -55,7 +54,11 @@ function ResetPasswordContent() {
     <main className="w-full max-w-md mx-auto relative z-10">
       <div className="flex flex-col items-center mb-10 text-center">
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">{t("auth.reset.title")}</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2">{t("auth.reset.subtitle")}</p>
+        <p className="text-slate-500 dark:text-slate-400 mt-2">
+          {i18n.language.startsWith("ar")
+            ? "أدخل رمز التحقق الذي وصل إلى بريدك الإلكتروني ثم كلمة المرور الجديدة."
+            : "Enter the 4-digit code from your email and set a new password."}
+        </p>
       </div>
 
       <Card className="border-0 shadow-2xl shadow-slate-200/50 dark:shadow-none dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl overflow-hidden">
@@ -72,6 +75,21 @@ function ResetPasswordContent() {
                 {success}
               </div>
             )}
+            <div className="space-y-2">
+              <Label htmlFor="code" className="dark:text-slate-300">
+                {i18n.language.startsWith("ar") ? "رمز التحقق" : "Verification code"}
+              </Label>
+              <Input
+                id="code"
+                type="text"
+                inputMode="numeric"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="1234"
+                className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
+                dir="ltr"
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="newPassword" className="dark:text-slate-300">{t("auth.reset.newPasswordLabel")}</Label>
               <Input
