@@ -10,7 +10,7 @@ import { getRemindersOverdue, getRemindersSent, getRemindersUpcoming } from "@/l
 import { ReminderActions } from "@/components/reminders/ReminderActions";
 
 export default function RemindersPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [overdueItems, setOverdueItems] = useState<any[]>([]);
   const [upcomingItems, setUpcomingItems] = useState<any[]>([]);
   const [sentItems, setSentItems] = useState<any[]>([]);
@@ -41,6 +41,32 @@ export default function RemindersPage() {
     fetchData();
   }, [t]);
 
+  const dayMs = 1000 * 60 * 60 * 24;
+
+  const getOverdueDays = (dueDate?: string) => {
+    if (!dueDate) return 1;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    return Math.max(1, Math.ceil((today.getTime() - due.getTime()) / dayMs));
+  };
+
+  const getUpcomingDays = (dueDate?: string) => {
+    if (!dueDate) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    return Math.max(0, Math.ceil((due.getTime() - today.getTime()) / dayMs));
+  };
+
+  const formatOverdueText = (days: number) =>
+    i18n.language.startsWith("ar") ? `متأخرة منذ ${days} يوم` : `${days} day(s) overdue`;
+
+  const formatUpcomingText = (days: number) =>
+    i18n.language.startsWith("ar") ? `متبقي ${days} يوم` : `${days} day(s) remaining`;
+
   return (
     <div className="space-y-8 pb-12">
       <div>
@@ -54,7 +80,6 @@ export default function RemindersPage() {
         </div>
       )}
 
-      {/* Overdue Section */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle size={20} className="text-red-500" />
@@ -63,32 +88,35 @@ export default function RemindersPage() {
           </h2>
         </div>
         <div className="space-y-3">
-          {(isLoading ? [] : overdueItems).map((item) => (
-            <Card key={item.installmentId ?? item.id} className="border-red-100 dark:border-red-900/30 bg-red-50/40 dark:bg-red-900/10 rounded-xl shadow-sm">
-              <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 shrink-0 font-bold">
-                    {item.dueDate ? Math.max(1, Math.ceil((Date.now() - new Date(item.dueDate).getTime()) / (1000 * 60 * 60 * 24))) : "!"}
+          {(isLoading ? [] : overdueItems).map((item) => {
+            const daysOverdue = getOverdueDays(item.dueDate);
+            return (
+              <Card key={item.installmentId ?? item.id} className="border-red-100 dark:border-red-900/30 bg-red-50/40 dark:bg-red-900/10 rounded-xl shadow-sm">
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 shrink-0 font-bold">
+                      {daysOverdue}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 dark:text-white">{item.customerName ?? "-"}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {formatOverdueText(daysOverdue)} - {t("debts.new.s2.amount")}: <span className="font-bold">{(item.amount ?? 0).toLocaleString()} {t("dashboard.currency")}</span>
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-slate-900 dark:text-white">{item.customerName ?? "-"}</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {t("analytics.charts.status.late")} — {t("debts.new.s2.amount")}: <span className="font-bold">{(item.amount ?? 0).toLocaleString()} {t("dashboard.currency")}</span>
-                    </p>
-                  </div>
-                </div>
-                <ReminderActions
-                  installmentId={item.installmentId ?? item.id}
-                  customerName={item.customerName}
-                  customerEmail={item.customerEmail}
-                  onSent={async () => {
-                    const sent = await getRemindersSent();
-                    setSentItems(sent.items ?? []);
-                  }}
-                />
-              </CardContent>
-            </Card>
-          ))}
+                  <ReminderActions
+                    installmentId={item.installmentId ?? item.id}
+                    customerName={item.customerName}
+                    customerEmail={item.customerEmail}
+                    onSent={async () => {
+                      const sent = await getRemindersSent();
+                      setSentItems(sent.items ?? []);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            );
+          })}
           {isLoading && (
             <div className="space-y-3">
               {Array.from({ length: 2 }).map((_, i) => (
@@ -110,7 +138,6 @@ export default function RemindersPage() {
         </div>
       </div>
 
-      {/* Upcoming Section */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <Clock size={20} className="text-orange-500" />
@@ -119,27 +146,35 @@ export default function RemindersPage() {
           </h2>
         </div>
         <div className="space-y-3">
-          {(isLoading ? [] : upcomingItems).map((item) => (
-            <Card key={item.installmentId ?? item.id} className="border-orange-100 dark:border-orange-900/30 bg-orange-50/30 dark:bg-orange-900/10 rounded-xl shadow-sm">
-              <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
-                <div>
-                  <p className="font-bold text-slate-900 dark:text-white">{item.customerName ?? "-"}</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {t("reminders.upcoming.title")} — {t("debts.new.s2.amount")}: <span className="font-bold">{(item.amount ?? 0).toLocaleString()} {t("dashboard.currency")}</span>
-                  </p>
-                </div>
-                <ReminderActions
-                  installmentId={item.installmentId ?? item.id}
-                  customerName={item.customerName}
-                  customerEmail={item.customerEmail}
-                  onSent={async () => {
-                    const sent = await getRemindersSent();
-                    setSentItems(sent.items ?? []);
-                  }}
-                />
-              </CardContent>
-            </Card>
-          ))}
+          {(isLoading ? [] : upcomingItems).map((item) => {
+            const daysRemaining = getUpcomingDays(item.dueDate);
+            return (
+              <Card key={item.installmentId ?? item.id} className="border-orange-100 dark:border-orange-900/30 bg-orange-50/30 dark:bg-orange-900/10 rounded-xl shadow-sm">
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/40 rounded-full flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0 font-bold">
+                      {daysRemaining}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 dark:text-white">{item.customerName ?? "-"}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {formatUpcomingText(daysRemaining)} - {t("debts.new.s2.amount")}: <span className="font-bold">{(item.amount ?? 0).toLocaleString()} {t("dashboard.currency")}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <ReminderActions
+                    installmentId={item.installmentId ?? item.id}
+                    customerName={item.customerName}
+                    customerEmail={item.customerEmail}
+                    onSent={async () => {
+                      const sent = await getRemindersSent();
+                      setSentItems(sent.items ?? []);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            );
+          })}
           {isLoading && (
             <div className="space-y-3">
               {Array.from({ length: 2 }).map((_, i) => (
@@ -161,7 +196,6 @@ export default function RemindersPage() {
         </div>
       </div>
 
-      {/* Sent Reminders */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2 size={20} className="text-green-600" />
@@ -209,5 +243,3 @@ export default function RemindersPage() {
     </div>
   );
 }
-
-

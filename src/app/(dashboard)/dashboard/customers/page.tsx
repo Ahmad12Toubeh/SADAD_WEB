@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Search, MoreVertical, Phone, Download } from "lucide-react";
+import { Plus, Search, MoreVertical, Phone, Download, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { apiFetch } from "@/lib/api";
-import { exportToCsv } from "@/lib/utils/export";
+import { exportToCsv, exportToXlsx } from "@/lib/utils/export";
 
 type Customer = {
   id: string;
@@ -74,7 +74,7 @@ export default function CustomersPage() {
           <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">{t("customers.subtitle")}</p>
         </div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          <Button 
+          <Button
             variant="outline" 
             className="w-full border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 sm:w-auto"
             onClick={() => exportToCsv("customers", items, {
@@ -86,7 +86,21 @@ export default function CustomersPage() {
             } as any)}
           >
             <Download size={18} />
-            {t("common.export")}
+            {t("common.csv")}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 sm:w-auto"
+            onClick={() => exportToXlsx("customers", items, {
+              name: t("customers.table.customer"),
+              phone: t("customers.table.phone"),
+              type: t("customers.table.type"),
+              totalDebt: t("customers.table.totalDebt"),
+              status: t("customers.table.status"),
+            } as any)}
+          >
+            <FileSpreadsheet size={18} />
+            {t("common.excel")}
           </Button>
           <Link href="/dashboard/customers/new" className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto">

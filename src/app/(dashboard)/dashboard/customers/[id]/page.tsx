@@ -95,6 +95,10 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
     }
   };
 
+  const deleteCustomerMessage = i18n.language.startsWith("ar")
+    ? "هل أنت متأكد من حذف هذا العميل؟ سيتم حذف جميع بياناته نهائيًا ولا يمكن التراجع."
+    : "Are you sure you want to delete this customer? All related data will be permanently deleted and cannot be undone.";
+
   return (
     <div className="space-y-6 pb-12">
       {error && (
@@ -281,7 +285,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                 <Trash2 size={32} />
               </div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t("common.confirm")}</h2>
-              <p className="text-slate-500 mb-6">{t("customers.details.deleteConfirm")}</p>
+              <p className="text-slate-500 mb-6">{deleteCustomerMessage}</p>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setShowDeleteConfirm(false)}>{t("common.cancel")}</Button>
                 <Button variant="destructive" className="flex-1" onClick={handleDelete}>{t("common.delete")}</Button>

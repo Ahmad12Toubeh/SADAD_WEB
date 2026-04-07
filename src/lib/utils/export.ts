@@ -1,3 +1,5 @@
+import * as XLSX from "xlsx";
+
 /**
  * Utility to export an array of objects to a CSV file.
  */
@@ -32,4 +34,31 @@ export function exportToCsv<T extends object>(
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+/**
+ * Utility to export an array of objects to an Excel file.
+ */
+export function exportToXlsx<T extends object>(
+  filename: string,
+  data: T[],
+  headers: Record<keyof T, string>
+) {
+  if (data.length === 0) return;
+
+  const headerKeys = Object.keys(headers) as (keyof T)[];
+  const rows = data.map((row) => {
+    const sheetRow: Record<string, unknown> = {};
+    headerKeys.forEach((key) => {
+      sheetRow[headers[key]] = row[key] ?? "";
+    });
+    return sheetRow;
+  });
+
+  const worksheet = XLSX.utils.json_to_sheet(rows, {
+    header: headerKeys.map((key) => headers[key]),
+  });
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+  XLSX.writeFile(workbook, `${filename}.xlsx`);
 }

@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Search, Eye, Calendar, CreditCard, Filter } from "lucide-react";
+import { Plus, Search, Eye, Calendar, CreditCard, Filter, Download, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { apiFetch } from "@/lib/api";
+import { exportToCsv, exportToXlsx } from "@/lib/utils/export";
 
 type Debt = {
   id: string;
@@ -24,7 +25,7 @@ type Debt = {
 };
 
 export default function DebtsPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [items, setItems] = useState<Debt[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -55,6 +56,16 @@ export default function DebtsPage() {
     (d.category ?? "").includes(search) ||
     d.id.includes(search)
   );
+
+  const exportHeaders = {
+    id: t("debts.page.colId"),
+    customerName: t("customers.table.customer"),
+    createdAt: t("debts.page.colDate"),
+    category: t("debts.page.colCategory"),
+    principalAmount: t("customers.table.totalDebt"),
+    currency: t("dashboard.currency"),
+    status: t("customers.table.status"),
+  } as const;
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -96,6 +107,22 @@ export default function DebtsPage() {
             <Button variant="outline" size="sm" className="w-full justify-center dark:border-slate-700 sm:w-auto">
               <Filter size={16} /> <span className="hidden sm:inline">{t("customers.filter")}</span>
               <span className="sm:hidden">{t("customers.filter")}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-center dark:border-slate-700 sm:w-auto"
+              onClick={() => exportToCsv("debts", filtered, exportHeaders as any)}
+            >
+              <Download size={16} /> {t("common.csv")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-center dark:border-slate-700 sm:w-auto"
+              onClick={() => exportToXlsx("debts", filtered, exportHeaders as any)}
+            >
+              <FileSpreadsheet size={16} /> {t("common.excel")}
             </Button>
           </div>
         </CardHeader>

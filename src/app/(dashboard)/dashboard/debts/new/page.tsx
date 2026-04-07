@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, UserCircle, Calculator, FileText, CheckCircle2, UserCheck } from "lucide-react";
@@ -30,13 +30,13 @@ function NewDebtWizardContent() {
   const [selectedCustomerName, setSelectedCustomerName] = useState<string | null>(null);
 
   const [amount, setAmount] = useState("");
-  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const [initialPaymentAmount, setInitialPaymentAmount] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [category, setCategory] = useState("");
   const [notes, setNotes] = useState("");
 
   const [planType, setPlanType] = useState<"one_time" | "installments">("one_time");
-  const [installmentCount, setInstallmentCount] = useState(3);
+  const [installmentCount, setInstallmentCount] = useState("");
   const [installmentPeriod, setInstallmentPeriod] = useState<"monthly" | "weekly">("monthly");
 
   const [guarantorName, setGuarantorName] = useState("");
@@ -57,6 +57,12 @@ function NewDebtWizardContent() {
     { id: 4, title: t("guarantor.title"), icon: UserCheck },
     { id: 5, title: t("debts.new.steps.step4"), icon: CheckCircle2 },
   ];
+
+  const formatMoney = (value: number) =>
+    new Intl.NumberFormat(i18n.language.startsWith("ar") ? "ar-JO" : "en-GB", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 3,
+    }).format(Number.isFinite(value) ? value : 0);
 
   useEffect(() => {
     if (initFromQuery.current) return;
@@ -108,9 +114,15 @@ function NewDebtWizardContent() {
         setError(t("errors.validation.invalid"));
         return;
       }
+      const initialPayment = Number(initialPaymentAmount || 0);
+      if (!Number.isFinite(initialPayment) || initialPayment < 0 || initialPayment > principalAmount) {
+        setError(t("debts.new.s2.initialPaymentValidation"));
+        return;
+      }
     }
     if (currentStep === 3 && planType === "installments") {
-      if (!Number.isFinite(installmentCount) || installmentCount < 2 || installmentCount > 24) {
+      const count = Number(installmentCount);
+      if (!Number.isFinite(count) || count < 1) {
         setError(t("errors.validation.invalid"));
         return;
       }
@@ -145,16 +157,23 @@ function NewDebtWizardContent() {
       if (!customerId) throw new Error("Customer is required");
       const principalAmount = Number(amount);
       if (!Number.isFinite(principalAmount) || principalAmount <= 0) throw new Error("Invalid amount");
+      const initialPayment = Number(initialPaymentAmount || 0);
+      if (!Number.isFinite(initialPayment) || initialPayment < 0 || initialPayment > principalAmount) {
+        throw new Error(t("debts.new.s2.initialPaymentValidation"));
+      }
 
       const res = await createDebt({
         customerId,
         principalAmount,
+        initialPaymentAmount: initialPayment || undefined,
         currency: "JOD",
         planType,
         dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
         category: category || undefined,
         notes: notes || undefined,
-        installmentsPlan: planType === "installments" ? { count: installmentCount, period: installmentPeriod } : undefined,
+        installmentsPlan: planType === "installments"
+          ? { count: Number(installmentCount), period: installmentPeriod }
+          : undefined,
         hasGuarantor,
         guarantor: hasGuarantor
           ? {
@@ -293,30 +312,48 @@ function NewDebtWizardContent() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2 col-span-2">
                       <Label className="dark:text-slate-300">{t("debts.new.s2.amount")}</Label>
-                      <div className="relative">
+                      <div className="flex h-16 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 dark:bg-slate-900 dark:border-slate-700">
                         <Input
                           type="number"
                           min={1}
-                          step="0.01"
+                          step="0.001"
                           inputMode="decimal"
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}
                           placeholder="0.00"
-                          className="h-16 ps-14 text-2xl font-bold dark:bg-slate-900 dark:border-slate-700 text-end"
+                          className="h-full border-0 bg-transparent text-2xl font-bold text-end shadow-none focus-visible:ring-0 dark:bg-transparent dark:border-0"
                           dir="ltr"
                         />
-                        <span className="absolute start-4 top-1/2 -translate-y-1/2 text-slate-500 font-semibold text-lg">{t("dashboard.currency")}</span>
+                        <span className="shrink-0 text-slate-500 font-semibold text-lg">{t("dashboard.currency")}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label className="dark:text-slate-300">{t("debts.new.s2.initialPayment")}</Label>
+                      <div className="flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 dark:bg-slate-900 dark:border-slate-700">
+                        <Input
+                          type="number"
+                          min={0}
+                          step="0.001"
+                          inputMode="decimal"
+                          value={initialPaymentAmount}
+                          onChange={(e) => setInitialPaymentAmount(e.target.value)}
+                          placeholder="0.00"
+                          className="h-full border-0 bg-transparent text-end shadow-none focus-visible:ring-0 dark:bg-transparent dark:border-0"
+                          dir="ltr"
+                        />
+                        <span className="shrink-0 text-slate-500 font-semibold">{t("dashboard.currency")}</span>
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="dark:text-slate-300">{t("debts.new.s2.dueDate")}</Label>
                       <Input
                         type="date"
-                        min={today}
+                        lang={i18n.language.startsWith("ar") ? "ar-EG" : "en-GB"}
                         value={dueDate}
                         onChange={(e) => setDueDate(e.target.value)}
                         className="h-11 dark:bg-slate-900 dark:border-slate-700 text-start"
                       />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{t("debts.new.s2.dueDateFormatHint")}</p>
                     </div>
                     <div className="space-y-2">
                       <Label className="dark:text-slate-300">{t("debts.new.s2.type")}</Label>
@@ -361,16 +398,10 @@ function NewDebtWizardContent() {
                       <Label className="dark:text-slate-300">{t("debts.new.s3.count")}</Label>
                       <Input
                         type="number"
-                        min={2}
-                        max={24}
                         step={1}
                         inputMode="numeric"
                         value={installmentCount}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          if (!Number.isFinite(v)) return;
-                          setInstallmentCount(Math.min(24, Math.max(2, Math.floor(v))));
-                        }}
+                        onChange={(e) => setInstallmentCount(e.target.value)}
                         className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
                       />
                     </div>
@@ -433,8 +464,8 @@ function NewDebtWizardContent() {
 
                           <ImageUploadField
                             inputId="guarantor-proof-image"
-                            label="إثبات شخصي أو صورة الهوية للضامن (اختياري)"
-                            hint="ارفع صورة واضحة لهوية الضامن أو أي إثبات شخصي."
+                            label="إثبات شخصي أو صورة الهوية للكفيل (اختياري)"
+                            hint="ارفع صورة واضحة لهوية الكفيل أو أي إثبات شخصي."
                             previewUrl={guarantorProofImageUrl}
                             isUploading={isUploadingGuarantorProof}
                             onFileSelect={handleGuarantorProofUpload}
@@ -478,13 +509,23 @@ function NewDebtWizardContent() {
                     )}
                     <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
                       <span className="text-slate-500 dark:text-slate-400">{t("debts.new.s4.total")}</span>
-                      <span className="font-bold text-xl dark:text-white">{Number(amount || 0).toLocaleString()} {t("dashboard.currency")}</span>
+                      <span className="font-bold text-xl dark:text-white">{formatMoney(Number(amount || 0))} {t("dashboard.currency")}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
+                      <span className="text-slate-500 dark:text-slate-400">{t("debts.new.s2.initialPayment")}</span>
+                      <span className="font-semibold dark:text-white">{formatMoney(Number(initialPaymentAmount || 0))} {t("dashboard.currency")}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
+                      <span className="text-slate-500 dark:text-slate-400">{t("debts.details.remainingAmount")}</span>
+                      <span className="font-semibold text-orange-600 dark:text-orange-400">
+                        {formatMoney(Math.max(0, Number(amount || 0) - Number(initialPaymentAmount || 0)))} {t("dashboard.currency")}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500 dark:text-slate-400">{t("debts.new.s4.plan")}</span>
                       <span className="font-semibold text-primary text-lg">
                         {planType === "installments"
-                          ? `${installmentCount} ${t(`debts.new.s3.periods.${installmentPeriod}`)}`
+                          ? `${Number(installmentCount) || 0} ${t(`debts.new.s3.periods.${installmentPeriod}`)}`
                           : t("debts.new.s3.oneTime")
                         }
                       </span>

@@ -8,11 +8,13 @@ import {
   LayoutDashboard, Users, PlusCircle, Bell,
   PieChart, UsersRound, Settings, ShieldCheck, UserCheck, X
 } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigationConfig = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { key: "customers", href: "/dashboard/customers", icon: Users },
+  { key: "debts", href: "/dashboard/debts", icon: CreditCard },
   { key: "addDebt", href: "/dashboard/debts/new", icon: PlusCircle },
   { key: "analytics", href: "/dashboard/analytics", icon: PieChart },
   { key: "associations", href: "/dashboard/associations", icon: UsersRound },

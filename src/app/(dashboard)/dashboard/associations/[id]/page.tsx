@@ -3,20 +3,20 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowRight, Plus, Trash2, ChevronUp, ChevronDown, Users, Calendar, DollarSign, Download } from "lucide-react";
+import { ArrowRight, Plus, Trash2, ChevronUp, ChevronDown, Users, Calendar, DollarSign, Download, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { useTranslation } from "react-i18next";
 import { Association, addAssociationFundTransaction, approveAssociationFundTransaction, closeAssociationMonth, deleteAssociation, getAssociation, patchAssociation, reopenAssociationCycle } from "@/lib/api";
-import { exportToCsv } from "@/lib/utils/export";
+import { exportToCsv, exportToXlsx } from "@/lib/utils/export";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 type Member = { id?: string; name?: string; phone?: string; turnOrder?: number; isPaid?: boolean; isReceiver?: boolean };
 
 export default function AssociationDetailsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const associationId = params?.id;
@@ -26,6 +26,7 @@ export default function AssociationDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [assoc, setAssoc] = useState<Association | null>(null);
   const [showDelete, setShowDelete] = useState(false);
+  const [showCloseMonthConfirm, setShowCloseMonthConfirm] = useState(false);
   const [isClosingMonth, setIsClosingMonth] = useState(false);
   const [isUpdatingPayments, setIsUpdatingPayments] = useState(false);
   const [fundForm, setFundForm] = useState({ type: "in", amount: "", note: "" });
@@ -163,6 +164,11 @@ export default function AssociationDetailsPage() {
     } finally {
       setIsClosingMonth(false);
     }
+  };
+
+  const handleCloseMonthConfirmed = async () => {
+    setShowCloseMonthConfirm(false);
+    await onCloseMonth();
   };
 
   const onReopenCycle = async () => {
@@ -381,7 +387,12 @@ export default function AssociationDetailsPage() {
           >
             <Trash2 size={16} /> {t("common.delete")}
           </Button>
-          <Button variant="outline" className="w-full sm:w-auto" onClick={onCloseMonth} disabled={isClosingMonth}>
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => setShowCloseMonthConfirm(true)}
+            disabled={isClosingMonth}
+          >
             {isClosingMonth ? t("common.loading") : t("associations.page.closeMonth")}
           </Button>
           <Button variant="outline" className="w-full sm:w-auto" onClick={onReopenCycle} disabled={!assoc?.lockOrder}>
@@ -668,20 +679,36 @@ export default function AssociationDetailsPage() {
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-slate-900 dark:text-white">{t("associations.page.paymentsTitle")}</CardTitle>
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() =>
-                exportToCsv("association_payments", assoc?.paymentLogs ?? [], {
-                  memberName: t("associations.page.memberName"),
-                  amount: t("associations.page.fundAmount"),
-                  paidAt: t("associations.page.paymentsDate"),
-                  month: t("associations.page.historyMonth"),
-                } as any)
-              }
-            >
-              {t("associations.page.exportPayments")}
-            </Button>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() =>
+                  exportToCsv("association_payments", assoc?.paymentLogs ?? [], {
+                    memberName: t("associations.page.memberName"),
+                    amount: t("associations.page.fundAmount"),
+                    paidAt: t("associations.page.paymentsDate"),
+                    month: t("associations.page.historyMonth"),
+                  } as any)
+                }
+              >
+                <Download size={16} /> {t("common.csv")}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() =>
+                  exportToXlsx("association_payments", assoc?.paymentLogs ?? [], {
+                    memberName: t("associations.page.memberName"),
+                    amount: t("associations.page.fundAmount"),
+                    paidAt: t("associations.page.paymentsDate"),
+                    month: t("associations.page.historyMonth"),
+                  } as any)
+                }
+              >
+                <FileSpreadsheet size={16} /> {t("common.excel")}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -716,6 +743,34 @@ export default function AssociationDetailsPage() {
           ))}
         </CardContent>
       </Card>
+
+      {showCloseMonthConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm">
+          <Card className="w-full max-w-md shadow-2xl dark:bg-slate-900">
+            <CardContent className="p-8 text-center">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t("common.confirm")}</h2>
+              <p className="text-slate-500 mb-2">
+                {i18n.language.startsWith("ar")
+                  ? "هل تريد إغلاق هذا الشهر الآن؟"
+                  : "Do you want to close this month now?"}
+              </p>
+              <p className="text-sm text-slate-500 mb-6">
+                {i18n.language.startsWith("ar")
+                  ? "سيتم تصفير حالة الدفع لجميع الأعضاء وبدء شهر جديد."
+                  : "All members payment statuses will be reset and a new month will start."}
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCloseMonthConfirm(false)}>
+                  {t("common.cancel")}
+                </Button>
+                <Button className="flex-1" onClick={handleCloseMonthConfirmed} disabled={isClosingMonth}>
+                  {isClosingMonth ? t("common.loading") : t("associations.page.closeMonth")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {showDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm">

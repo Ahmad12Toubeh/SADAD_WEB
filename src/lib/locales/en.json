@@ -2,6 +2,7 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "customers": "Customers",
+    "debts": "Debts",
     "addDebt": "Create New Debt",
     "debtDetails": "Debt Details",
     "analytics": "Analytics Summary",
@@ -27,7 +28,9 @@
     "search": "Search...",
     "noResults": "No results found",
     "export": "Export Data",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "csv": "CSV",
+    "excel": "Excel"
   },
   "header": {
     "searchPlaceholder": "Search for customer or invoice...",
@@ -186,7 +189,10 @@
       },
       "s2": {
         "amount": "Total Amount",
+        "initialPayment": "First Payment (Optional)",
+        "initialPaymentValidation": "First payment must be between 0 and total amount.",
         "dueDate": "Debt Due Date",
+        "dueDateFormatHint": "Date format: day/month/year",
         "type": "Debt Type",
         "types": {
           "t1": "Deferred Sales Invoice",

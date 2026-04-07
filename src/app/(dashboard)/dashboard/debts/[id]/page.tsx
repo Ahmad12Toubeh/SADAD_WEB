@@ -42,6 +42,7 @@ export default function DebtDetailsPage() {
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [activationSuccess, setActivationSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [confirmPayInstallmentId, setConfirmPayInstallmentId] = useState<string | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [isIssuingInvoice, setIsIssuingInvoice] = useState(false);
 
@@ -81,6 +82,17 @@ export default function DebtDetailsPage() {
     const progress = total > 0 ? Math.round((paid / total) * 100) : 0;
     return { total, paid, remaining, progress };
   }, [debt, installments]);
+
+  const orderedInstallments = useMemo(() => {
+    return [...installments].sort((a, b) => {
+      const aInitial = a.isInitialPayment ? 1 : 0;
+      const bInitial = b.isInitialPayment ? 1 : 0;
+      if (aInitial !== bInitial) return bInitial - aInitial;
+      const aDue = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      const bDue = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+      return aDue - bDue;
+    });
+  }, [installments]);
   const hasGuarantorInfo = Boolean(debt?.guarantor?.name || debt?.guarantor?.phone);
 
   const handleActivateGuarantor = async () => {
@@ -105,6 +117,29 @@ export default function DebtDetailsPage() {
       const key = err?.messageKey as string | undefined;
       setError(key ? t(key) : err?.message ?? "Payment failed");
     }
+  };
+
+  const canPayInstallmentByOrder = (installmentIndex: number) => {
+    return orderedInstallments.slice(0, installmentIndex).every((item) => item.status === "paid");
+  };
+
+  const handleRequestPay = (installmentId: string, installmentIndex: number) => {
+    setError(null);
+    if (!canPayInstallmentByOrder(installmentIndex)) {
+      const orderValidationMsg =
+        i18n.language?.startsWith("ar")
+          ? "لازم تسدد الأقساط السابقة أولاً."
+          : "You must pay earlier installments first.";
+      setError(orderValidationMsg);
+      return;
+    }
+    setConfirmPayInstallmentId(installmentId);
+  };
+
+  const handleConfirmPay = async () => {
+    if (!confirmPayInstallmentId) return;
+    await handlePay(confirmPayInstallmentId);
+    setConfirmPayInstallmentId(null);
   };
 
   const handleDelete = async () => {
@@ -341,9 +376,8 @@ export default function DebtDetailsPage() {
               <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
                 #{debt?.id?.slice(-6).toUpperCase()}
               </h1>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                debt?.status === "paid" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-              }`}>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${debt?.status === "paid" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                }`}>
                 {debt?.status === "paid" ? t("analytics.charts.status.paid") : t("analytics.charts.status.active")}
               </span>
             </div>
@@ -356,7 +390,7 @@ export default function DebtDetailsPage() {
             className="text-red-500 border-red-200 bg-white hover:bg-red-50 gap-2 dark:bg-slate-900 dark:border-red-900/30 dark:hover:bg-red-900/20"
             onClick={() => setShowDeleteConfirm(true)}
           >
-             <Trash2 size={16} /> {t("common.delete")}
+            <Trash2 size={16} /> {t("common.delete")}
           </Button>
           <Button
             variant="outline"
@@ -379,15 +413,47 @@ export default function DebtDetailsPage() {
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm">
           <Card className="w-full max-w-sm shadow-2xl border-red-200 dark:bg-slate-900 p-8 text-center ring-1 ring-red-500/10">
-              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trash2 size={32} />
-              </div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t("common.confirm")}</h2>
-              <p className="text-slate-500 mb-6">{t("guarantor.modal.desc")}</p>
-              <div className="flex gap-3">
-                <Button variant="ghost" className="flex-1" onClick={() => setShowDeleteConfirm(false)}>{t("common.cancel")}</Button>
-                <Button variant="destructive" className="flex-1 shadow-lg shadow-red-500/20" onClick={handleDelete}>{t("common.delete")}</Button>
-              </div>
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={32} />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t("common.confirm")}</h2>
+            <p className="text-slate-500 mb-6">{t("guarantor.modal.desc")}</p>
+            <div className="flex gap-3">
+              <Button variant="ghost" className="flex-1" onClick={() => setShowDeleteConfirm(false)}>{t("common.cancel")}</Button>
+              <Button variant="destructive" className="flex-1 shadow-lg shadow-red-500/20" onClick={handleDelete}>{t("common.delete")}</Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {confirmPayInstallmentId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm">
+          <Card className="w-full max-w-sm shadow-2xl border-0 overflow-hidden dark:bg-slate-900 rounded-3xl">
+            <div className="bg-slate-900 p-8 text-center text-white">
+              <h2 className="text-2xl font-black mb-3">
+                {i18n.language?.startsWith("ar") ? "تأكيد الدفع" : "Confirm Payment"}
+              </h2>
+              <p className="text-white/70 text-sm leading-relaxed">
+                {i18n.language?.startsWith("ar")
+                  ? "هل أنت متأكد من تسجيل هذا القسط كسداد؟ لا يمكن التراجع بعد التنفيذ."
+                  : "Are you sure you want to mark this installment as paid? This action cannot be undone."}
+              </p>
+            </div>
+            <div className="p-6 bg-white dark:bg-slate-900 flex flex-col gap-3">
+              <Button
+                onClick={handleConfirmPay}
+                className="w-full h-12 text-base font-black bg-primary hover:bg-primary/90 text-white rounded-2xl"
+              >
+                {i18n.language?.startsWith("ar") ? "نعم، تأكيد الدفع" : "Yes, Confirm Payment"}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setConfirmPayInstallmentId(null)}
+                className="w-full h-11 font-bold text-slate-500"
+              >
+                {t("common.cancel")}
+              </Button>
+            </div>
           </Card>
         </div>
       )}
@@ -453,9 +519,8 @@ export default function DebtDetailsPage() {
         </Card>
 
         {/* Guarantor Card */}
-        <Card className={`border-0 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden transition-all ${
-           isGuarantorActive ? "bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30" : "bg-slate-900 text-white"
-        }`}>
+        <Card className={`border-0 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden transition-all ${isGuarantorActive ? "bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30" : "bg-slate-900 text-white"
+          }`}>
           <CardContent className="p-7 flex flex-col h-full">
             <div className={`p-3 rounded-2xl w-fit mb-5 ${isGuarantorActive ? "bg-red-100 text-red-600" : "bg-white/10 text-white"}`}>
               {isGuarantorActive ? <ShieldAlert size={24} /> : <UserCheck size={24} />}
@@ -464,7 +529,7 @@ export default function DebtDetailsPage() {
             <p className={isGuarantorActive ? "text-red-700/70" : "text-slate-400"}>
               {isGuarantorActive ? t("guarantor.status.active") : t("guarantor.desc")}
             </p>
-            
+
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3">
                 <User size={18} className="opacity-40" />
@@ -473,19 +538,19 @@ export default function DebtDetailsPage() {
               <div className="flex items-center gap-3">
                 <Phone size={18} className="opacity-40" />
                 <span className="font-bold tracking-widest" dir="ltr">{debt?.guarantor?.phone || "-"}</span>
-              {!hasGuarantorInfo && <div className="text-sm opacity-70">{t("guarantor.status.noGuarantor")}</div>}
+                {!hasGuarantorInfo && <div className="text-sm opacity-70">{t("guarantor.status.noGuarantor")}</div>}
               </div>
               {debt?.guarantor?.proofImageUrl && (
                 <Link href={debt.guarantor.proofImageUrl} target="_blank" className={`inline-flex items-center gap-2 text-sm font-semibold ${isGuarantorActive ? "text-red-700 dark:text-red-300" : "text-primary"}`}>
                   <Eye size={16} />
-                  عرض إثبات الضامن
+                  عرض إثبات الكفيل
                 </Link>
               )}
             </div>
 
             <div className="mt-auto pt-8">
               {!isGuarantorActive ? (
-                <Button 
+                <Button
                   className="w-full bg-white text-slate-900 hover:bg-slate-100 font-bold gap-2 disabled:opacity-60"
                   onClick={() => setShowActivateModal(true)}
                   disabled={!hasGuarantorInfo}
@@ -523,12 +588,11 @@ export default function DebtDetailsPage() {
           </div>
         </div>
         <div className="divide-y divide-slate-50 dark:divide-slate-700">
-          {installments.map((inst, idx) => (
+          {orderedInstallments.map((inst, idx) => (
             <div key={idx} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
               <div className="flex items-center gap-5">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-lg ${
-                  inst.status === "paid" ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
-                }`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-lg ${inst.status === "paid" ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
+                  }`}>
                   {idx + 1}
                 </div>
                 <div>
@@ -536,7 +600,11 @@ export default function DebtDetailsPage() {
                     {inst.amount.toLocaleString()} <span className="text-sm font-medium opacity-50">{t("dashboard.currency")}</span>
                   </p>
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                    {t("debts.details.installment")} {idx + 1}
+                    {inst.isInitialPayment
+                      ? i18n.language?.startsWith("ar")
+                        ? "الدفعة الأولى"
+                        : "Initial payment"
+                      : `${t("debts.details.installment")} ${idx + 1}`}
                   </p>
                 </div>
               </div>
@@ -549,16 +617,23 @@ export default function DebtDetailsPage() {
                   </div>
                   <p className="font-bold text-slate-900 dark:text-white">{inst.dueDate ? inst.dueDate.split("T")[0] : "-"}</p>
                 </div>
-                
+
                 {inst.status === "paid" ? (
                   <div className="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-2.5 rounded-xl border border-green-100 dark:border-green-900/30">
                     <CheckCircle2 size={18} />
                     <span className="text-sm font-black uppercase tracking-tight">{t("analytics.charts.status.paid")}</span>
                   </div>
                 ) : (
-                  <Button 
+                  <Button
                     className="bg-primary hover:bg-primary/90 text-white font-black px-6 rounded-xl shadow-lg shadow-primary/20 h-11"
-                    onClick={() => handlePay(inst.id)}
+                    onClick={() => handleRequestPay(inst.id, idx)}
+                    title={
+                      canPayInstallmentByOrder(idx)
+                        ? undefined
+                        : i18n.language?.startsWith("ar")
+                          ? "لازم تسدد الأقساط السابقة أولاً"
+                          : "You must pay earlier installments first"
+                    }
                   >
                     {t("debts.details.markAsPaid")}
                   </Button>
@@ -592,10 +667,10 @@ export default function DebtDetailsPage() {
             </div>
             <div className="p-6 bg-white dark:bg-slate-900 flex flex-col gap-3">
               <Button onClick={handleActivateGuarantor} className="w-full h-14 text-lg font-black bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 rounded-2xl shadow-xl">
-                 {t("guarantor.modal.confirm")}
+                {t("guarantor.modal.confirm")}
               </Button>
               <Button variant="ghost" onClick={() => setShowActivateModal(false)} className="w-full h-12 font-bold text-slate-500">
-                 {t("guarantor.modal.cancel")}
+                {t("guarantor.modal.cancel")}
               </Button>
             </div>
           </Card>
