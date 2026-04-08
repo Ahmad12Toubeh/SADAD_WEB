@@ -75,7 +75,9 @@
       "late": "Late",
       "defaulting": "Defaulting"
     },
-    "pagination": "Showing 1 to 5 of 342 customers",
+    "pagination": "Showing {{from}}–{{to}} of {{count}}",
+    "paginationEmpty": "No customers to display",
+    "rowsPerPage": "Rows per page",
     "prev": "Previous",
     "next": "Next",
     "new": {

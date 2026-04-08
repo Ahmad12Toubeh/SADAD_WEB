@@ -75,7 +75,9 @@
       "late": "متأخر",
       "defaulting": "متعثر"
     },
-    "pagination": "يتم عرض 1 إلى 5 من أصل 342 عميل",
+    "pagination": "عرض {{from}}–{{to}} من أصل {{count}}",
+    "paginationEmpty": "لا يوجد عملاء للعرض",
+    "rowsPerPage": "عدد الصفوف لكل صفحة",
     "prev": "السابق",
     "next": "التالي",
     "new": {

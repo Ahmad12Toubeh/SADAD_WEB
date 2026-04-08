@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { apiFetch } from "@/lib/api";
 import { exportToCsv, exportToXlsx } from "@/lib/utils/export";
 
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
+
 type Customer = {
   id: string;
   type: "individual" | "company";
@@ -27,20 +29,33 @@ export default function CustomersPage() {
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [pageSize, setPageSize] = useState<number>(20);
   const [error, setError] = useState<string | null>(null);
   const latestRequestIdRef = useRef(0);
+  const initialSearchFetchRef = useRef(true);
 
-  const fetchItems = async (page: number, q: string, reqId: number) => {
+  const fetchItems = async (page: number, q: string, reqId: number, limit = pageSize) => {
     setIsLoading(true);
     setError(null);
     try {
       const qs = q.trim() ? `&search=${encodeURIComponent(q.trim())}` : "";
-      const res = await apiFetch<{ items: Customer[]; page: number; totalPages: number; total: number }>(
-        `/customers?page=${page}&limit=20${qs}`
-      );
+      const res = await apiFetch<{
+        items: Customer[];
+        page: number;
+        totalPages: number;
+        total: number;
+        limit?: number;
+      }>(`/customers?page=${page}&limit=${limit}${qs}`);
       if (reqId !== latestRequestIdRef.current) return;
-      setItems(res.items);
-      setPagination({ page: res.page, totalPages: res.totalPages, total: res.total });
+      setItems(res.items ?? []);
+      const total = res.total ?? 0;
+      const rawPages = res.totalPages ?? 0;
+      const totalPages = total === 0 ? 1 : Math.max(1, rawPages);
+      setPagination({
+        page: res.page ?? page,
+        totalPages,
+        total,
+      });
     } catch (err: any) {
       if (reqId !== latestRequestIdRef.current) return;
       const key = err?.messageKey as string | undefined;
@@ -51,19 +66,43 @@ export default function CustomersPage() {
   };
 
   useEffect(() => {
+    if (initialSearchFetchRef.current) {
+      initialSearchFetchRef.current = false;
+      return;
+    }
     const reqId = latestRequestIdRef.current + 1;
     latestRequestIdRef.current = reqId;
     const timeout = setTimeout(() => {
-      fetchItems(1, search, reqId);
+      fetchItems(1, search, reqId, pageSize);
     }, 450);
     return () => clearTimeout(timeout);
   }, [search]);
+
+  useEffect(() => {
+    const reqId = latestRequestIdRef.current + 1;
+    latestRequestIdRef.current = reqId;
+    fetchItems(1, search, reqId, pageSize);
+  }, [pageSize]);
+
+  const fromCount =
+    pagination.total === 0 ? 0 : (pagination.page - 1) * pageSize + 1;
+  const toCount =
+    pagination.total === 0
+      ? 0
+      : Math.min(pagination.page * pageSize, pagination.total);
 
   const onPageChange = (newPage: number) => {
     if (newPage < 1 || newPage > pagination.totalPages) return;
     const reqId = latestRequestIdRef.current + 1;
     latestRequestIdRef.current = reqId;
-    fetchItems(newPage, search, reqId);
+    fetchItems(newPage, search, reqId, pageSize);
+  };
+
+  const onPageSizeChange = (value: string) => {
+    const nextSize = Number(value);
+    if (!Number.isFinite(nextSize) || nextSize <= 0) return;
+    if (nextSize === pageSize) return;
+    setPageSize(nextSize);
   };
 
   return (
@@ -243,8 +282,26 @@ export default function CustomersPage() {
         
         {/* Pagination */}
         <div className="mt-6 flex flex-col gap-3 px-2 text-sm text-slate-500 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>{t("customers.pagination")} - {pagination.total} {t("customers.title")}</span>
-          <div className="flex flex-wrap gap-2">
+          <span>
+            {isLoading && items.length === 0
+              ? t("common.loading")
+              : pagination.total === 0
+                ? t("customers.paginationEmpty")
+                : t("customers.pagination", { from: fromCount, to: toCount, count: pagination.total })}
+          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 dark:text-slate-400">{t("customers.rowsPerPage")}</span>
+              <select
+                value={pageSize}
+                onChange={(e) => onPageSizeChange(e.target.value)}
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>{size}</option>
+                ))}
+              </select>
+            </div>
             <Button 
               variant="outline" 
               size="sm" 
