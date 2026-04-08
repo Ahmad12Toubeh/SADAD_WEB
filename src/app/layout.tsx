@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Tajawal } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/contexts/Providers";
+import { LOCALE_STORAGE_KEY, normalizeLocaleTag } from "@/lib/locale";
 
 const tajawal = Tajawal({
   variable: "--font-tajawal",
@@ -19,15 +21,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const locale = normalizeLocaleTag(cookieStore.get(LOCALE_STORAGE_KEY)?.value);
+
   return (
     <html
-      lang="ar"
-      dir="rtl"
+      lang={locale === "en" ? "en" : "ar"}
+      dir={locale === "en" ? "ltr" : "rtl"}
       className={`${tajawal.variable} antialiased`}
       suppressHydrationWarning
     >
@@ -36,15 +41,17 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var l = window.localStorage.getItem('i18nextLng') || 'ar';
-                var isEng = l.startsWith('en');
-                document.documentElement.lang = isEng ? 'en' : 'ar';
-                document.documentElement.dir = isEng ? 'ltr' : 'rtl';
+                var k = ${JSON.stringify(LOCALE_STORAGE_KEY)};
+                var l = window.localStorage.getItem(k) || 'ar';
+                var lang = l.startsWith('en') ? 'en' : 'ar';
+                document.documentElement.lang = lang === 'en' ? 'en' : 'ar';
+                document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+                document.cookie = k + '=' + lang + ';path=/;max-age=31536000;SameSite=Lax';
               } catch (e) {}
             `,
           }}
         />
-        <Providers>
+        <Providers initialLocale={locale}>
           {children}
         </Providers>
       </body>

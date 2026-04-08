@@ -9,6 +9,7 @@ import { useTheme } from "@/contexts/Providers";
 import { Search, Moon, Sun, Globe, LogOut, Menu } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { getSettingsProfile, getSettingsStore, logout } from "@/lib/api";
+import { persistLocalePreference } from "@/lib/locale";
 import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
 
 type HeaderProps = {
@@ -67,10 +68,8 @@ export function Header({ onMenuClick }: HeaderProps) {
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "ar" ? "en" : "ar";
-    i18n.changeLanguage(newLang);
-    document.documentElement.dir = i18n.dir(newLang);
-    document.documentElement.lang = newLang;
-    localStorage.setItem("i18nextLng", newLang);
+    void i18n.changeLanguage(newLang);
+    persistLocalePreference(newLang);
   };
 
   const handleLogout = async () => {

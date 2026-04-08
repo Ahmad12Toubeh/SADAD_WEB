@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
+import { persistLocalePreference } from "@/lib/locale";
 import { ShieldCheck, Moon, Sun, Globe, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { BrandName } from "@/components/layout/BrandLogo";
@@ -13,10 +14,8 @@ export function AuthNavbar() {
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "ar" ? "en" : "ar";
-    i18n.changeLanguage(newLang);
-    document.documentElement.dir = i18n.dir(newLang);
-    document.documentElement.lang = newLang;
-    localStorage.setItem("i18nextLng", newLang);
+    void i18n.changeLanguage(newLang);
+    persistLocalePreference(newLang);
   };
 
   return (

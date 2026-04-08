@@ -6,6 +6,7 @@ import { useTheme } from "@/contexts/Providers";
 import { ArrowLeft, ArrowRight, ShieldCheck, Globe, Moon, Sun } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
+import { persistLocalePreference } from "@/lib/locale";
 
 import { HeroSection } from "@/components/landing/HeroSection";
 import { BrandName } from "@/components/layout/BrandLogo";
@@ -21,10 +22,8 @@ export default function Home() {
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "ar" ? "en" : "ar";
-    i18n.changeLanguage(newLang);
-    document.documentElement.dir = i18n.dir(newLang);
-    document.documentElement.lang = newLang;
-    localStorage.setItem("i18nextLng", newLang);
+    void i18n.changeLanguage(newLang);
+    persistLocalePreference(newLang);
   };
 
   return (

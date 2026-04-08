@@ -1,9 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import i18n from "@/lib/i18n";
+import i18n, { syncI18nToLocale } from "@/lib/i18n";
 import { I18nextProvider } from "react-i18next";
 import { setupClientMonitoring } from "@/lib/monitoring";
+import type { AppLocale } from "@/lib/locale";
+import { LOCALE_STORAGE_KEY, normalizeLocaleTag, persistLocalePreference } from "@/lib/locale";
 
 type Theme = "light" | "dark";
 
@@ -49,19 +51,30 @@ export function useTheme() {
   return context;
 }
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+  children,
+  initialLocale,
+}: {
+  children: ReactNode;
+  initialLocale: AppLocale;
+}) {
+  syncI18nToLocale(initialLocale);
+
   useEffect(() => {
-    // Read saved language or default to Arabic
-    const savedLang = localStorage.getItem("i18nextLng");
-    if (savedLang) {
-      i18n.changeLanguage(savedLang);
+    const raw = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (raw != null && raw !== "") {
+      const saved = normalizeLocaleTag(raw);
+      if (saved !== initialLocale) {
+        void i18n.changeLanguage(saved);
+        persistLocalePreference(saved);
+      }
     }
     document.documentElement.dir = i18n.dir();
     document.documentElement.lang = i18n.language;
 
     const cleanupMonitoring = setupClientMonitoring();
     return cleanupMonitoring;
-  }, []);
+  }, [initialLocale]);
 
   return (
     <I18nextProvider i18n={i18n}>
