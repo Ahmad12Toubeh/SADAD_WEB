@@ -6,8 +6,9 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { 
   LayoutDashboard, Users, PlusCircle, Bell,
-  PieChart, UsersRound, Settings, ShieldCheck, UserCheck, X
+  PieChart, UsersRound, Settings, UserCheck, X
 } from "lucide-react";
+import { BrandLogo, BrandName } from "@/components/layout/BrandLogo";
 import { CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -60,11 +61,12 @@ export function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
         )}
       >
         <div className="flex items-center justify-between h-20 border-b border-slate-100 px-5 dark:border-white/10 shrink-0 lg:justify-center">
-          <Link href="/" className="text-2xl font-bold text-secondary dark:text-white flex items-center gap-2">
-            <div className="bg-primary/10 dark:bg-primary p-1.5 rounded-lg">
-              <ShieldCheck size={24} className="text-primary dark:text-white" />
-            </div>
-            SADAD
+          <Link
+            href="/dashboard"
+            className="text-secondary dark:text-white flex items-center gap-2"
+          >
+            <BrandLogo size="sm" className="dark:bg-primary" />
+            <BrandName size="sm" />
           </Link>
           <button
             type="button"

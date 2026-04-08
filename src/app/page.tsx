@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 
 import { HeroSection } from "@/components/landing/HeroSection";
+import { BrandName } from "@/components/layout/BrandLogo";
 
 const FeaturesSection = dynamic(() => import("@/components/landing/FeaturesSection").then((m) => m.FeaturesSection));
 const HowItWorksSection = dynamic(() => import("@/components/landing/HowItWorksSection").then((m) => m.HowItWorksSection));
@@ -34,7 +35,7 @@ export default function Home() {
           <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg text-primary">
             <ShieldCheck size={28} />
           </div>
-          <span className="text-xl font-bold text-secondary dark:text-white">سداد</span>
+          <BrandName size="lg" />
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
           <a href="#features" className="hover:text-primary transition-colors">{t("landing.nav.features")}</a>
