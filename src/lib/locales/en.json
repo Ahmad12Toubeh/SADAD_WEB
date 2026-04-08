@@ -35,7 +35,13 @@
   "header": {
     "searchPlaceholder": "Search for customer or invoice...",
     "storeName": "Al-Amal Store",
-    "role": "General Manager"
+    "role": "General Manager",
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Installments that need attention",
+      "empty": "No overdue installments or dues within the next week.",
+      "viewAll": "Open reminders"
+    }
   },
   "dashboard": {
     "title": "Overview",

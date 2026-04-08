@@ -6,9 +6,10 @@ import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/contexts/Providers";
-import { Bell, Search, Moon, Sun, Globe, LogOut, Menu } from "lucide-react";
+import { Search, Moon, Sun, Globe, LogOut, Menu } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { getSettingsProfile, getSettingsStore, logout } from "@/lib/api";
+import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
 
 type HeaderProps = {
   onMenuClick?: () => void;
@@ -134,11 +135,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           </button>
         </div>
 
-        {/* Notifications */}
-        <button className="relative p-1.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
-          <Bell size={22} />
-          <span className="absolute top-1 end-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-        </button>
+        <HeaderNotifications />
 
         {/* Profile & Logout */}
         <div className="flex min-w-0 items-center gap-3 border-s border-slate-200 ps-3 dark:border-slate-700 sm:gap-4 sm:ps-4">
