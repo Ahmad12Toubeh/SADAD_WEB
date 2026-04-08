@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { activateGuarantor, deleteDebt, getCustomer, getDebt, getSettingsStore, payInstallment } from "@/lib/api";
+import { formatDebtCategory } from "@/lib/debtCategory";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -172,7 +173,7 @@ export default function DebtDetailsPage() {
     const resolvedCustomerName = customerName || debt.customerName || `#${debt.customerId?.slice?.(-6) ?? "-"}`;
     const statusLabel =
       debt?.status === "paid" ? t("analytics.charts.status.paid") : debt?.status === "late" ? t("analytics.charts.status.late") : t("analytics.charts.status.active");
-    const categoryLabel = debt?.category || t("debts.new.s2.types.t1");
+    const categoryLabel = formatDebtCategory(debt?.category, t);
 
     const rows = installments.map((inst: any, idx: number) => `
       <tr>
@@ -376,12 +377,12 @@ export default function DebtDetailsPage() {
               <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
                 #{debt?.id?.slice(-6).toUpperCase()}
               </h1>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${debt?.status === "paid" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${i18n.language.startsWith("ar") ? "" : "uppercase"} ${debt?.status === "paid" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                 }`}>
-                {debt?.status === "paid" ? t("analytics.charts.status.paid") : t("analytics.charts.status.active")}
+                {debt?.status === "paid" ? t("analytics.charts.status.paid") : debt?.status === "late" ? t("analytics.charts.status.late") : t("analytics.charts.status.active")}
               </span>
             </div>
-            <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">{debt?.category || t("debts.new.s2.types.t1")}</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">{formatDebtCategory(debt?.category, t)}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -621,7 +622,7 @@ export default function DebtDetailsPage() {
                 {inst.status === "paid" ? (
                   <div className="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-2.5 rounded-xl border border-green-100 dark:border-green-900/30">
                     <CheckCircle2 size={18} />
-                    <span className="text-sm font-black uppercase tracking-tight">{t("analytics.charts.status.paid")}</span>
+                    <span className={`text-sm font-black tracking-tight ${i18n.language.startsWith("ar") ? "" : "uppercase"}`}>{t("analytics.charts.status.paid")}</span>
                   </div>
                 ) : (
                   <Button

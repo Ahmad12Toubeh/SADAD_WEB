@@ -32,7 +32,7 @@ function NewDebtWizardContent() {
   const [amount, setAmount] = useState("");
   const [initialPaymentAmount, setInitialPaymentAmount] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("t1");
   const [notes, setNotes] = useState("");
 
   const [planType, setPlanType] = useState<"one_time" | "installments">("one_time");
@@ -169,7 +169,7 @@ function NewDebtWizardContent() {
         currency: "JOD",
         planType,
         dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
-        category: category || undefined,
+        category: category || "t1",
         notes: notes || undefined,
         installmentsPlan: planType === "installments"
           ? { count: Number(installmentCount), period: installmentPeriod }
@@ -358,10 +358,9 @@ function NewDebtWizardContent() {
                     <div className="space-y-2">
                       <Label className="dark:text-slate-300">{t("debts.new.s2.type")}</Label>
                       <select value={category} onChange={(e) => setCategory(e.target.value)} className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-sm text-start">
-                        <option value="">{t("debts.new.s2.types.t1")}</option>
-                        <option value={t("debts.new.s2.types.t1")}>{t("debts.new.s2.types.t1")}</option>
-                        <option value={t("debts.new.s2.types.t2")}>{t("debts.new.s2.types.t2")}</option>
-                        <option value={t("debts.new.s2.types.t3")}>{t("debts.new.s2.types.t3")}</option>
+                        <option value="t1">{t("debts.new.s2.types.t1")}</option>
+                        <option value="t2">{t("debts.new.s2.types.t2")}</option>
+                        <option value="t3">{t("debts.new.s2.types.t3")}</option>
                       </select>
                     </div>
                     <div className="space-y-2 col-span-2">

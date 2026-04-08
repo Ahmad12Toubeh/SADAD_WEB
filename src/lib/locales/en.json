@@ -45,7 +45,8 @@
   },
   "dashboard": {
     "title": "Overview",
-    "subtitle": "Welcome back Al-Amal Store, here is a summary of your store's financial performance.",
+    "storeNamePlaceholder": "your store",
+    "subtitle": "Welcome back, {{storeName}}, here is a summary of your store's financial performance.",
     "totalActiveDebt": "Total Active Debt",
     "collectedThisMonth": "Collected This Month",
     "badDebt": "Bad Debt (Overdue)",

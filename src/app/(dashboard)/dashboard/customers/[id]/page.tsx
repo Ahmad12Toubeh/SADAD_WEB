@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { getCustomer, getCustomerDebts, updateCustomer, deleteCustomer } from "@/lib/api";
 import { ReminderActions } from "@/components/reminders/ReminderActions";
 import { isValidJordan07Phone, JORDAN_07_PHONE_HINT, sanitizeJordan07PhoneInput } from "@/lib/phone";
+import { formatDebtCategory } from "@/lib/debtCategory";
 
 type Debt = {
   id: string;
@@ -201,7 +202,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                   <td className="px-6 py-5 font-bold text-slate-900 dark:text-white">
                     {tx.type
                       ? t(`debts.new.s2.types.${tx.type === "invoice" ? "t1" : tx.type === "loan" ? "t2" : "t3"}`)
-                      : (tx.category ?? "-")}
+                      : formatDebtCategory(tx.category, t)}
                   </td>
                   <td className="px-6 py-5 font-black text-slate-900 dark:text-white">
                     {tx.principalAmount.toLocaleString()} {t("dashboard.currency")}

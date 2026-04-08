@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { apiFetch } from "@/lib/api";
 import { exportToCsv, exportToXlsx } from "@/lib/utils/export";
+import { formatDebtCategory } from "@/lib/debtCategory";
 
 type Debt = {
   id: string;
@@ -51,11 +52,17 @@ export default function DebtsPage() {
     };
   }, [t]);
 
-  const filtered = items.filter((d) => 
-    (d.customerName ?? "").includes(search) || 
-    (d.category ?? "").includes(search) ||
-    d.id.includes(search)
-  );
+  const filtered = items.filter((d) => {
+    const q = search.trim();
+    if (!q) return true;
+    const catLabel = formatDebtCategory(d.category, t);
+    return (
+      (d.customerName ?? "").includes(q) ||
+      (d.category ?? "").includes(q) ||
+      catLabel.includes(q) ||
+      d.id.includes(q)
+    );
+  });
 
   const exportHeaders = {
     id: t("debts.page.colId"),
@@ -162,7 +169,7 @@ export default function DebtsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="text-slate-600 dark:text-slate-300 font-medium">{item.category || "-"}</span>
+                    <span className="text-slate-600 dark:text-slate-300 font-medium">{formatDebtCategory(item.category, t)}</span>
                   </td>
                   <td className="px-6 py-5 font-black text-slate-900 dark:text-white text-[15px]">
                     <div className="flex items-center gap-1.5">

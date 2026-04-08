@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
-import { Debt, getAnalyticsMonthly, getAnalyticsSummary, getRecentActivity } from "@/lib/api";
+import { Debt, getAnalyticsMonthly, getAnalyticsSummary, getRecentActivity, getSettingsStore } from "@/lib/api";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
@@ -28,6 +28,23 @@ export default function DashboardPage() {
   } | null>(null);
   const [monthly, setMonthly] = useState<Array<{ year: number; month: number; debts: number; collected: number }>>([]);
   const [recent, setRecent] = useState<Debt[]>([]);
+  const [storeName, setStoreName] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSettingsStore()
+      .then((store) => {
+        if (cancelled) return;
+        const name = (store?.storeName ?? "").trim();
+        setStoreName(name || null);
+      })
+      .catch(() => {
+        if (!cancelled) setStoreName(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,7 +82,11 @@ export default function DashboardPage() {
     <div className="space-y-6 pb-12">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t("dashboard.title")}</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">{t("dashboard.subtitle")}</p>
+        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
+          {t("dashboard.subtitle", {
+            storeName: storeName ?? t("dashboard.storeNamePlaceholder"),
+          })}
+        </p>
       </div>
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-medium dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
