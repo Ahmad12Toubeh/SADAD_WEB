@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useTheme } from "@/contexts/Providers";
 import { Search, Moon, Sun, Globe, LogOut, Menu } from "lucide-react";
 import { Input } from "@/components/ui/Input";
-import { getSettingsProfile, getSettingsStore, logout } from "@/lib/api";
+import { getCurrentSubscriptionStatus, getSettingsProfile, getSettingsStore, logout } from "@/lib/api";
 import { persistLocalePreference } from "@/lib/locale";
 import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
 
@@ -25,6 +25,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const [userRole, setUserRole] = useState<string>("");
   const [userFullName, setUserFullName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [subscriptionStage, setSubscriptionStage] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
@@ -32,18 +33,24 @@ export function Header({ onMenuClick }: HeaderProps) {
 
     const loadHeaderProfile = async () => {
       try {
-        const [profile, store] = await Promise.all([getSettingsProfile(), getSettingsStore()]);
+        const [profile, store, subscription] = await Promise.all([
+          getSettingsProfile(),
+          getSettingsStore(),
+          getCurrentSubscriptionStatus(),
+        ]);
         if (cancelled) return;
         setStoreName((store?.storeName ?? "").trim());
         setUserRole((profile?.role ?? "").trim());
         setUserFullName((profile?.fullName ?? "").trim());
         setAvatarUrl((profile?.avatarUrl ?? "").trim());
+        setSubscriptionStage((subscription?.stage ?? "").trim());
       } catch {
         if (cancelled) return;
         setStoreName("");
         setUserRole("");
         setUserFullName("");
         setAvatarUrl("");
+        setSubscriptionStage("");
       }
     };
 
@@ -80,9 +87,14 @@ export function Header({ onMenuClick }: HeaderProps) {
     }
   };
 
-  const formatRole = (role: string) => {
+  const formatRole = (role: string, stage: string) => {
     const normalized = role.toLowerCase();
-    if (normalized === "owner" || normalized === "admin") return t("header.role");
+    if (normalized === "owner" || normalized === "admin") return "صاحب المشروع";
+    if (normalized === "user") {
+      if (stage === "trial") return i18n.language === "ar" ? "تجريبي" : "Trial";
+      if (stage === "expired") return i18n.language === "ar" ? "منتهي" : "Expired";
+      return i18n.language === "ar" ? "مشترك" : "Subscriber";
+    }
     return role;
   };
 
@@ -141,7 +153,9 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Link href="/dashboard/settings" className="flex min-w-0 items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="min-w-0 text-end hidden sm:block">
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{storeName || t("header.storeName")}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{userRole ? formatRole(userRole) : t("header.role")}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {userRole ? formatRole(userRole, subscriptionStage) : i18n.language === "ar" ? "مشترك" : "Subscriber"}
+              </p>
             </div>
             <div className="relative w-10 h-10 rounded-full overflow-hidden bg-primary/10 dark:bg-primary/20 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-primary font-bold">
               {avatarUrl ? (

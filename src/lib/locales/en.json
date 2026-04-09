@@ -9,6 +9,7 @@
     "associations": "Associations Flow",
     "guarantors": "Guarantors (Trust System)",
     "reminders": "Smart Reminders",
+    "ownerDashboard": "Owner Dashboard",
     "settings": "Platform Settings",
     "logout": "Logout",
     "language": "Change Language",
@@ -496,6 +497,7 @@
       "submit": "Create Free Account",
       "loading": "Creating account...",
       "hasAccount": "Already have an account?",
+      "haveAccount": "Already have an account?",
       "loginLink": "Log In"
     },
     "forgot": {

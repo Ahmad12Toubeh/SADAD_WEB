@@ -140,14 +140,13 @@ function RegisterPageContent() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t("auth.register.passwordPlaceholder")}
-                className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
                 dir="ltr"
+                className="h-11 dark:bg-slate-950 dark:border-slate-800 text-start"
               />
             </div>
 
             <Button
-              type="button"
-              onClick={() => void handleRegister()}
+              type="submit"
               className="w-full h-11 text-base shadow-xl shadow-primary/20 mt-4 active:scale-95 transition-transform"
               disabled={isLoading}
             >
@@ -157,8 +156,8 @@ function RegisterPageContent() {
         </CardContent>
       </Card>
 
-      <p className="text-center text-slate-600 dark:text-slate-400 mt-10">
-        {t("auth.register.hasAccount")}{" "}
+      <p className="text-center text-slate-600 dark:text-slate-400 mt-8">
+        {t("auth.register.haveAccount")}{"auth.register.haveAccount "}
         <Link href="/login" className="font-semibold text-primary hover:text-secondary dark:hover:text-blue-400 transition-colors underline decoration-primary/30 underline-offset-4 hover:decoration-primary">
           {t("auth.register.loginLink")}
         </Link>

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { ImageUploadField } from "@/components/ui/ImageUploadField";
 import {
   changePassword,
+  getCurrentSubscriptionStatus,
   getSettingsNotifications,
   getSettingsProfile,
   getSettingsStore,
@@ -44,6 +45,7 @@ export default function SettingsPage() {
     whatsappEnabled: true,
     customWhatsappNumber: "",
   });
+  const [subscription, setSubscription] = useState<any>(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -60,6 +62,7 @@ export default function SettingsPage() {
           getSettingsStore(),
           getSettingsNotifications(),
         ]);
+        const sub = await getCurrentSubscriptionStatus();
         if (cancelled) return;
         setProfile(p ?? {});
         setStore(s ?? {});
@@ -67,6 +70,7 @@ export default function SettingsPage() {
           ...n,
           customWhatsappNumber: n?.customWhatsappNumber ?? "",
         });
+        setSubscription(sub);
       } catch (err: any) {
         const key = err?.messageKey as string | undefined;
         if (!cancelled) setError(key ? t(key) : err?.message ?? "Failed to load settings");
@@ -146,6 +150,47 @@ export default function SettingsPage() {
                   {error}
                 </div>
               )}
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-900/60">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">حالة الاشتراك</p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                      {subscription?.stage === "active"
+                        ? `الحساب مفعل حاليا${subscription?.subscriptionPlanLabel ? ` ضمن خطة ${subscription.subscriptionPlanLabel}` : ""}.`
+                        : subscription?.stage === "trial"
+                          ? `أنت داخل التجربة المجانية، والمتبقي ${subscription?.daysRemaining ?? 0} يوم.`
+                          : "الحساب يحتاج تفعيل اشتراك مدفوع من الإدارة."}
+                    </p>
+                  </div>
+                  <div className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
+                    subscription?.stage === "active"
+                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+                      : subscription?.stage === "trial"
+                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                  }`}>
+                    {subscription?.stage === "active" ? "مفعل" : subscription?.stage === "trial" ? "تجريبي" : "منتهي"}
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 text-sm text-slate-700 dark:text-slate-300 sm:grid-cols-2">
+                  <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-950/60">
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">نهاية التجربة</span>
+                    <span className="mt-1 block font-semibold">
+                      {subscription?.trialEndsAt ? new Date(subscription.trialEndsAt).toLocaleDateString("ar-JO") : "-"}
+                    </span>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-950/60">
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">نهاية الاشتراك المدفوع</span>
+                    <span className="mt-1 block font-semibold">
+                      {subscription?.subscriptionEndsAt ? new Date(subscription.subscriptionEndsAt).toLocaleDateString("ar-JO") : "غير مفعل بعد"}
+                    </span>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+                  تفعيل الاشتراك لا يتم ذاتيا من داخل الحساب. العميل يتواصل معكم أو مع صاحب المشروع، ثم تتم إضافته يدويا إلى خطة شهر أو شهرين أو أي مدة يتم الاتفاق عليها.
+                </p>
+              </div>
 
               {activeTab === "profile" && (
                 <>

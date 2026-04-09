@@ -31,7 +31,13 @@ export function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <Link href="/register">
+            <Link href="/login" className="sm:hidden">
+              <Button size="lg" className="gap-2 px-8 shadow-lg shadow-primary/25 hover:scale-105 transition-transform active:scale-95">
+                {t("landing.hero.ctaPrimary")}
+                {i18n.dir() === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+              </Button>
+            </Link>
+            <Link href="/register" className="hidden sm:inline-flex">
               <Button size="lg" className="gap-2 px-8 shadow-lg shadow-primary/25 hover:scale-105 transition-transform active:scale-95">
                 {t("landing.hero.ctaPrimary")}
                 {i18n.dir() === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}

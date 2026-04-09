@@ -128,18 +128,18 @@ export function HeaderNotifications() {
 
       {open && (
         <div
-          className="absolute end-0 top-full z-50 mt-2 w-[min(calc(100vw-2rem),20rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+          className="fixed inset-x-2 top-20 z-50 flex max-h-[min(70vh,28rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 sm:absolute sm:inset-x-auto sm:end-0 sm:top-full sm:mt-2 sm:w-[min(calc(100vw-2rem),20rem)] sm:max-h-[min(70vh,24rem)]"
           role="dialog"
           aria-label={t("header.notifications.title")}
         >
-          <div className="border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+          <div className="border-b border-slate-100 px-3 py-3 sm:px-4 dark:border-slate-800">
             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("header.notifications.title")}</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">{t("header.notifications.subtitle")}</p>
           </div>
 
-          <div className="max-h-[min(70vh,24rem)] overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
             {loading ? (
-              <div className="space-y-3 p-4">
+              <div className="space-y-3 p-3 sm:p-4">
                 <Skeleton className="h-14 w-full rounded-xl" />
                 <Skeleton className="h-14 w-full rounded-xl" />
               </div>
@@ -150,8 +150,8 @@ export function HeaderNotifications() {
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {sliceOverdue.length > 0 && (
-                  <div className="p-2">
-                    <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-bold uppercase tracking-wide text-red-600 dark:text-red-400">
+                  <div className="p-1.5 sm:p-2">
+                    <div className="flex items-center gap-2 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wide text-red-600 dark:text-red-400">
                       <AlertTriangle size={14} />
                       {t("reminders.overdue.title")}
                     </div>
@@ -182,8 +182,8 @@ export function HeaderNotifications() {
                 )}
 
                 {sliceUpcoming.length > 0 && (
-                  <div className="p-2">
-                    <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-bold uppercase tracking-wide text-orange-600 dark:text-orange-400">
+                  <div className="p-1.5 sm:p-2">
+                    <div className="flex items-center gap-2 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wide text-orange-600 dark:text-orange-400">
                       <Clock size={14} />
                       {t("reminders.upcoming.title")}
                     </div>

@@ -6,7 +6,7 @@ export function SupportSection() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-24 px-6 bg-white dark:bg-slate-950 overflow-hidden relative">
+    <section id="support" className="py-24 px-6 bg-white dark:bg-slate-950 overflow-hidden relative">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl -z-10"></div>
       <div className="max-w-4xl mx-auto">
         <div className="bg-slate-50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-16 text-start">
@@ -20,6 +20,9 @@ export function SupportSection() {
             <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
               {t("landing.support.desc")}
             </p>
+            <div className="mb-6 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-300">
+              الاشتراكات المدفوعة تتم يدويا. بعد انتهاء التجربة المجانية، يتم تفعيل الخطة من طرف الإدارة بعد التواصل معكم.
+            </div>
             <div className="flex flex-wrap gap-4">
               <Button className="gap-2 px-6 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20">
                 <Zap size={18} />

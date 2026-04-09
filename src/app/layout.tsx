@@ -4,6 +4,7 @@ import { Tajawal } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/contexts/Providers";
 import { LOCALE_STORAGE_KEY, normalizeLocaleTag } from "@/lib/locale";
+import { LocaleSync } from "@/components/layout/LocaleSync";
 
 const tajawal = Tajawal({
   variable: "--font-tajawal",
@@ -37,21 +38,8 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-slate-50 text-slate-900 font-tajawal dark:bg-slate-900 dark:text-slate-50 transition-colors" suppressHydrationWarning>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var k = ${JSON.stringify(LOCALE_STORAGE_KEY)};
-                var l = window.localStorage.getItem(k) || 'ar';
-                var lang = l.startsWith('en') ? 'en' : 'ar';
-                document.documentElement.lang = lang === 'en' ? 'en' : 'ar';
-                document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
-                document.cookie = k + '=' + lang + ';path=/;max-age=31536000;SameSite=Lax';
-              } catch (e) {}
-            `,
-          }}
-        />
         <Providers initialLocale={locale}>
+          <LocaleSync initialLocale={locale === "en" ? "en" : "ar"} />
           {children}
         </Providers>
       </body>
