@@ -10,6 +10,7 @@ const tajawal = Tajawal({
   variable: "--font-tajawal",
   subsets: ["arabic", "latin"],
   weight: ["300", "400", "500", "700", "800", "900"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {

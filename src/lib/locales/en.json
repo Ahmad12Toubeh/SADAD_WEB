@@ -585,6 +585,9 @@
       "badRequest": "Bad request",
       "internalServerError": "Internal server error"
     },
+    "subscription": {
+      "expired": "Your free trial has ended. Contact the project owner to activate a paid plan."
+    },
     "auth": {
       "invalidCredentials": "Invalid email or password",
       "emailAlreadyRegistered": "This email is already registered"

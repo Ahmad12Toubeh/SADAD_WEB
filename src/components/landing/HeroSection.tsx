@@ -31,28 +31,37 @@ export function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <Link href="/login" className="sm:hidden">
-              <Button size="lg" className="gap-2 px-8 shadow-lg shadow-primary/25 hover:scale-105 transition-transform active:scale-95">
+            <Button
+              asChild
+              size="lg"
+              className="sm:hidden gap-2 px-8 shadow-lg shadow-primary/25 hover:scale-105 transition-transform active:scale-95"
+            >
+              <Link href="/login">
                 {t("landing.hero.ctaPrimary")}
-                {i18n.dir() === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
-              </Button>
-            </Link>
-            <Link href="/register" className="hidden sm:inline-flex">
-              <Button size="lg" className="gap-2 px-8 shadow-lg shadow-primary/25 hover:scale-105 transition-transform active:scale-95">
+                {i18n.dir() === "rtl" ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              className="hidden sm:inline-flex gap-2 px-8 shadow-lg shadow-primary/25 hover:scale-105 transition-transform active:scale-95"
+            >
+              <Link href="/register">
                 {t("landing.hero.ctaPrimary")}
-                {i18n.dir() === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
-              </Button>
-            </Link>
-            <a href="#how-it-works">
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2 px-8 border-primary/40 text-primary font-semibold bg-white/95 hover:bg-primary/5 shadow-md shadow-primary/10 dark:border-primary/50 dark:text-primary dark:bg-slate-900/80 dark:hover:bg-primary/10"
-              >
+                {i18n.dir() === "rtl" ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="gap-2 px-8 border-primary/40 text-primary font-semibold bg-white/95 hover:bg-primary/5 shadow-md shadow-primary/10 dark:border-primary/50 dark:text-primary dark:bg-slate-900/80 dark:hover:bg-primary/10"
+            >
+              <a href="#how-it-works">
                 {t("landing.hero.ctaSecondary")}
                 <ChevronDown size={18} />
-              </Button>
-            </a>
+              </a>
+            </Button>
           </div>
         </div>
 

@@ -97,16 +97,16 @@ export function PricingSection() {
                     </li>
                   </ul>
 
-                  <Link href="/login" className="block mt-8 sm:hidden">
-                    <Button className={`w-full ${highlight ? "bg-primary hover:bg-primary/90 text-white" : "dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"}`} variant={highlight ? "primary" : "outline"}>
+                  <Button asChild className={`mt-8 sm:hidden w-full ${highlight ? "bg-primary hover:bg-primary/90 text-white" : "dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"}`} variant={highlight ? "primary" : "outline"}>
+                    <Link href="/login">
                       {isArabic ? "ابدأ التجربة" : "Start Trial"}
-                    </Button>
-                  </Link>
-                  <Link href="/register" className="hidden sm:block mt-8">
-                    <Button className={`w-full ${highlight ? "bg-primary hover:bg-primary/90 text-white" : "dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"}`} variant={highlight ? "primary" : "outline"}>
+                    </Link>
+                  </Button>
+                  <Button asChild className={`mt-8 hidden sm:inline-flex w-full ${highlight ? "bg-primary hover:bg-primary/90 text-white" : "dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"}`} variant={highlight ? "primary" : "outline"}>
+                    <Link href="/register">
                       {isArabic ? "ابدأ التجربة" : "Start Trial"}
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               );
             })

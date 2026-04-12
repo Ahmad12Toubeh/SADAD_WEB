@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
-import { login } from "@/lib/api";
+import { login, type ApiError } from "@/lib/api";
 
 function LoginPageContent() {
   const router = useRouter();
@@ -35,9 +35,16 @@ function LoginPageContent() {
         const role = String(res?.user?.role ?? "").toLowerCase();
         router.push(role === "admin" || role === "owner" ? "/owner" : "/dashboard");
       }
-    } catch (err: any) {
-      const key = err?.messageKey as string | undefined;
-      setError(key ? t(key) : err?.message ?? "Login failed");
+    } catch (err: unknown) {
+      const apiErr = err as Partial<ApiError> | undefined;
+
+      // Prefer specific error codes over generic message keys.
+      if (apiErr?.code === "SUBSCRIPTION_EXPIRED") {
+        setError(t("errors.subscription.expired"));
+      } else {
+        const key = apiErr?.messageKey as string | undefined;
+        setError(key ? t(key) : (apiErr?.message as string | undefined) ?? "Login failed");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -118,14 +125,15 @@ function LoginPageContent() {
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 {isArabic ? "ما عندك حساب؟" : "Don't have an account?"}
               </p>
-              <Link href="/register" className="mt-2 inline-flex w-full">
-                <Button
-                  variant="outline"
-                  className="w-full border-primary/30 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/10"
-                >
+              <Button
+                asChild
+                variant="outline"
+                className="mt-2 w-full border-primary/30 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/10"
+              >
+                <Link href="/register">
                   {isArabic ? "إنشاء حساب" : "Create account"}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </form>
         </CardContent>

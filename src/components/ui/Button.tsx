@@ -1,15 +1,21 @@
-import { type ButtonHTMLAttributes } from "react";
+import React, { type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "destructive";
   size?: "sm" | "md" | "lg";
+  /**
+   * Render the button styles onto the child element (e.g. Next.js <Link />),
+   * avoiding invalid interactive nesting like <a><button/></a>.
+   */
+  asChild?: boolean;
 }
 
 export function Button({
   className,
   variant = "primary",
   size = "md",
+  asChild = false,
   ...props
 }: ButtonProps) {
   const baseStyles =
@@ -29,9 +35,25 @@ export function Button({
     lg: "min-h-12 px-6 text-base sm:px-8 sm:text-lg",
   };
 
+  const mergedClassName = cn(baseStyles, variants[variant], sizes[size], className);
+
+  if (asChild) {
+    const { children, ...rest } = props;
+    const child = React.Children.only(children) as React.ReactElement<{ className?: string }>;
+
+    // Avoid passing <button>-specific props like `type` onto anchors/links.
+    const { type: _ignoredType, ...safeRest } = rest as Omit<typeof rest, "type"> & { type?: unknown };
+    void _ignoredType;
+
+    return React.cloneElement(child, {
+      ...(safeRest as unknown as React.HTMLAttributes<HTMLElement>),
+      className: cn(mergedClassName, child.props.className),
+    });
+  }
+
   return (
     <button
-      className={cn(baseStyles, variants[variant], sizes[size], className)}
+      className={mergedClassName}
       {...props}
     />
   );

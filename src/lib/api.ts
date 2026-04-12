@@ -36,6 +36,22 @@ export type OwnerOverview = {
   currency: string;
 };
 
+export type AppNotificationKind = "trial_expiring" | "subscription_expiring";
+export type AppNotificationStage = "trial" | "active";
+
+export type AppNotification = {
+  id: string;
+  kind: AppNotificationKind;
+  targetStage: AppNotificationStage;
+  targetDate: string;
+  daysRemainingSnapshot: number;
+  subscriptionPlanLabel: string | null;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type OwnerSubscriptionPlan = {
   id: string;
   name: string;
@@ -532,6 +548,22 @@ export async function activateSubscriptionForUser(input: {
 
 export async function getOwnerOverview() {
   return apiFetch<OwnerOverview>(`/settings/owner/overview`);
+}
+
+export async function listNotifications(limit = 20) {
+  return apiFetch<{ items: AppNotification[] }>(`/notifications?limit=${encodeURIComponent(String(limit))}`);
+}
+
+export async function getUnreadNotificationCount() {
+  return apiFetch<{ count: number }>(`/notifications/unread-count`);
+}
+
+export async function markNotificationRead(id: string) {
+  return apiFetch<AppNotification | null>(`/notifications/${id}/read`, { method: "PATCH" });
+}
+
+export async function markAllNotificationsRead() {
+  return apiFetch<{ ok: boolean }>(`/notifications/read-all`, { method: "PATCH" });
 }
 
 export async function listOwnerSubscriptionPlans() {

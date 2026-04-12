@@ -24,9 +24,9 @@ export function EmptyState({ title, description, actionLabel, actionHref }: Empt
       )}
       {actionLabel && actionHref && (
         <div className="mt-5">
-          <Link href={actionHref}>
-            <Button className="h-10 px-5">{actionLabel}</Button>
-          </Link>
+          <Button asChild className="h-10 px-5">
+            <Link href={actionHref}>{actionLabel}</Link>
+          </Button>
         </div>
       )}
     </div>

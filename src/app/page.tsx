@@ -50,15 +50,15 @@ export default function Home() {
             <span className="hidden sm:inline-block bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{i18n.language === "ar" ? "EN" : "AR"}</span>
           </button>
           
-          <Link href="/login" className="inline-flex sm:hidden">
-            <Button>{t("landing.nav.start")}</Button>
-          </Link>
-          <Link href="/login" className="hidden sm:inline-flex">
-            <Button variant="ghost" className="text-secondary dark:text-slate-200">{t("landing.nav.login")}</Button>
-          </Link>
-          <Link href="/register" className="hidden sm:inline-flex">
-            <Button>{t("landing.nav.start")}</Button>
-          </Link>
+          <Button asChild className="inline-flex sm:hidden">
+            <Link href="/login">{t("landing.nav.start")}</Link>
+          </Button>
+          <Button asChild variant="ghost" className="hidden sm:inline-flex text-secondary dark:text-slate-200">
+            <Link href="/login">{t("landing.nav.login")}</Link>
+          </Button>
+          <Button asChild className="hidden sm:inline-flex">
+            <Link href="/register">{t("landing.nav.start")}</Link>
+          </Button>
         </div>
       </header>
 
@@ -73,18 +73,26 @@ export default function Home() {
         <section className="py-20 px-6 bg-secondary text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">{t("landing.cta.title")}</h2>
           <p className="text-slate-300 mb-8 max-w-xl mx-auto">{t("landing.cta.desc")}</p>
-          <Link href="/login" className="sm:hidden">
-            <Button size="lg" className="gap-2 px-10 bg-primary hover:bg-primary/90 shadow-xl shadow-primary/30">
+          <Button
+            asChild
+            size="lg"
+            className="sm:hidden gap-2 px-10 bg-primary hover:bg-primary/90 shadow-xl shadow-primary/30"
+          >
+            <Link href="/login">
               {t("landing.cta.btn")}
-              {i18n.dir() === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
-            </Button>
-          </Link>
-          <Link href="/register" className="hidden sm:inline-flex">
-            <Button size="lg" className="gap-2 px-10 bg-primary hover:bg-primary/90 shadow-xl shadow-primary/30">
+              {i18n.dir() === "rtl" ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+            </Link>
+          </Button>
+          <Button
+            asChild
+            size="lg"
+            className="hidden sm:inline-flex gap-2 px-10 bg-primary hover:bg-primary/90 shadow-xl shadow-primary/30"
+          >
+            <Link href="/register">
               {t("landing.cta.btn")}
-              {i18n.dir() === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
-            </Button>
-          </Link>
+              {i18n.dir() === "rtl" ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+            </Link>
+          </Button>
         </section>
       </main>
 
