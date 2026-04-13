@@ -18,7 +18,7 @@ const navigationConfig = [
   { key: "debts", href: "/dashboard/debts", icon: CreditCard },
   { key: "addDebt", href: "/dashboard/debts/new", icon: PlusCircle },
   { key: "analytics", href: "/dashboard/analytics", icon: PieChart },
-  { key: "associations", href: "/dashboard/associations", icon: UsersRound },
+  // { key: "associations", href: "/dashboard/associations", icon: UsersRound },
   { key: "guarantors", href: "/dashboard/guarantors", icon: UserCheck },
   { key: "reminders", href: "/dashboard/reminders", icon: Bell },
   { key: "settings", href: "/dashboard/settings", icon: Settings },
