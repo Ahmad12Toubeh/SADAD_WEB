@@ -153,14 +153,20 @@ export default function SettingsPage() {
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-900/60">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">حالة الاشتراك</p>
+                  <div className="text-start">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{t("settings.subscription.title")}</p>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                       {subscription?.stage === "active"
-                        ? `الحساب مفعل حاليا${subscription?.subscriptionPlanLabel ? ` ضمن خطة ${subscription.subscriptionPlanLabel}` : ""}.`
+                        ? t("settings.subscription.activeDesc", {
+                          plan: subscription?.subscriptionPlanLabel 
+                            ? (i18n.language.startsWith("ar") 
+                                ? ` ضمن خطة ${subscription.subscriptionPlanLabel}` 
+                                : ` on the ${subscription.subscriptionPlanLabel} plan`)
+                            : ""
+                        })
                         : subscription?.stage === "trial"
-                          ? `أنت داخل التجربة المجانية، والمتبقي ${subscription?.daysRemaining ?? 0} يوم.`
-                          : "الحساب يحتاج تفعيل اشتراك مدفوع من الإدارة."}
+                          ? t("settings.subscription.trialDesc", { days: subscription?.daysRemaining ?? 0 })
+                          : t("settings.subscription.inactiveDesc")}
                     </p>
                   </div>
                   <div className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
@@ -168,27 +174,33 @@ export default function SettingsPage() {
                       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
                       : subscription?.stage === "trial"
                         ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200"
                   }`}>
-                    {subscription?.stage === "active" ? "مفعل" : subscription?.stage === "trial" ? "تجريبي" : "منتهي"}
+                    {subscription?.stage === "active" 
+                      ? t("settings.subscription.status.active") 
+                      : subscription?.stage === "trial" 
+                        ? t("settings.subscription.status.trial") 
+                        : t("settings.subscription.status.expired")}
                   </div>
                 </div>
                 <div className="mt-4 grid gap-3 text-sm text-slate-700 dark:text-slate-300 sm:grid-cols-2">
-                  <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-950/60">
-                    <span className="block text-xs text-slate-500 dark:text-slate-400">نهاية التجربة</span>
+                  <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-950/60 text-start">
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">{t("settings.subscription.trialEnd")}</span>
                     <span className="mt-1 block font-semibold">
-                      {subscription?.trialEndsAt ? new Date(subscription.trialEndsAt).toLocaleDateString("ar-JO") : "-"}
+                      {subscription?.trialEndsAt ? new Date(subscription.trialEndsAt).toLocaleDateString(i18n.language) : "-"}
                     </span>
                   </div>
-                  <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-950/60">
-                    <span className="block text-xs text-slate-500 dark:text-slate-400">نهاية الاشتراك المدفوع</span>
+                  <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-950/60 text-start">
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">{t("settings.subscription.paidEnd")}</span>
                     <span className="mt-1 block font-semibold">
-                      {subscription?.subscriptionEndsAt ? new Date(subscription.subscriptionEndsAt).toLocaleDateString("ar-JO") : "غير مفعل بعد"}
+                      {subscription?.subscriptionEndsAt 
+                        ? new Date(subscription.subscriptionEndsAt).toLocaleDateString(i18n.language) 
+                        : t("settings.subscription.notActiveYet")}
                     </span>
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-                  تفعيل الاشتراك لا يتم ذاتيا من داخل الحساب. العميل يتواصل معكم أو مع صاحب المشروع، ثم تتم إضافته يدويا إلى خطة شهر أو شهرين أو أي مدة يتم الاتفاق عليها.
+                <p className="mt-4 text-sm text-slate-600 dark:text-slate-400 text-start">
+                  {t("settings.subscription.howToActivate")}
                 </p>
               </div>
 
@@ -219,8 +231,8 @@ export default function SettingsPage() {
 
                   <ImageUploadField
                     inputId="profile-avatar-upload"
-                    label="الصورة الشخصية"
-                    hint="ارفع صورة شخصية واضحة ليتم عرضها في الحساب."
+                    label={t("settings.profile.avatarLabel")}
+                    hint={t("settings.profile.avatarHint")}
                     previewUrl={profile?.avatarUrl ?? null}
                     isUploading={isUploadingAvatar}
                     onFileSelect={handleAvatarUpload}
@@ -330,7 +342,7 @@ export default function SettingsPage() {
                         onChange={(e) => setStore((s: any) => ({ ...s, currency: e.target.value }))}
                         className="flex h-11 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-sm text-start"
                       >
-                        <option value="JOD">دينار أردني (د.ا)</option>
+                        <option value="JOD">{t("settings.store.currencyLabel")}</option>
                       </select>
                     </div>
                   </div>
@@ -384,7 +396,7 @@ export default function SettingsPage() {
                       if (activeTab === "store") await patchSettingsStore(store);
                       if (activeTab === "notifications") await patchSettingsNotifications(notifications);
                       if (activeTab === "security") {
-                        if (newPassword !== confirmPassword) throw new Error("Passwords do not match");
+                        if (newPassword !== confirmPassword) throw new Error(t("settings.security.mismatch"));
                         await changePassword({ currentPassword, newPassword });
                         setCurrentPassword("");
                         setNewPassword("");

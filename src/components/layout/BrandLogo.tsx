@@ -11,27 +11,28 @@ type BrandLogoProps = {
 };
 
 const sizeClasses = {
-  md: { wrap: "p-2 rounded-xl", dim: 28 },
-  sm: { wrap: "p-1.5 rounded-lg", dim: 24 },
+  md: { wrap: "p-0 rounded-none", h: 44, w: 44 },
+  sm: { wrap: "p-0 rounded-none", h: 32, w: 32 },
 } as const;
 
 export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
-  const { wrap, dim } = sizeClasses[size];
+  const { wrap, h, w } = sizeClasses[size];
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center bg-primary/10 dark:bg-primary/20",
+        "flex shrink-0 items-center justify-center overflow-visible",
         wrap,
         className,
       )}
     >
       <Image
-        src="/logo.png"
-        alt=""
-        width={dim}
-        height={dim}
+        src="/logo.png?v=1"
+        alt="SADAD"
+        width={w}
+        height={h}
         className="object-contain"
         priority
+        unoptimized
       />
     </div>
   );

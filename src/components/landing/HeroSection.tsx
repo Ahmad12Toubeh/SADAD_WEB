@@ -80,7 +80,7 @@ export function HeroSection() {
       </div>
 
       <div className="mt-14 flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400 justify-center">
-        {(t("landing.hero.tags", { returnObjects: true }) as string[]).map((feat: string) => (
+        {((t("landing.hero.tags", { returnObjects: true }) || []) as string[]).map((feat: string) => (
           <div key={feat} className="flex items-center gap-2">
             <CheckCircle2 size={17} className="text-green-500" />
             <span>{feat}</span>

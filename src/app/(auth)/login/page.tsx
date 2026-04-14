@@ -123,7 +123,7 @@ function LoginPageContent() {
 
             <div className="pt-1 text-center">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                {isArabic ? "ما عندك حساب؟" : "Don't have an account?"}
+                {t("auth.login.noAccount")}
               </p>
               <Button
                 asChild
@@ -131,7 +131,7 @@ function LoginPageContent() {
                 className="mt-2 w-full border-primary/30 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/10"
               >
                 <Link href="/register">
-                  {isArabic ? "إنشاء حساب" : "Create account"}
+                  {t("auth.login.registerLink")}
                 </Link>
               </Button>
             </div>

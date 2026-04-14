@@ -157,7 +157,7 @@ function RegisterPageContent() {
       </Card>
 
       <p className="text-center text-slate-600 dark:text-slate-400 mt-8">
-        {t("auth.register.haveAccount")}{"auth.register.haveAccount "}
+        {t("auth.register.haveAccount")}{" "}
         <Link href="/login" className="font-semibold text-primary hover:text-secondary dark:hover:text-blue-400 transition-colors underline decoration-primary/30 underline-offset-4 hover:decoration-primary">
           {t("auth.register.loginLink")}
         </Link>

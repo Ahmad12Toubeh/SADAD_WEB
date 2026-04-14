@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
 import { persistLocalePreference } from "@/lib/locale";
 import { ShieldCheck, Moon, Sun, Globe, ArrowLeft, ArrowRight } from "lucide-react";
-import { BrandName } from "@/components/layout/BrandLogo";
+import { BrandLogo, BrandName } from "@/components/layout/BrandLogo";
 
 export function AuthNavbar() {
   const { t, i18n } = useTranslation();
@@ -23,11 +23,8 @@ export function AuthNavbar() {
 
   return (
     <header className="absolute top-0 w-full z-50 px-6 py-4 flex items-center justify-between">
-      <button type="button" onClick={goHome} className="flex items-center gap-2 text-secondary dark:text-white">
-        <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-xl text-primary">
-          <ShieldCheck size={26} />
-        </div>
-        <BrandName size="lg" />
+      <button type="button" onClick={goHome} className="flex items-center gap-3 text-secondary dark:text-white">
+        <BrandLogo />
       </button>
 
       <div className="flex items-center gap-2 md:gap-4 lg:gap-5">

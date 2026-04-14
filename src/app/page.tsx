@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/Providers";
-import { ArrowLeft, ArrowRight, ShieldCheck, Globe, Moon, Sun } from "lucide-react";
+import { ArrowLeft, ArrowRight, Globe, Moon, Sun } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 import { persistLocalePreference } from "@/lib/locale";
 
 import { HeroSection } from "@/components/landing/HeroSection";
-import { BrandName } from "@/components/layout/BrandLogo";
+import { BrandName, BrandLogo } from "@/components/layout/BrandLogo";
 
 const FeaturesSection = dynamic(() => import("@/components/landing/FeaturesSection").then((m) => m.FeaturesSection));
 const HowItWorksSection = dynamic(() => import("@/components/landing/HowItWorksSection").then((m) => m.HowItWorksSection));
@@ -30,11 +30,8 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
       {/* Navbar */}
       <header className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg text-primary">
-            <ShieldCheck size={28} />
-          </div>
-          <BrandName size="lg" />
+        <div className="flex items-center gap-3">
+          <BrandLogo />
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
           <a href="#features" className="hover:text-primary transition-colors">{t("landing.nav.features")}</a>

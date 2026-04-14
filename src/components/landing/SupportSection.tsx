@@ -21,16 +21,20 @@ export function SupportSection() {
               {t("landing.support.desc")}
             </p>
             <div className="mb-6 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-300">
-              الاشتراكات المدفوعة تتم يدويا. بعد انتهاء التجربة المجانية، يتم تفعيل الخطة من طرف الإدارة بعد التواصل معكم.
+              {t("landing.support.notice")}
             </div>
             <div className="flex flex-wrap gap-4">
-              <Button className="gap-2 px-6 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20">
-                <Zap size={18} />
-                {t("landing.support.btn")}
+              <Button asChild className="gap-2 px-6 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20">
+                <a href="https://wa.me/962797812733?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D8%A5%D9%84%D9%89%20%D8%AF%D8%B9%D9%85%20%D9%81%D9%86%D9%8A%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20%D9%85%D9%86%D8%B5%D8%A9%20%D8%B3%D8%AF%D8%A7%D8%AF" target="_blank" rel="noopener noreferrer">
+                  <Zap size={18} />
+                  {t("landing.support.btn")}
+                </a>
               </Button>
-              <Button variant="ghost" className="gap-2 dark:text-slate-300">
-                <Globe size={18} />
-                {t("landing.support.email")}
+              <Button asChild variant="ghost" className="gap-2 dark:text-slate-300">
+                <a href="mailto:ahmadtoubeh45@gmail.com">
+                  <Globe size={18} />
+                  {t("landing.support.email")}
+                </a>
               </Button>
             </div>
           </div>
