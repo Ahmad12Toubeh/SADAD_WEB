@@ -24,9 +24,9 @@ export default function DashboardError({
         </p>
         <div className="mt-6 flex items-center justify-center gap-3">
           <Button onClick={() => reset()}>Try Again</Button>
-          <Link href="/dashboard">
-            <Button variant="outline">Back to Dashboard</Button>
-          </Link>
+          <Button asChild variant="outline">
+            <Link href="/dashboard">Back to Dashboard</Link>
+          </Button>
         </div>
       </div>
     </div>

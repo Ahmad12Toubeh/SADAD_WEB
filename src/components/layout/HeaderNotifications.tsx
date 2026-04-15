@@ -1,46 +1,34 @@
 "use client";
 
-import { Bell, AlertTriangle, Clock } from "lucide-react";
+import { Bell, CalendarClock, CheckCheck, Clock3 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getRemindersOverdue, getRemindersUpcoming } from "@/lib/api";
+import { getUnreadNotificationCount, listNotifications, markAllNotificationsRead, markNotificationRead, type AppNotification } from "@/lib/api";
 import { Skeleton } from "@/components/ui/Skeleton";
 
-const MAX_OVERDUE = 5;
-const MAX_UPCOMING = 3;
-
-type InstallmentRow = {
-  installmentId?: string;
-  debtId?: string;
-  id?: string;
-  customerName?: string | null;
-  amount?: number;
-  dueDate?: string;
-};
+const MAX_ITEMS = 8;
 
 export function HeaderNotifications() {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [overdueItems, setOverdueItems] = useState<InstallmentRow[]>([]);
-  const [upcomingItems, setUpcomingItems] = useState<InstallmentRow[]>([]);
-  const [attentionTotal, setAttentionTotal] = useState(0);
+  const [items, setItems] = useState<AppNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async (mode: "full" | "quiet" = "full") => {
     if (mode === "full") setLoading(true);
     try {
-      const [overdue, upcoming] = await Promise.all([getRemindersOverdue(), getRemindersUpcoming(7)]);
-      const o = (overdue.items ?? []) as InstallmentRow[];
-      const u = (upcoming.items ?? []) as InstallmentRow[];
-      setOverdueItems(o);
-      setUpcomingItems(u);
-      setAttentionTotal(o.length + u.length);
+      const [listRes, unreadRes] = await Promise.all([
+        listNotifications(MAX_ITEMS),
+        getUnreadNotificationCount(),
+      ]);
+      setItems(listRes.items ?? []);
+      setUnreadCount(unreadRes.count ?? 0);
     } catch {
-      setOverdueItems([]);
-      setUpcomingItems([]);
-      setAttentionTotal(0);
+      setItems([]);
+      setUnreadCount(0);
     } finally {
       if (mode === "full") setLoading(false);
     }
@@ -69,31 +57,49 @@ export function HeaderNotifications() {
     };
   }, [open]);
 
-  const dayMs = 86_400_000;
-  const getOverdueDays = (dueDate?: string) => {
-    if (!dueDate) return 1;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate);
-    due.setHours(0, 0, 0, 0);
-    return Math.max(1, Math.ceil((today.getTime() - due.getTime()) / dayMs));
-  };
-  const getUpcomingDays = (dueDate?: string) => {
-    if (!dueDate) return 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate);
-    due.setHours(0, 0, 0, 0);
-    return Math.max(0, Math.ceil((due.getTime() - today.getTime()) / dayMs));
+  const isArabic = i18n.language.startsWith("ar");
+
+  const relativeTime = useMemo(
+    () =>
+      new Intl.RelativeTimeFormat(isArabic ? "ar" : "en", {
+        numeric: "auto",
+        style: "short",
+      }),
+    [isArabic],
+  );
+
+  const formatCreatedAt = (createdAt?: string) => {
+    if (!createdAt) return "";
+    const diffMs = new Date(createdAt).getTime() - Date.now();
+    const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+    if (Math.abs(diffHours) < 24) {
+      return relativeTime.format(diffHours, "hour");
+    }
+    const diffDays = Math.round(diffHours / 24);
+    return relativeTime.format(diffDays, "day");
   };
 
-  const formatOverdueText = (days: number) =>
-    i18n.language.startsWith("ar") ? `متأخرة منذ ${days} يوم` : `${days} day(s) overdue`;
-  const formatUpcomingText = (days: number) =>
-    i18n.language.startsWith("ar") ? `متبقي ${days} يوم` : `${days} day(s) left`;
+  const getCopy = (item: AppNotification) => {
+    if (item.kind === "trial_expiring") {
+      return {
+        title: isArabic ? "انتهاء التجربة قريبًا" : "Trial ending soon",
+        body: isArabic
+          ? `تبقّى ${item.daysRemainingSnapshot} يوم على انتهاء التجربة المجانية. تواصل مع صاحب المشروع لتجديد الاشتراك.`
+          : `Your free trial ends in ${item.daysRemainingSnapshot} day(s). Contact the owner to renew your plan.`,
+        icon: CalendarClock,
+        tone: "amber" as const,
+      };
+    }
 
-  const totalAttention = overdueItems.length + upcomingItems.length;
-  const showDot = attentionTotal > 0;
+    return {
+      title: isArabic ? "انتهاء الاشتراك قريبًا" : "Subscription ending soon",
+      body: isArabic
+        ? `تبقّى ${item.daysRemainingSnapshot} أيام على انتهاء الاشتراك${item.subscriptionPlanLabel ? ` (${item.subscriptionPlanLabel})` : ""}.`
+        : `Your subscription${item.subscriptionPlanLabel ? ` (${item.subscriptionPlanLabel})` : ""} ends in ${item.daysRemainingSnapshot} day(s).`,
+      icon: Clock3,
+      tone: "orange" as const,
+    };
+  };
 
   const toggle = () => {
     setOpen((prev) => {
@@ -103,9 +109,25 @@ export function HeaderNotifications() {
     });
   };
 
-  const sliceOverdue = overdueItems.slice(0, MAX_OVERDUE);
-  const sliceUpcoming = upcomingItems.slice(0, MAX_UPCOMING);
-  const curr = t("dashboard.currency");
+  const handleMarkRead = async (id: string) => {
+    setItems((current) => current.map((item) => (item.id === id ? { ...item, isRead: true } : item)));
+    setUnreadCount((current) => Math.max(0, current - 1));
+    try {
+      await markNotificationRead(id);
+    } catch {
+      void load("quiet");
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    setItems((current) => current.map((item) => ({ ...item, isRead: true })));
+    setUnreadCount(0);
+    try {
+      await markAllNotificationsRead();
+    } catch {
+      void load("quiet");
+    }
+  };
 
   return (
     <div className="relative shrink-0 border-s border-slate-200 ps-3 dark:border-slate-700 sm:ps-4" ref={rootRef}>
@@ -118,7 +140,7 @@ export function HeaderNotifications() {
         className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
       >
         <Bell size={22} strokeWidth={1.75} />
-        {showDot && (
+        {unreadCount > 0 && (
           <span
             className="absolute top-1 start-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-500 dark:border-slate-900"
             aria-hidden
@@ -128,99 +150,88 @@ export function HeaderNotifications() {
 
       {open && (
         <div
-          className="absolute end-0 top-full z-50 mt-2 w-[min(calc(100vw-2rem),20rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+          className="fixed inset-x-2 top-20 z-50 flex max-h-[min(70vh,28rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 sm:absolute sm:inset-x-auto sm:end-0 sm:top-full sm:mt-2 sm:w-[min(calc(100vw-2rem),20rem)] sm:max-h-[min(70vh,24rem)]"
           role="dialog"
           aria-label={t("header.notifications.title")}
         >
-          <div className="border-b border-slate-100 px-4 py-3 dark:border-slate-800">
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("header.notifications.title")}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{t("header.notifications.subtitle")}</p>
+          <div className="border-b border-slate-100 px-3 py-3 sm:px-4 dark:border-slate-800">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("header.notifications.title")}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{t("header.notifications.subtitle")}</p>
+              </div>
+              {unreadCount > 0 && (
+                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary dark:bg-primary/20">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="max-h-[min(70vh,24rem)] overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
             {loading ? (
-              <div className="space-y-3 p-4">
-                <Skeleton className="h-14 w-full rounded-xl" />
-                <Skeleton className="h-14 w-full rounded-xl" />
+              <div className="space-y-3 p-3 sm:p-4">
+                <Skeleton className="h-16 w-full rounded-xl" />
+                <Skeleton className="h-16 w-full rounded-xl" />
               </div>
-            ) : totalAttention === 0 ? (
+            ) : items.length === 0 ? (
               <p className="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-                {t("header.notifications.empty")}
+                {isArabic ? "لا توجد إشعارات حالياً." : "No notifications right now."}
               </p>
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {sliceOverdue.length > 0 && (
-                  <div className="p-2">
-                    <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-bold uppercase tracking-wide text-red-600 dark:text-red-400">
-                      <AlertTriangle size={14} />
-                      {t("reminders.overdue.title")}
-                    </div>
-                    <ul className="space-y-1">
-                      {sliceOverdue.map((item, idx) => {
-                        const key = item.installmentId ?? item.id ?? `od-${idx}`;
-                        const days = getOverdueDays(item.dueDate);
-                        const href = item.debtId ? `/dashboard/debts/${item.debtId}` : "/dashboard/reminders";
-                        return (
-                          <li key={key}>
-                            <Link
-                              href={href}
-                              onClick={() => setOpen(false)}
-                              className="block rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
-                            >
-                              <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                {item.customerName ?? "—"}
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {formatOverdueText(days)} · {(item.amount ?? 0).toLocaleString()} {curr}
-                              </p>
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
-
-                {sliceUpcoming.length > 0 && (
-                  <div className="p-2">
-                    <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-bold uppercase tracking-wide text-orange-600 dark:text-orange-400">
-                      <Clock size={14} />
-                      {t("reminders.upcoming.title")}
-                    </div>
-                    <ul className="space-y-1">
-                      {sliceUpcoming.map((item, idx) => {
-                        const key = item.installmentId ?? item.id ?? `up-${idx}`;
-                        const days = getUpcomingDays(item.dueDate);
-                        const href = item.debtId ? `/dashboard/debts/${item.debtId}` : "/dashboard/reminders";
-                        return (
-                          <li key={key}>
-                            <Link
-                              href={href}
-                              onClick={() => setOpen(false)}
-                              className="block rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-orange-50 dark:hover:bg-orange-950/20"
-                            >
-                              <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                {item.customerName ?? "—"}
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {formatUpcomingText(days)} · {(item.amount ?? 0).toLocaleString()} {curr}
-                              </p>
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
+                {items.map((item) => {
+                  const copy = getCopy(item);
+                  const Icon = copy.icon;
+                  return (
+                    <Link
+                      key={item.id}
+                      href="/dashboard/settings"
+                      onClick={async () => {
+                        setOpen(false);
+                        if (!item.isRead) {
+                          await handleMarkRead(item.id);
+                        }
+                      }}
+                      className={`block px-3 py-3 text-start transition-colors sm:px-4 ${item.isRead ? "hover:bg-slate-50 dark:hover:bg-white/5" : "bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/15"}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`mt-0.5 rounded-xl p-2 ${copy.tone === "amber" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" : "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"}`}>
+                          <Icon size={16} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{copy.title}</p>
+                            {!item.isRead && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                          </div>
+                          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                            {copy.body}
+                          </p>
+                          <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                            {formatCreatedAt(item.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          <div className="border-t border-slate-100 p-2 dark:border-slate-800">
+          <div className="flex items-center gap-2 border-t border-slate-100 p-2 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary/5 dark:text-blue-400 dark:hover:bg-primary/10"
+            >
+              <CheckCheck size={16} />
+              {isArabic ? "تحديد الكل كمقروء" : "Mark all read"}
+            </button>
             <Link
-              href="/dashboard/reminders"
+              href="/dashboard/settings"
               onClick={() => setOpen(false)}
-              className="block rounded-xl px-3 py-2.5 text-center text-sm font-semibold text-primary hover:bg-primary/5 dark:text-blue-400 dark:hover:bg-primary/10"
+              className="inline-flex flex-1 items-center justify-center rounded-xl px-3 py-2.5 text-center text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {t("header.notifications.viewAll")}
             </Link>

@@ -17,7 +17,7 @@ export function proxy(request: NextRequest) {
   }
 
   const token = request.cookies.get("accessToken")?.value;
-  if (!token && pathname.startsWith("/dashboard")) {
+  if (!token && (pathname.startsWith("/dashboard") || pathname.startsWith("/owner"))) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);

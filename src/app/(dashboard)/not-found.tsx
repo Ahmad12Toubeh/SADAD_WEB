@@ -10,9 +10,9 @@ export default function DashboardNotFound() {
           The page you are looking for does not exist or was moved.
         </p>
         <div className="mt-6">
-          <Link href="/dashboard">
-            <Button>Back to Dashboard</Button>
-          </Link>
+          <Button asChild>
+            <Link href="/dashboard">Back to Dashboard</Link>
+          </Button>
         </div>
       </div>
     </div>

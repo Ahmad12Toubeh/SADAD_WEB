@@ -5,6 +5,64 @@ export type ApiError = {
   messageKey?: string;
 };
 
+export type SubscriptionStatusSummary = {
+  stage: "trial" | "active" | "expired";
+  trialStartedAt: string | null;
+  trialEndsAt: string | null;
+  subscriptionStartedAt: string | null;
+  subscriptionEndsAt: string | null;
+  subscriptionMonths: number | null;
+  subscriptionPlanLabel: string | null;
+  daysRemaining: number;
+  showExpiryWarning: boolean;
+  isExpired: boolean;
+};
+
+export type SubscriptionAdminUser = {
+  id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  createdAt?: string;
+  subscription: SubscriptionStatusSummary;
+};
+
+export type OwnerOverview = {
+  customersCount: number;
+  totalCollected: number;
+  activeSubscriptions: number;
+  expiringSoon: number;
+  trialUsers: number;
+  currency: string;
+};
+
+export type AppNotificationKind = "trial_expiring" | "subscription_expiring";
+export type AppNotificationStage = "trial" | "active";
+
+export type AppNotification = {
+  id: string;
+  kind: AppNotificationKind;
+  targetStage: AppNotificationStage;
+  targetDate: string;
+  daysRemainingSnapshot: number;
+  subscriptionPlanLabel: string | null;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OwnerSubscriptionPlan = {
+  id: string;
+  name: string;
+  months: number;
+  price: number;
+  currency: string;
+  description?: string | null;
+  isActive: boolean;
+  createdBy?: string | null;
+};
+
 const GET_CACHE_TTL_MS = 15_000;
 const REQUEST_TIMEOUT_MS = 10_000;
 const getCache = new Map<string, { expiresAt: number; data: unknown }>();
@@ -279,7 +337,7 @@ function handleUnauthorizedRedirect() {
 
 // Auth
 export async function login(input: { email: string; password: string }) {
-  return apiFetch<{ accessToken: string; user: { id: string; email: string; fullName: string; role: string } }>(
+  return apiFetch<{ accessToken: string; user: { id: string; email: string; fullName: string; role: string; subscription: SubscriptionStatusSummary } }>(
     "/auth/login",
     { method: "POST", body: JSON.stringify(input) },
   );
@@ -461,6 +519,103 @@ export async function getRecentActivity(limit = 5): Promise<Debt[]> {
 // Settings
 export async function getSettingsProfile() {
   return apiFetch<any>(`/settings/profile`);
+}
+
+export async function getCurrentSubscriptionStatus() {
+  return apiFetch<SubscriptionStatusSummary>(`/settings/subscription`);
+}
+
+export async function listSubscriptionAdminUsers() {
+  return apiFetch<SubscriptionAdminUser[]>(`/settings/subscription/admin/users`);
+}
+
+export async function activateSubscriptionForUser(input: {
+  userId: string;
+  months: number;
+  planLabel?: string;
+  notes?: string;
+}) {
+  return apiFetch<{
+    id: string;
+    email: string;
+    fullName: string;
+    subscription: SubscriptionStatusSummary;
+  }>(`/settings/subscription/admin`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getOwnerOverview() {
+  return apiFetch<OwnerOverview>(`/settings/owner/overview`);
+}
+
+export async function listNotifications(limit = 20) {
+  return apiFetch<{ items: AppNotification[] }>(`/notifications?limit=${encodeURIComponent(String(limit))}`);
+}
+
+export async function getUnreadNotificationCount() {
+  return apiFetch<{ count: number }>(`/notifications/unread-count`);
+}
+
+export async function markNotificationRead(id: string) {
+  return apiFetch<AppNotification | null>(`/notifications/${id}/read`, { method: "PATCH" });
+}
+
+export async function markAllNotificationsRead() {
+  return apiFetch<{ ok: boolean }>(`/notifications/read-all`, { method: "PATCH" });
+}
+
+export async function listOwnerSubscriptionPlans() {
+  return apiFetch<OwnerSubscriptionPlan[]>(`/settings/owner/plans`);
+}
+
+export async function listPublicSubscriptionPlans() {
+  return apiFetch<OwnerSubscriptionPlan[]>(`/settings/subscription-plans`);
+}
+
+export async function createOwnerSubscriptionPlan(input: {
+  name: string;
+  months: number;
+  price: number;
+  currency?: string;
+  description?: string;
+  isActive?: boolean;
+}) {
+  return apiFetch<OwnerSubscriptionPlan>(`/settings/owner/plans`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateOwnerSubscriptionPlan(
+  id: string,
+  input: {
+    name?: string;
+    months?: number;
+    price?: number;
+    currency?: string;
+    description?: string;
+    isActive?: boolean;
+  },
+) {
+  return apiFetch<OwnerSubscriptionPlan>(`/settings/owner/plans/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function assignOwnerSubscription(input: { userId: string; planId: string; notes?: string }) {
+  return apiFetch<{
+    id: string;
+    email: string;
+    fullName: string;
+    plan: { id: string; name: string; months: number; price: number; currency: string };
+    subscription: SubscriptionStatusSummary;
+  }>(`/settings/owner/assign-subscription`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 export async function patchSettingsProfile(input: { fullName?: string; phone?: string; avatarUrl?: string; avatarPublicId?: string }) {

@@ -9,6 +9,7 @@
     "associations": "Associations Flow",
     "guarantors": "Guarantors (Trust System)",
     "reminders": "Smart Reminders",
+    "ownerDashboard": "Owner Dashboard",
     "settings": "Platform Settings",
     "logout": "Logout",
     "language": "Change Language",
@@ -133,7 +134,9 @@
       "firstName": "First Name",
       "lastName": "Last Name",
       "email": "Email Address",
-      "phone": "Phone Number"
+      "phone": "Phone Number",
+      "avatarLabel": "Profile Picture",
+      "avatarHint": "Upload a clear profile picture to be displayed in your account."
     },
     "store": {
       "title": "Store Settings",
@@ -142,6 +145,7 @@
       "address": "Address",
       "cr": "Commercial Register (Optional)",
       "currency": "Default Currency",
+      "currencyLabel": "Jordanian Dinar (JOD)",
       "types": {
         "food": "Grocery / Food",
         "building": "Construction / Building",
@@ -169,10 +173,26 @@
       "currentPass": "Current Password",
       "newPass": "New Password",
       "confirmPass": "Confirm New Password",
-      "hint": "🔐 It's recommended to use a strong password with uppercase, lowercase, numbers, and symbols."
+      "hint": "🔐 It's recommended to use a strong password with uppercase, lowercase, numbers, and symbols.",
+      "mismatch": "Passwords do not match"
     },
     "saveBtn": "Save Changes",
-    "savedBtn": "✅ Saved!"
+    "savedBtn": "✅ Saved!",
+    "subscription": {
+      "title": "Subscription Status",
+      "status": {
+        "active": "Active",
+        "trial": "Trial",
+        "expired": "Expired"
+      },
+      "activeDesc": "Account is currently active{{plan}}.",
+      "trialDesc": "You are in the free trial, {{days}} days remaining.",
+      "inactiveDesc": "Account requires a paid subscription activation from administration.",
+      "trialEnd": "Trial End",
+      "paidEnd": "Paid Subscription End",
+      "notActiveYet": "Not active yet",
+      "howToActivate": "To activate or renew your subscription, please contact the platform management directly. Your account status will be updated manually once the subscription plan is finalized."
+    }
   },
   "debts": {
     "new": {
@@ -495,7 +515,7 @@
       "passwordPlaceholder": "••••••••",
       "submit": "Create Free Account",
       "loading": "Creating account...",
-      "hasAccount": "Already have an account?",
+      "haveAccount": "Already have an account?",
       "loginLink": "Log In"
     },
     "forgot": {
@@ -583,6 +603,9 @@
       "badRequest": "Bad request",
       "internalServerError": "Internal server error"
     },
+    "subscription": {
+      "expired": "Your free trial has ended. Contact the project owner to activate a paid plan."
+    },
     "auth": {
       "invalidCredentials": "Invalid email or password",
       "emailAlreadyRegistered": "This email is already registered"
@@ -614,6 +637,91 @@
       "emailSent": "Email reminder sent.",
       "emailFailed": "Failed to send email reminder.",
       "whatsappFailed": "Could not open WhatsApp for this customer."
+    }
+  },
+  "landing": {
+    "hero": {
+      "badge": "#1 Debt Management Platform in Jordan",
+      "title1": "Manage your debts",
+      "title2": "Smartly and Easily",
+      "desc": "**SADAD** helps you track customer debts, collect installments, and send automatic WhatsApp reminders to ensure your cash flow and business growth.",
+      "ctaPrimary": "Start Now for Free",
+      "ctaSecondary": "How it works?",
+      "tags": ["No hidden fees", "24/7 Support", "Secure & Encrypted"],
+      "dashboard": {
+        "active": "Active Debts",
+        "collected": "Collected Amount",
+        "overdue": "Overdue"
+      }
+    },
+    "features": {
+      "badge": "Our Features",
+      "title": "Everything you need for successful financial management",
+      "desc": "We designed SADAD to be the perfect partner for merchants and small business owners to manage their receivables.",
+      "f1Title": "Customer Management",
+      "f1Desc": "Organize customer data and financial history in one place with ease.",
+      "f2Title": "WhatsApp Reminders",
+      "f2Desc": "Send professional reminder messages to your customers about due dates with one click to follow up effectively.",
+      "f3Title": "Debt & Installments",
+      "f3Desc": "Schedule debts and track due, remaining, and paid amounts with high accuracy.",
+      "f4Title": "Guarantor System",
+      "f4Desc": "Link debts to guarantors to reduce risk and protect legal and financial rights.",
+      "f5Title": "Account Statements",
+      "f5Desc": "Issue precise and detailed account statements for each customer to share and ensure transparency.",
+      "f6Title": "Reports & Analytics",
+      "f6Desc": "Accurate and comprehensive graphical reports on cash flow, overdue, and active debts."
+    },
+    "howItWorks": {
+      "badge": "How it works?",
+      "title": "Three simple steps to start your success journey",
+      "s1": "Create your account",
+      "s1d": "Create an account for your store and start adding your customers' data.",
+      "s2": "Add Debts",
+      "s2d": "Record the amounts owed and schedule installments according to your agreement.",
+      "s3": "Collect & Monitor",
+      "s3d": "Track collections and send reminders with one click via WhatsApp."
+    },
+    "pricing": {
+      "badge": "Subscription Plans",
+      "title": "Choose the right plan for your business growth",
+      "desc": "Flexible plans starting with a free trial to suit all store sizes and business activities.",
+      "btnSubscribe": "Subscribe Now",
+      "btnTry": "Or start a 7-day free trial",
+      "loading": "Loading plans...",
+      "empty": "No active plans available right now.",
+      "perMonth": " / {{months}} months",
+      "defaultDesc": "Active subscription plan from owner dashboard",
+      "features": {
+        "manual": "Subscription activated by project owner",
+        "trial": "7-day free trial before activation",
+        "editable": "Plan can be modified from owner dashboard"
+      },
+      "whatsappMessage": "Hello, I'm interested in the {{plan}} plan and would like to activate it for my account.\n\nRegistered Account Info:\n- Email: \n- Shop Name: "
+    },
+    "support": {
+      "badge": "Support & Guarantee",
+      "title": "We're with you every step",
+      "desc": "Our team is ready to answer your inquiries and ensure your business runs smoothly and securely.",
+      "notice": "Paid subscriptions are handled manually. After the free trial ends, the plan is activated by administration after contacting you.",
+      "btn": "Contact Support",
+      "email": "Email us"
+    },
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works?",
+      "pricing": "Pricing",
+      "start": "Get Started",
+      "login": "Login"
+    },
+    "cta": {
+      "title": "Ready to organize your debts?",
+      "desc": "Join hundreds of merchants who trust SADAD to manage their financial collections and improve cash flow.",
+      "btn": "Start Free Trial Now"
+    },
+    "footer": {
+      "rights": "© 2026 SADAD - All rights reserved",
+      "login": "Login",
+      "register": "Register"
     }
   }
 }

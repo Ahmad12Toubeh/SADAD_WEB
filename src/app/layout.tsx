@@ -4,11 +4,13 @@ import { Tajawal } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/contexts/Providers";
 import { LOCALE_STORAGE_KEY, normalizeLocaleTag } from "@/lib/locale";
+import { LocaleSync } from "@/components/layout/LocaleSync";
 
 const tajawal = Tajawal({
   variable: "--font-tajawal",
   subsets: ["arabic", "latin"],
   weight: ["300", "400", "500", "700", "800", "900"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -16,8 +18,8 @@ export const metadata: Metadata = {
   description: "سداد - الحل الأمثل لإدارة الديون، العملاء، والتنبيهات الذكية للتحصيل المالي. نظام متكامل يدعم العربية والإنجليزية.",
   keywords: ["سداد", "إدارة ديون", "تحصيل مالي", "منصة مالية", "SADAD", "Debt Management"],
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo.png?v=1",
+    apple: "/logo.png?v=1",
   },
 };
 
@@ -37,21 +39,8 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-slate-50 text-slate-900 font-tajawal dark:bg-slate-900 dark:text-slate-50 transition-colors" suppressHydrationWarning>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var k = ${JSON.stringify(LOCALE_STORAGE_KEY)};
-                var l = window.localStorage.getItem(k) || 'ar';
-                var lang = l.startsWith('en') ? 'en' : 'ar';
-                document.documentElement.lang = lang === 'en' ? 'en' : 'ar';
-                document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
-                document.cookie = k + '=' + lang + ';path=/;max-age=31536000;SameSite=Lax';
-              } catch (e) {}
-            `,
-          }}
-        />
         <Providers initialLocale={locale}>
+          <LocaleSync initialLocale={locale === "en" ? "en" : "ar"} />
           {children}
         </Providers>
       </body>
